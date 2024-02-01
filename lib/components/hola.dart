@@ -1,4 +1,4 @@
-/*import 'package:app_final/components/test/asistencia.dart';
+import 'package:appsol_final/components/asistencia.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:location/location.dart' as location_package;
@@ -8,10 +8,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'dart:async';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'package:provider/provider.dart';
+import 'package:appsol_final/provider/user_provider.dart';
 
 class Producto {
   final String nombre;
@@ -115,15 +117,7 @@ void initState() {
     }
   }
 
-  void _handleLogout() async {
-    if (widget.LoggedInWith == "google") {
-      await FirebaseAuth.instance.signOut();
-      await GoogleSignIn().signOut();
-    } else if (widget.LoggedInWith == "face") {
-      await FacebookAuth.instance.logOut();
-    }
-    print('Sesión cerrada automáticamente debido a inactividad');
-  }
+
 
   bool _autoScrollInProgress = false;
 
@@ -265,9 +259,12 @@ void initState() {
     _scrollController2.dispose();
     super.dispose();
   }
+  
   @override
   Widget build(BuildContext context) {
    
+    final userProvider = context.watch<UserProvider>();
+
     final TabController _tabController = TabController(length: 2, vsync: this);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
@@ -305,7 +302,7 @@ void initState() {
               ),
               ElevatedButton(
                   onPressed: () {
-                    _handleLogout();
+           
                     Navigator.pushReplacementNamed(context, '/loginsol');
                   },
                   child: Text("Salir",style: TextStyle(color:Colors.black),)
@@ -502,7 +499,7 @@ void initState() {
                          width: MediaQuery.of(context).size.width,
                         margin: const EdgeInsets.only(left: 20),
                         child: Text(
-                          "Hola, Stefanny !",
+                          "Hola, ${userProvider.user?.nombre} !",
                           style: TextStyle(
                               fontWeight: FontWeight.w300,
                               fontSize: 20,
@@ -776,11 +773,11 @@ void initState() {
                               height: 50,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  /*Navigator.push(
+                                  Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => const Asistencia()),
-                                  );*/
+                                  );
                                 },
                                 style: ButtonStyle(
                                   backgroundColor: MaterialStateProperty.all(
@@ -815,4 +812,3 @@ void initState() {
                     ]))));
   }
 }
-*/

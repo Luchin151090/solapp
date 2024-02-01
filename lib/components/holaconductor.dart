@@ -1,14 +1,16 @@
-/*import 'package:app_final/components/test/camara.dart';
+//import 'package:app_final/components/test/camara.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:flutter_map/flutter_map.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart' as map;
+import 'package:flutter_map/flutter_map.dart';
 import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 //import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
+import 'package:appsol_final/provider/user_provider.dart';
 
 extension StringExtension on String {
   String capitalize() {
@@ -314,6 +316,7 @@ class _HolaConductorState extends State<HolaConductor> {
   Widget build(BuildContext context) {
     double anchoPantalla = MediaQuery.of(context).size.width;
     int numeroTotalPedidos = listPedidosbyRuta.length;
+    final userProvider = context.watch<UserProvider>();
     print('16) Esta es la longitud de Pedidos $numeroTotalPedidos');
     print('17) Este es el pedido id actual $numPedidoActual');
     print('18) Este es el pedido actual $pedidoIDActual');
@@ -328,6 +331,14 @@ class _HolaConductorState extends State<HolaConductor> {
                   //mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Container(
+                      child: Column(
+                        children: [
+                          Text("Nombres: ${userProvider.user?.nombre}"),
+                          Text("Apellidos: ${userProvider.user?.apellidos}"),
+                        ],
+                      ),
+                    ),
                     Container(
                       // color: Colors.grey,
                       margin: const EdgeInsets.only(left: 10, right: 10),
@@ -532,13 +543,13 @@ class _HolaConductorState extends State<HolaConductor> {
                               options: MapOptions(
                                 initialCenter: LatLng(-16.40521646629229,
                                     -71.57102099896395), // Centro del mapa (California)
-                                initialZoom: 17.0, // Nivel de zoom
+                                initialZoom: 12.0, // Nivel de zoom
                               ),
                               children: [
                                 TileLayer(
                                   urlTemplate:
                                       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                  //subdomains: ['a', 'b', 'c'],
+                                  userAgentPackageName: 'com.example.app',
                                 )
                               ]),
                           Positioned(
@@ -598,14 +609,14 @@ class _HolaConductorState extends State<HolaConductor> {
                             height: 40,
                             child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.push(
+                                  /* Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => Camara(
                                               pedidoID: pedidoTrabajo.id,
                                               problemasOpago: 'problemas',
                                             )),
-                                  );
+                                  );*/
                                 },
                                 style: ButtonStyle(
                                     backgroundColor: MaterialStateProperty.all(
@@ -731,14 +742,14 @@ class _HolaConductorState extends State<HolaConductor> {
         margin: const EdgeInsets.all(10),
         child: ElevatedButton(
           onPressed: () {
-            Navigator.push(
+            /*Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => Camara(
                         pedidoID: pedidoTrabajo.id,
                         problemasOpago: 'problemas',
                       )),
-            );
+            );*/
           },
           style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.grey)),
@@ -767,4 +778,3 @@ class _HolaConductorState extends State<HolaConductor> {
     );
   }
 }
-*/

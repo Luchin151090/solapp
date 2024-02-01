@@ -1,63 +1,16 @@
-// ignore_for_file: use_build_context_synchronously
-
+import 'package:appsol_final/components/hola.dart';
+import 'package:appsol_final/components/holaconductor.dart';
+import 'package:appsol_final/components/prueba.dart';
+import 'package:appsol_final/modeluser/user_model.dart';
+import 'package:appsol_final/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 //import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/*class Usuario {
-  final int id;
-	final int rol_id;
-	final String nickname;
-	final String contrasena;
-	String? email;
-	final String nombres;// varchar(100) not null,
-	final String apellidos;// varchar(200) not null,
-	final String dni;// varchar(200) no,
-	String fecha_nacimiento;// date not null,
-	String? licencia;// varchar (100),
-	String? frecuencia;// int,
-	String? sexo;// varchar(100),
-	String? direccion;// varchar(150),
-	String? telefono;// varchar(50),
-	String? codigo;// varchar(200),
-	double? saldo_beneficios;// int,
-	String? direccion_empresa;// varchar(200),
-	String? suscripcion;// varchar(200),
-	String? ubicacion; //varchar(200), --GEOMETRY
-	String? ruc;// varchar(200),
-	String? nombre_empresa;// varchar(200),
-	String? zona_trabajo_id;//int
-
-
-   Usuario(
-      {required this.id,
-      required this.nombres,
-      required this.apellidos,
-      required this.dni,
-      this.codigo,
-      required this.nickname,
-      required this.contrasena,
-      this.direccion,
-      this.direccion_empresa,
-      required this.fecha_nacimiento,
-      this.email,
-      this.frecuencia,
-      this.licencia,
-      this.nombre_empresa,
-      required this.rol_id,
-      this.ruc,
-      this.saldo_beneficios,
-      this.sexo,
-      this.suscripcion,
-      this.telefono,
-      this.ubicacion,
-      this.zona_trabajo_id
-});
-}*/
+import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -73,13 +26,10 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _usuario = TextEditingController();
   final TextEditingController _contrasena = TextEditingController();
-  late SharedPreferences cliente;
-  late SharedPreferences conductor;
-  late SharedPreferences gerente;
+
   late int status = 0;
   late int rol = 0;
-
-  //List<Usuario>usuarios= [];
+  late UserModel userData;
 
   @override
   void initState() {
@@ -92,128 +42,30 @@ class _LoginState extends State<Login> {
       });
     });
   }
-/*
-  String? LoggedInWith;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseAuth _auth = FirebaseAuth.instance;*/
 
-  /* Future<dynamic>getUsers()async{
-    var res = await http.get(
-      Uri.parse(apiUsers),
-      headers: {"Content-type": "application/json"},
-    );
-    try {
-      if (res.statusCode == 200) {
-        var data = json.decode(res.body);
-        List<Usuario> tempUsuario = data.map<Usuario>((mapa) {
-          return Usuario(
-              id: mapa['id'],
-              nombres: mapa['nombres'],
-              apellidos: mapa['apellidos'],
-              licencia: mapa['licencia'],
-              dni: mapa['dni'],
-              fecha_nacimiento: mapa['fecha_nacimiento'],
-              nickname: mapa['nickname'],
-              contrasena: mapa['contrasena'],
-              email: mapa['email'],
-              rol_id: mapa['rol_id'],
-              codigo: mapa['codigo'],
-              direccion: mapa['direccion'],
-              direccion_empresa: mapa['direccion_empresa'],
-              nombre_empresa: mapa['nombre_empresa'],
-              ruc: mapa['ruc'],
-              sexo: mapa['sexo'],
-              saldo_beneficios:mapa['saldo_beneficios'],
-              suscripcion: mapa['mapa'],
-              telefono: mapa['telefono'],
-              ubicacion: mapa['ubicacion'],
-              frecuencia: mapa['frecuencia'],
-              zona_trabajo_id: mapa['zona_trabajo_id']
-              
-              
-          );
-        }).toList();
-
-        setState(() {
-          usuarios = tempUsuario;
-        });
-      }
-    } catch (e) {
-      print('Error en la solicitud: $e');
-      throw Exception('Error en la solicitud: $e');
-    }
-  }*/
-
-  /* Future<dynamic> signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final UserCredential authResult =
-          await _auth.signInWithCredential(credential);
-      final User? user = authResult.user;
-      LoggedInWith = "google";
-      return user;
-    } catch (e) {
-      print('Error during Google sign-in: $e');
-      return null;
-    }
-  }*/
-
-  /* Future<dynamic> signInWithFacebook() async {
-    // Inicia sesión con Facebook
-    try {
-      print("tengo hambre chamo");
-      final LoginResult result = await FacebookAuth.instance.login();
-      print("no he desayunado");
-      if (result.status == LoginStatus.success) {
-        final AccessToken? accessToken = result.accessToken;
-        final AuthCredential credential =
-            FacebookAuthProvider.credential(accessToken!.token);
-
-        // Autentica con Firebase
-        UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithCredential(credential);
-        final User? user = userCredential.user;
-        LoggedInWith = "face";
-        return user;
-      }
-    } catch (e) {
-      print("aca?");
-      print(e.toString());
-      // Manejar el error
-    }
-    return null;
-  }*/
   Future<dynamic> loginsol(username, password) async {
     try {
       print("------loginsool");
       print(username);
-      cliente = await SharedPreferences.getInstance();
-      conductor = await SharedPreferences.getInstance();
-      gerente = await SharedPreferences.getInstance();
+
       var res = await http.post(Uri.parse(apiUrl + apiLogin),
           headers: {"Content-type": "application/json"},
           body: jsonEncode({"nickname": username, "contrasena": password}));
       if (res.statusCode == 200) {
         var data = json.decode(res.body);
+
         // CLIENTE
+
         if (data['usuario']['rol_id'] == 4) {
           print("cli");
-          cliente.setInt('cliid', data['usuario']['id']);
-          cliente.setString('clidireccion',data['usuario']['direccion']);
-          cliente.setString('clinombre', data['usuario']['nombre']);
-          cliente.setString('cliapellidos', data['usuario']['apellidos']);
-          cliente.setString('clisexo', data['usuario']['sexo']);
-          cliente.setString('clisuscripcion', data['usuario']['suscripcion']);
-          cliente.setInt('clisaldobeneficio', data['usuario']['saldo_beneficios']);
+
+          // data['usuario']['nombre']
+          userData = UserModel(
+              id: data['usuario']['id'],
+              nombre: data['usuario']['nombre'],
+              apellidos: data['usuario']['apellidos'],
+              codigocliente: data['usuario']['codigocliente']  ?? 'NoCode',
+              suscripcion:data['usuario']['suscripcion'] ?? 'NoSubscribe');
           setState(() {
             status = 200;
             rol = 4;
@@ -222,11 +74,12 @@ class _LoginState extends State<Login> {
         //CONDUCTOR
         else if (data['usuario']['rol_id'] == 5) {
           print("conductor");
-          conductor.setString('condnombre', data['usuario']['nombres']);
-          conductor.setString('condapellidos', data['usuario']['apellidos']);
-          conductor.setString('condsexo', data['usuario']['licencia']);
-          conductor.setString('conddni', data['usuario']['dni']);
-          conductor.setInt('condid', data['usuario']['id']);
+          userData = UserModel(
+              id: data['usuario']['id'],
+              nombre: data['usuario']['nombres'],
+              apellidos: data['usuario']['apellidos'],
+          );
+
           setState(() {
             status = 200;
             rol = 5;
@@ -235,17 +88,20 @@ class _LoginState extends State<Login> {
         // GERENTE
         else if (data['usuario']['rol_id'] == 3) {
           print("gerente");
-          gerente.setInt('getid', data['usuario']['id']);
-          gerente.setString('gernombre', data['usuario']['nombre']);
-          gerente.setString('gerapellidos', data['usuario']['apellidos']);
-          gerente.setString('gerdni', data['usuario']['sexo']);
-
+          userData = UserModel(
+              id: data['usuario']['id'],
+              nombre: data['usuario']['nombre'],
+              apellidos: data['usuario']['apellidos']
+            );
 
           setState(() {
             status = 200;
             rol = 3;
           });
         }
+
+        // ACTUALIZAMOS EL ESTADO DEL PROVIDER, PARA QUE SE PUEDA USAR DE MANERA GLOBAL
+        Provider.of<UserProvider>(context, listen: false).updateUser(userData);
       } else if (res.statusCode == 401) {
         var data400 = json.decode(res.body);
         print("data400");
@@ -416,23 +272,23 @@ class _LoginState extends State<Login> {
                               .pop(); // Cerrar el primer AlertDialog
 
                           if (rol == 4) {
-                          /*  Navigator.push(
+                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const Prueba()),
-                            );*/
+                                  builder: (context) => const Hola()),
+                            );
                           } else if (rol == 5) {
-                            /*  Navigator.push(
+                              Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const HolaConductor()),
+                            );
+                          } else if (rol == 3) {
+                              Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => const Prueba()),
-                            );*/
-                          } else if(rol==3){
-                             /*  Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Prueba()),
-                            );*/
+                            );
                           }
                         } else if (status == 401) {
                           Navigator.of(context)
