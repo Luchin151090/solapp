@@ -530,8 +530,8 @@ class _HolaConductorState extends State<HolaConductor> {
                     // MAPA
                     Container(
                       // padding: const EdgeInsets.all(10),
-                      margin: const EdgeInsets.only(right: 10, left: 10),
-                      //width: 500,
+                      //margin: const EdgeInsets.only(right: 10, left: 10),
+                      width: MediaQuery.of(context).size.width,
                       height: 300,
                       decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 16, 63, 100),
@@ -540,10 +540,9 @@ class _HolaConductorState extends State<HolaConductor> {
                       child: Stack(
                         children: [
                           FlutterMap(
-                              options: MapOptions(
-                                initialCenter: LatLng(-16.40521646629229,
-                                    -71.57102099896395), // Centro del mapa (California)
-                                initialZoom: 12.0, // Nivel de zoom
+                              options: const MapOptions(
+                                initialCenter: LatLng(-16.4055561, -71.5712185),
+                                initialZoom: 20.5,
                               ),
                               children: [
                                 TileLayer(
@@ -552,7 +551,7 @@ class _HolaConductorState extends State<HolaConductor> {
                                   userAgentPackageName: 'com.example.app',
                                 )
                               ]),
-                          Positioned(
+                         /* Positioned(
                             bottom:
                                 16.0, // Ajusta la posición vertical según tus necesidades
                             right:
@@ -578,7 +577,7 @@ class _HolaConductorState extends State<HolaConductor> {
                                     const Icon(Icons.call, color: Colors.white),
                               ),
                             ),
-                          ),
+                          ),*/
                         ],
                       ),
                     ),
@@ -735,8 +734,9 @@ class _HolaConductorState extends State<HolaConductor> {
                       height: 10,
                     ),
                   ]))),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Container(
+     // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+   /*  
+     Container(
         height: 45,
         width: anchoPantalla - 30,
         margin: const EdgeInsets.all(10),
@@ -774,7 +774,7 @@ class _HolaConductorState extends State<HolaConductor> {
             ],
           ),
         ),
-      ),
+      ),*/
     );
   }
 }

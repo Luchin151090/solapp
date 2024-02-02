@@ -39,15 +39,21 @@ dependencies:
   lottie: ^3.0.0
   flutter_dotenv: ^5.1.0
   shared_preferences: ^2.2.2
-  provider: ^6.1.1
+  provider: ^6.1.1 # GESTOR DE ESTADOS GLOBAL
   flutter_animate: ^4.5.0
-  url_launcher: ^6.2.4
+  url_launcher: ^6.2.4 # TELEFONO
   location: ^5.0.3
   geocoding: ^2.1.1
   latlong2: ^0.9.0
   geolocator: ^10.1.0
   flutter_map: ^6.1.0
-  socket_io_client: ^2.0.3+1
+  socket_io_client: ^2.0.3+1 # TIEMPO REAL
+
+  path_provider: ^2.1.2 # MANEJO DE RUTAS DE CARPETAS DEL CELULAR
+  syncfusion_flutter_pdf: ^24.2.3
+  open_file: ^3.3.2
+  pdf: ^3.10.7 #^3.1.0
+  permission_handler: ^11.2.0
 
 dev_dependencies:
   flutter_test:
