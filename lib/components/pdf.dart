@@ -1,12 +1,11 @@
+/*
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
-
 
 class Pdf extends StatefulWidget {
   const Pdf({Key? key}) : super(key: key);
@@ -52,41 +51,33 @@ class _PdfState extends State<Pdf> {
     print(".......dentro d create");
     final pdf = pw.Document();
 
-   
-
     // SECCION 1
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin:const pw.EdgeInsets.only(
-          top: 20,
-          left: 10,
-          right: 10,
-          bottom: 20
-        ),
+        margin:
+            const pw.EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
         build: (context) => [
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // Titulos
               pw.Center(
-                child:  pw.Text("Informe de ventas",
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 20,
-                      )),
-                
+                child: pw.Text("Informe de ventas",
+                    style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 20,
+                    )),
               ),
 
               // FECHA
               pw.Center(
                 child: pw.Text(
-                      "Del: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
-                      style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 20,
-                      )),
-                
+                    "Del: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+                    style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold,
+                      fontSize: 20,
+                    )),
               ),
 
               // DATOS PERSONALES
@@ -116,7 +107,6 @@ class _PdfState extends State<Pdf> {
                         child: pw.Image(pw.MemoryImage(logoData)))
                   ]),
               pw.SizedBox(height: 5),
-
 
               // TITULO
               pw.Container(
@@ -153,9 +143,6 @@ class _PdfState extends State<Pdf> {
                       pw.Text("data 3"),
                     ]),
                   ])),
-
-             
-              
             ],
           ),
         ],
@@ -164,231 +151,240 @@ class _PdfState extends State<Pdf> {
 
     // SECCION 2
     pdf.addPage(
-  pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
-    margin: const pw.EdgeInsets.only(top: 20, left: 10, right: 10),
-    build: (context) => [
-      // TITULO
-      pw.Container(
-        child: pw.Text(
-          "2.- Vendidos por c/presentación".toUpperCase(),
-          style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
-        ),
-      ),
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.only(top: 20, left: 10, right: 10),
+        build: (context) => [
+          // TITULO
+          pw.Container(
+            child: pw.Text(
+              "2.- Vendidos por c/presentación".toUpperCase(),
+              style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
 
-      pw.SizedBox(height: 10),
+          pw.SizedBox(height: 10),
 
-      // INFORME
-      pw.Container(
-        margin: pw.EdgeInsets.only(bottom: 18),
-        child: pw.Table(
-          border: pw.TableBorder.all(),
-          children: [
-            // HEADER
-            pw.TableRow(
+          // INFORME
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 18),
+            child: pw.Table(
+              border: pw.TableBorder.all(),
               children: [
-                pw.Text(
-                  "Ruta",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                // HEADER
+                pw.TableRow(
+                  children: [
+                    pw.Text(
+                      "Ruta",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      "Cliente",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      "Descuento",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                  ],
                 ),
-                pw.Text(
-                  "Cliente",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-                pw.Text(
-                  "Descuento",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                // DATA
+                pw.TableRow(
+                  children: [
+                    pw.Text("data 1"),
+                    pw.Text("data 2"),
+                    pw.Text("data 3"),
+                  ],
                 ),
               ],
             ),
-            // DATA
-            pw.TableRow(
-              children: [
-                pw.Text("data 1"),
-                pw.Text("data 2"),
-                pw.Text("data 3"),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ],
-  ),
-);
+    );
 
 // SECCION 3
-pdf.addPage(
-  pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
-    margin:const pw.EdgeInsets.only(top: 20, left: 10, right: 10),
-    build: (context) => [
-      // TITULO
-      pw.Container(
-        child: pw.Text(
-          "3.- Filtrado de precios a distintos montos (para recarga)".toUpperCase(),
-          style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
-        ),
-      ),
-
-      pw.SizedBox(height: 10),
-
-      // INFORME
-      pw.Container(
-        margin: pw.EdgeInsets.only(bottom: 18),
-        child: pw.Table(
-          border: pw.TableBorder.all(),
-          children: [
-            // HEADER
-            pw.TableRow(
-              children: [
-                pw.Text(
-                  "Ruta",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-                pw.Text(
-                  "Cliente",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-                pw.Text(
-                  "Descuento",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-              ],
-            ),
-            // DATA
-            pw.TableRow(
-              children: [
-                pw.Text("data 1"),
-                pw.Text("data 2"),
-                pw.Text("data 3"),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
-);
-
-// SECCION 4
-pdf.addPage(
-  pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
-    margin: const pw.EdgeInsets.only(top: 20, left: 10, right: 10),
-    build: (context) => [
-      // TITULO
-      pw.Container(
-        child: pw.Text(
-          "4.- Filtrado de precios a distintos montos (para bidón) ".toUpperCase(),
-          style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
-        ),
-      ),
-
-      pw.SizedBox(height: 10),
-
-      // INFORME
-      pw.Container(
-        margin: pw.EdgeInsets.only(bottom: 18),
-        child: pw.Table(
-          border: pw.TableBorder.all(),
-          children: [
-            // HEADER
-            pw.TableRow(
-              children: [
-                pw.Text(
-                  "Ruta",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-                pw.Text(
-                  "Cliente",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-                pw.Text(
-                  "Descuento",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-              ],
-            ),
-            // DATA
-            pw.TableRow(
-              children: [
-                pw.Text("data 1"),
-                pw.Text("data 2"),
-                pw.Text("data 3"),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
-);
-
-pdf.addPage(
-  pw.MultiPage(
-    pageFormat: PdfPageFormat.a4,
-    margin: const pw.EdgeInsets.only(top: 20, left: 10, right: 10),
-    build: (context) => [
-      // TITULO
-      pw.Container(
-        child: pw.Text(
-          "5.- Filtrado de pagos por efectivo y digital".toUpperCase(),
-          style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
-        ),
-      ),
-
-      pw.SizedBox(height: 10),
-
-      // INFORME
-      pw.Container(
-        margin:const pw.EdgeInsets.only(bottom: 18),
-        child: pw.Table(
-          border: pw.TableBorder.all(),
-          children: [
-            // HEADER
-            pw.TableRow(
-              children: [
-                pw.Text(
-                  "Ruta",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-                pw.Text(
-                  "Cliente",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-                pw.Text(
-                  "Descuento",
-                  style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
-                ),
-              ],
-            ),
-            // DATA
-            pw.TableRow(
-              children: [
-                pw.Text("data 1"),
-                pw.Text("data 2"),
-                pw.Text("data 3"),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
-);
-
-    // SECCION 4
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.only(
-          top: 20,
-          left: 10,
-          right: 10,
-          bottom: 20
-        ),
+        margin: const pw.EdgeInsets.only(top: 20, left: 10, right: 10),
         build: (context) => [
+          // TITULO
           pw.Container(
+            child: pw.Text(
+              "3.- Filtrado de precios a distintos montos (para recarga)"
+                  .toUpperCase(),
+              style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+
+          pw.SizedBox(height: 10),
+
+          // INFORME
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 18),
+            child: pw.Table(
+              border: pw.TableBorder.all(),
+              children: [
+                // HEADER
+                pw.TableRow(
+                  children: [
+                    pw.Text(
+                      "Ruta",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      "Cliente",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      "Descuento",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                  ],
+                ),
+                // DATA
+                pw.TableRow(
+                  children: [
+                    pw.Text("data 1"),
+                    pw.Text("data 2"),
+                    pw.Text("data 3"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+// SECCION 4
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.only(top: 20, left: 10, right: 10),
+        build: (context) => [
+          // TITULO
+          pw.Container(
+            child: pw.Text(
+              "4.- Filtrado de precios a distintos montos (para bidón) "
+                  .toUpperCase(),
+              style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+
+          pw.SizedBox(height: 10),
+
+          // INFORME
+          pw.Container(
+            margin: pw.EdgeInsets.only(bottom: 18),
+            child: pw.Table(
+              border: pw.TableBorder.all(),
+              children: [
+                // HEADER
+                pw.TableRow(
+                  children: [
+                    pw.Text(
+                      "Ruta",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      "Cliente",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      "Descuento",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                  ],
+                ),
+                // DATA
+                pw.TableRow(
+                  children: [
+                    pw.Text("data 1"),
+                    pw.Text("data 2"),
+                    pw.Text("data 3"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.only(top: 20, left: 10, right: 10),
+        build: (context) => [
+          // TITULO
+          pw.Container(
+            child: pw.Text(
+              "5.- Filtrado de pagos por efectivo y digital".toUpperCase(),
+              style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+
+          pw.SizedBox(height: 10),
+
+          // INFORME
+          pw.Container(
+            margin: const pw.EdgeInsets.only(bottom: 18),
+            child: pw.Table(
+              border: pw.TableBorder.all(),
+              children: [
+                // HEADER
+                pw.TableRow(
+                  children: [
+                    pw.Text(
+                      "Ruta",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      "Cliente",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(
+                      "Descuento",
+                      style: pw.TextStyle(
+                          fontSize: 14, fontWeight: pw.FontWeight.bold),
+                    ),
+                  ],
+                ),
+                // DATA
+                pw.TableRow(
+                  children: [
+                    pw.Text("data 1"),
+                    pw.Text("data 2"),
+                    pw.Text("data 3"),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // SECCION 4
+    pdf.addPage(pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin:
+            const pw.EdgeInsets.only(top: 20, left: 10, right: 10, bottom: 20),
+        build: (context) => [
+              pw.Container(
                   child: pw.Text(
                       "6.- Imágenes de los pedidos pagados vía digital"
                           .toUpperCase(),
@@ -406,9 +402,7 @@ pdf.addPage(
                           child: pw.Image(pw.MemoryImage(finalPedido))));
                 },
               ))
-        ]
-      )
-    );
+            ]));
 
     return saveDocument(
         name:
@@ -444,4 +438,4 @@ pdf.addPage(
       ),
     );
   }
-}
+}*/
