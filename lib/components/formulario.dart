@@ -1,6 +1,5 @@
 /*
 import 'dart:convert';
-import 'package:app_final/components/test/dise%C3%B1o.dart';
 import 'package:intl/intl.dart';
 
 import 'package:flutter/material.dart';
@@ -61,7 +60,8 @@ class _FormuState extends State<Formu> {
   @override
   Widget build(BuildContext context) {
     //final TabController _tabController = TabController(length: 2, vsync: this);
-
+    final anchoActual = MediaQuery.of(context).size.width;
+    final largoActual = MediaQuery.of(context).size.height;
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 255, 255, 255),
         appBar: AppBar(),
@@ -75,7 +75,7 @@ class _FormuState extends State<Formu> {
                     children: [
                       // TITULOS
                       Container(
-                        margin: const EdgeInsets.only(top: 10, left: 20),
+                        margin: const EdgeInsets.only(top: largoActual * 0.013, left: anchoActual * 0.055),
                         //color:Colors.grey,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -84,43 +84,43 @@ class _FormuState extends State<Formu> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                    child: const Text(
+                                    child: Text(
                                   "Me encantaría",
                                   style: TextStyle(
                                       color:
                                           const Color.fromARGB(255, 0, 57, 103),
-                                      fontSize: 35,
+                                      fontSize: largoActual * 0.047,
                                       fontWeight: FontWeight.w300),
                                 )),
                                 Container(
-                                    child: const Text(
+                                    child: Text(
                                   "saber de ti",
                                   style: TextStyle(
-                                      fontSize: 35,
+                                      fontSize: largoActual * 0.047,
                                       color: Color.fromARGB(255, 0, 41, 72)),
                                 )),
                               ],
                             ),
                             Container(
-                              margin: const EdgeInsets.only(right: 50),
-                              height: 100,
-                              width: 100,
+                              margin: EdgeInsets.only(right: anchoActual * 0.025),
+                              height: (largoActual * 0.094) + 20,
+                              width: (largoActual * 0.094) + 20,
                               child: Lottie.asset(
                                   'lib/imagenes/Animation - 1701877289450.json'),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 20,
+                      SizedBox(
+                        height: largoActual * 0.027,
                       ),
 
                       // FORMULARIO
                       Container(
-                        margin: const EdgeInsets.only(left: 20),
+                        margin: EdgeInsets.only(left: anchoActual * 0.055),
                         padding: const EdgeInsets.all(8),
                         // height: 700,
-                        width: 300,
+                        width: anchoActual * 0.83,
                         decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 237, 210, 242),
                             borderRadius: BorderRadius.circular(20),
@@ -140,12 +140,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingrese sus apellidos',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -163,12 +163,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingrese sus apellidos',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -186,12 +186,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingrese sus apellidos',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -219,7 +219,7 @@ class _FormuState extends State<Formu> {
                                     labelText: 'Sexo',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
@@ -246,22 +246,22 @@ class _FormuState extends State<Formu> {
                                     }
                                   },
                                   keyboardType: TextInputType.datetime,
-                                  style: const TextStyle(
-                                    fontSize: 18,
+                                  style: TextStyle(
+                                    fontSize: largoActual * 0.024,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                   ),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     labelText: 'Fecha de Nacimiento',
                                     // hintText: 'Ingrese sus apellidos',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -273,12 +273,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingresa un usuario',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -297,13 +297,13 @@ class _FormuState extends State<Formu> {
                                     labelText: 'Contraseña',
                                     hintText: 'Ingrese una contraseña',
                                     isDense: true,
-                                    labelStyle: const TextStyle(
-                                      fontSize: 15.0,
+                                    labelStyle: TextStyle(
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      color: const Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                     suffixIcon: GestureDetector(
@@ -335,12 +335,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingresa su email',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -354,12 +354,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingresa un usuario',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -379,12 +379,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingresa un usuario',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: 15.0,
+                                      fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
                                       color: Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: 13.0,
+                                      fontSize: largoActual * 0.018,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -394,13 +394,13 @@ class _FormuState extends State<Formu> {
                       ),
 
                       // REGISTRAR
-                      const SizedBox(
-                        height: 15,
+                      SizedBox(
+                        height: largoActual * 0.02,
                       ),
                       Container(
-                        margin: const EdgeInsets.only(left: 20),
-                        height: 60,
-                        width: 150,
+                        margin: EdgeInsets.only(left: anchoActual * 0.055),
+                        height: largoActual * 0.081,
+                        width: anchoActual * 0.42,
                         child: ElevatedButton(
                           onPressed: ()  {
                             if (_formKey.currentState!.validate()) {
@@ -415,10 +415,10 @@ class _FormuState extends State<Formu> {
                                             color: Color.fromARGB(
                                                 255, 4, 80, 143)),
                                       ),
-                                      content: const Text(
+                                      content: Text(
                                         'Te esparamos!',
                                         style: TextStyle(
-                                            fontSize: 20,
+                                            fontSize: largoActual * 0.027,
                                             fontWeight: FontWeight.w600),
                                       ),
                                       actions: <Widget>[
@@ -436,17 +436,17 @@ class _FormuState extends State<Formu> {
                                   _telefono.text,
                                   _ruc.text);
                               print("registrado-....");
-                                            Navigator.push(
+                                            /*Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const Login2()),
-                                ); // Cierra el AlertDialog
+                                );*/ // Cierra el AlertDialog
                                           },
                                           child: const Text(
                                             'OK',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 25,
+                                                fontSize: largoActual * 0.034,
                                                 color: Color.fromARGB(
                                                     255, 13, 58, 94)),
                                           ),
@@ -460,7 +460,7 @@ class _FormuState extends State<Formu> {
                           },
                           child: Text(
                             "Registrar",
-                            style: TextStyle(fontSize: 20, color: Colors.white),
+                            style: TextStyle(fontSize: largoActual * 0.027, color: Colors.white),
                           ),
                           style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all(
