@@ -272,7 +272,7 @@ class _LoginState extends State<Login> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const Hola()),
+                                      builder: (context) => const Hola2()),
                                 );
                               } else if (rol == 5) {
                                 Navigator.push(
