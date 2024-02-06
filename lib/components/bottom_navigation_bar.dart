@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:appsol_final/components/hola2.dart';
+import 'package:appsol_final/components/hola.dart';
 import 'package:appsol_final/components/promos.dart';
 import 'package:appsol_final/components/pedido.dart';
 import 'package:appsol_final/components/productos.dart';

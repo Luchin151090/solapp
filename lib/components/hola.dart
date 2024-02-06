@@ -1,9 +1,9 @@
 import 'package:appsol_final/components/asistencia.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:appsol_final/components/promos.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:geocoding/geocoding.dart';
+import 'package:appsol_final/components/productos.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
@@ -25,14 +25,14 @@ class Producto {
       required this.foto});
 }
 
-class Hola extends StatefulWidget {
+class Hola2 extends StatefulWidget {
   final String? url;
   final String? LoggedInWith;
   final String direccion;
   //final double? latitud;
   // final double? longitud;
 
-  const Hola({
+  const Hola2({
     this.url,
     this.LoggedInWith,
     this.direccion = '',
@@ -42,10 +42,10 @@ class Hola extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<Hola> createState() => _HolaState();
+  State<Hola2> createState() => _HolaState();
 }
 
-class _HolaState extends State<Hola> with TickerProviderStateMixin {
+class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   String apiUrl = dotenv.env['API_URL'] ?? '';
   List<Producto> listProducto = [];
   late List<String> listUbicaciones = [];
@@ -81,7 +81,7 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
   }
 
   Future<dynamic> getProducts() async {
-    print("1) get products---------");
+    print("-------get products---------");
     var res = await http.get(
       Uri.parse(apiUrl + '/api/products'),
       headers: {"Content-type": "application/json"},
@@ -254,314 +254,167 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
+
     final TabController _tabController = TabController(length: 2, vsync: this);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
-        bottomNavigationBar: CurvedNavigationBar(
-          backgroundColor: Color.fromRGBO(47, 76, 245, 1.000),
-          items: [
-            Icon(Icons.home_rounded),
-            Icon(Icons.shopping_cart_rounded),
-            Icon(Icons.person)
-          ],
-        ),
-        key: _scaffoldKey,
-        drawer: Drawer(
-          child: ListView(
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 9, 133, 235),
-                ),
-                child: Text(
-                  'Menu',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
-              ),
-              ListTile(
-                title: Text('Cuenta'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text('Soporte'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              const SizedBox(
-                height: 200,
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/loginsol');
-                  },
-                  child: const Text(
-                    "Salir",
-                    style: TextStyle(color: Colors.black),
-                  )),
-            ],
-          ),
-        ),
+        backgroundColor: Colors.white,
         body: SafeArea(
+            key: _scaffoldKey,
             child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 80,
+                        //color: Colors.amberAccent,
                         width: MediaQuery.of(context).size.width,
                         margin:
                             const EdgeInsets.only(top: 10, left: 10, right: 10),
-                        //color:Colors.red,
+                        //color: Colors.red,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // MENU
-                            Container(
-                              //margin: EdgeInsets.only(right: ),
-                              child: IconButton(
-                                  onPressed: () {
-                                    _scaffoldKey.currentState?.openDrawer();
-                                  },
-                                  icon: const Icon(
-                                    Icons.menu,
-                                    size: 25,
-                                  )),
+                            SizedBox(
+                              width: 10,
                             ),
-
-                            // LOCATION
+                            //LOCATION
                             Container(
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20)),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  /*const Text(
-                                    "¿Donde lo entregamos?",
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color.fromARGB(255, 7, 135, 50)),
-                                  ),*/
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      /*Container(
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(40),
-                                            color: Colors.green),
-                                        child: IconButton(
-                                          onPressed: () {
-                                            showModalBottomSheet(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return Container(
-                                                  height: 150,
-                                                  width: MediaQuery.of(context)
-                                                      .size
-                                                      .width,
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      const Text(
-                                                        'Agregar Ubicación',
-                                                        style: TextStyle(
-                                                          color: Color.fromARGB(
-                                                              255, 3, 64, 113),
-                                                          fontSize: 20,
+                                  color:
+                                      const Color.fromRGBO(83, 176, 68, 1.000),
+                                  borderRadius: BorderRadius.circular(40)),
+                              height: 45,
+                              width: 251,
+                              child: DropdownMenu<String>(
+                                hintText: '¿Dónde lo entregamos?',
+                                trailingIcon: const Icon(
+                                  Icons.arrow_drop_down,
+                                  size: 23,
+                                  color: Colors.white,
+                                ),
+                                leadingIcon: IconButton(
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                      backgroundColor: Colors.white,
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Container(
+                                          margin: const EdgeInsets.only(
+                                              top: 30, left: 20, right: 20),
+                                          height: 130,
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Text(
+                                                'Agregar Ubicación',
+                                                style: TextStyle(
+                                                  color: Color.fromARGB(
+                                                      255, 3, 34, 60),
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              ElevatedButton(
+                                                onPressed: () async {
+                                                  print("ubi añadidda");
+                                                  await currentLocation();
+                                                  Navigator.of(context).pop();
+                                                },
+                                                style: ButtonStyle(
+                                                  minimumSize:
+                                                      const MaterialStatePropertyAll(
+                                                          Size(100, 40)),
+                                                  backgroundColor:
+                                                      MaterialStateProperty.all(
+                                                          Color.fromRGBO(88,
+                                                              184, 249, 1.000)),
+                                                ),
+                                                child: const Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Icon(
+                                                      Icons
+                                                          .add_location_alt_rounded,
+                                                      color: Colors.white,
+                                                      size: 25,
+                                                    ),
+                                                    Text(
+                                                      ' Agregar ubicación actual',
+                                                      style: TextStyle(
+                                                          fontSize: 18,
                                                           fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 10),
-                                                      const SizedBox(
-                                                          height: 10),
-                                                      ElevatedButton(
-                                                        onPressed: () async {
-                                                          print("ubi añadidda");
-                                                          await currentLocation();
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: const Row(
-                                                          children: [
-                                                            Icon(
-                                                              Icons
-                                                                  .add_location_alt_outlined,
-                                                              color:
-                                                                  Colors.blue,
-                                                              size: 25,
-                                                            ),
-                                                            Text(
-                                                              ' Agregar ubicación actual ?',
-                                                              style: TextStyle(
-                                                                  fontSize: 20,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400,
-                                                                  color: Color
-                                                                      .fromARGB(
-                                                                          255,
-                                                                          47,
-                                                                          90,
-                                                                          48)),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          icon: const Icon(
-                                              Icons.add_location_alt_outlined,
-                                              size: 23,
-                                              color: Colors.white),
-                                        ),
-                                      ),*/
-                                      DropdownMenu<String>(
-                                        trailingIcon: IconButton(
-                                          onPressed: () {
-                                            showModalBottomSheet(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return Container(
-                                                  height: 150,
-                                                  width: MediaQuery.of(context)
-                                                      .size
-                                                      .width,
-                                                  padding: const EdgeInsets.all(
-                                                      16.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      const Text(
-                                                        'Agregar Ubicación',
-                                                        style: TextStyle(
-                                                          color: Color.fromARGB(
-                                                              255, 3, 64, 113),
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 10),
-                                                      const SizedBox(
-                                                          height: 10),
-                                                      ElevatedButton(
-                                                        onPressed: () async {
-                                                          print("ubi añadidda");
-                                                          await currentLocation();
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: const Row(
-                                                          children: [
-                                                            Icon(
-                                                              Icons
-                                                                  .add_location_alt_outlined,
-                                                              color:
-                                                                  Colors.blue,
-                                                              size: 25,
-                                                            ),
-                                                            Text(
-                                                              '¿Agregar ubicación actual?',
-                                                              style: TextStyle(
-                                                                  fontSize: 20,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w400,
-                                                                  color: Color
-                                                                      .fromARGB(
-                                                                          255,
-                                                                          47,
-                                                                          90,
-                                                                          48)),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          icon: const Icon(
-                                              Icons.add_location_alt_outlined,
-                                              size: 23,
-                                              color: Colors.green),
-                                        ),
-                                        hintText: "¿Donde lo entregamos?",
-                                        menuHeight: 300,
-                                        menuStyle: MenuStyle(
-                                          backgroundColor:
-                                              MaterialStateProperty.all(
-                                                  const Color.fromARGB(
-                                                      255, 197, 251, 0)),
-                                        ),
-                                        initialSelection: listUbicaciones.first,
-                                        onSelected: (String? value) {
-                                          // This is called when the user selects an item.
-                                          print("valor");
-                                          print(value);
-                                          setState(() {
-                                            if (listUbicaciones
-                                                .contains(value)) {
-                                              listUbicaciones.remove(value);
-                                              listUbicaciones.insert(0, value!);
-                                              dropdownValue = value;
-                                            }
-                                          });
-                                        },
-                                        dropdownMenuEntries: List.generate(
-                                            listUbicaciones.length, (index) {
-                                          final value = listUbicaciones[index];
-                                          return DropdownMenuEntry<String>(
-                                              value: value,
-                                              label: value.length > 20
-                                                  ? '${value.substring(0, 15)}'
-                                                  : value);
-                                        }).toList(),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                                              FontWeight.w400,
+                                                          color: Colors.white),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  icon: const Icon(
+                                      Icons.add_location_alt_rounded,
+                                      size: 23,
+                                      color: Colors.white),
+                                ),
+                                inputDecorationTheme: InputDecorationTheme(
+                                    fillColor:
+                                        Color.fromRGBO(83, 176, 68, 1.000),
+                                    hintStyle: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      //fontWeight: FontWeight.w400
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(30),
+                                        borderSide: const BorderSide(
+                                            width: 0, color: Colors.white))),
+                                expandedInsets: EdgeInsets.zero,
+                                menuStyle: MenuStyle(
+                                  backgroundColor: MaterialStateProperty.all(
+                                      Color.fromARGB(255, 252, 255, 255)),
+                                ),
+                                initialSelection: listUbicaciones.first,
+                                onSelected: (String? value) {
+                                  // This is called when the user selects an item.
+                                  print("valor");
+                                  print(value);
+                                  setState(() {
+                                    if (listUbicaciones.contains(value)) {
+                                      listUbicaciones.remove(value);
+                                      listUbicaciones.insert(0, value!);
+                                      dropdownValue = value;
+                                    }
+                                  });
+                                },
+                                dropdownMenuEntries: List.generate(
+                                    listUbicaciones.length, (index) {
+                                  final value = listUbicaciones[index];
+                                  return DropdownMenuEntry<String>(
+                                      value: value,
+                                      label: value.length > 20
+                                          ? '${value.substring(0, 15)}'
+                                          : value);
+                                }).toList(),
                               ),
                             ),
 
                             // USER PHOTO
                             Container(
-                              margin: const EdgeInsets.only(right: 10),
                               decoration: BoxDecoration(
                                   color: const Color.fromARGB(255, 84, 81, 81),
                                   borderRadius: BorderRadius.circular(40)),
                               height: 50,
-                              // width: 50,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(40),
                                 child: widget.url != null
@@ -572,61 +425,46 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 20,
-                      ),
                       Container(
                         width: MediaQuery.of(context).size.width,
-                        margin: const EdgeInsets.only(left: 20),
+                        margin: const EdgeInsets.only(left: 20, top: 30),
                         child: Text(
-                          "Hola, ${userProvider.user?.nombre} \nBienvenid@ a",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w300,
+                          "Bienvenid@, ${userProvider.user?.nombre}",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w200,
                               fontSize: 18,
                               color: Color.fromARGB(255, 3, 34, 60)),
                         ),
                       ),
                       Container(
-                        width: MediaQuery.of(context).size.width,
                         margin: const EdgeInsets.only(left: 20),
-                        // color: Colors.grey,
-                        child: Row(
-                          //mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Text(
-                              "Disfruta de Agua Sol!",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 25,
-                                  color: Color.fromARGB(255, 3, 34, 60)),
-                            ),
-                            Container(
-                                height: 50,
-                                child: Lottie.asset('lib/imagenes/vasito.json'))
-                          ],
+                        child: const Text(
+                          "Disfruta de Agua Sol!",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 18,
+                              color: Color.fromARGB(255, 3, 34, 60)),
                         ),
                       ),
-                      const SizedBox(
-                        height: 20,
-                      ),
                       Container(
-                        //color:Colors.red,
                         height: 50,
                         width: MediaQuery.of(context).size.width,
-                        margin: const EdgeInsets.only(left: 20),
+                        margin:
+                            const EdgeInsets.only(top: 10, left: 10, right: 10),
                         child: TabBar(
                             controller: _tabController,
                             indicatorWeight: 10,
                             labelStyle: const TextStyle(
-                                fontSize:
-                                    20), // Ajusta el tamaño del texto de la pestaña seleccionada
-                            unselectedLabelStyle: const TextStyle(fontSize: 16),
-                            labelColor: const Color.fromARGB(255, 0, 52, 95),
+                                fontSize: 18,
+                                fontWeight: FontWeight
+                                    .w400), // Ajusta el tamaño del texto de la pestaña seleccionada
+                            unselectedLabelStyle: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w300),
+                            labelColor: Color.fromARGB(255, 3, 34, 60),
                             unselectedLabelColor:
-                                const Color.fromARGB(255, 46, 43, 43),
+                                const Color.fromARGB(255, 3, 34, 60),
                             indicatorColor:
-                                const Color.fromARGB(255, 21, 168, 14),
+                                const Color.fromRGBO(83, 176, 68, 1.000),
                             tabs: const [
                               Tab(
                                 text: "Promociones",
@@ -637,11 +475,9 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                             ]),
                       ),
                       Container(
-                        margin: const EdgeInsets.only(top: 20, left: 20),
-                        height: MediaQuery.of(context).size.height / 3.5,
-                        // color:Colors.grey,
-
-                        //
+                        margin:
+                            const EdgeInsets.only(top: 10, left: 10, right: 10),
+                        height: MediaQuery.of(context).size.height / 2.5,
                         width: double.maxFinite,
                         child: TabBarView(
                           controller: _tabController,
@@ -653,7 +489,12 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                                 itemBuilder: (context, index) {
                                   return GestureDetector(
                                     onTap: () {
-                                      Navigator.pushNamed(context, '/promos');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const Promos()),
+                                      );
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.only(left: 10),
@@ -663,7 +504,7 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                                           color:
                                               Color.fromARGB(255, 71, 106, 133),
                                           borderRadius:
-                                              BorderRadius.circular(50),
+                                              BorderRadius.circular(30),
                                           image: const DecorationImage(
                                             image: AssetImage(
                                                 'lib/imagenes/bodegon.png'),
@@ -680,8 +521,11 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                                   Producto producto = listProducto[index];
                                   return GestureDetector(
                                     onTap: () {
-                                      Navigator.pushNamed(
-                                          context, '/productos');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => Productos()),
+                                      );
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.only(left: 10),
@@ -703,12 +547,10 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                         ),
                       ),
                       const SizedBox(
-                        height: 10,
+                        height: 20,
                       ),
                       Container(
-                        height: 80,
                         margin: const EdgeInsets.only(left: 20, right: 20),
-                        //color: Colors.grey,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -716,35 +558,30 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Container(
-                                    margin: const EdgeInsets.only(right: 90),
                                     child: const Text(
-                                      "Mejora!",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w300,
-                                          color:
-                                              Color.fromARGB(255, 2, 46, 83)),
-                                    )),
+                                  "Mejora",
+                                  style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w400,
+                                      color: Color.fromARGB(255, 3, 34, 60)),
+                                )),
                                 Container(
-                                    margin: const EdgeInsets.only(right: 80),
-                                    //color:Colors.grey,
                                     child: const Text(
-                                      "Tú vida",
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color:
-                                              Color.fromARGB(255, 3, 31, 54)),
-                                    )),
+                                  "tú vida!",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 17,
+                                      color: Color.fromARGB(255, 3, 34, 60)),
+                                )),
                               ],
                             ),
                             Container(
                               margin: const EdgeInsets.only(top: 20),
-                              // color:Colors.amber,
                               child: const Text(
                                 "Necesitas",
                                 style: TextStyle(
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 17,
                                     color: Color.fromARGB(255, 6, 46, 78)),
                               ),
                             )
@@ -752,11 +589,11 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                         ),
                       ),
                       Container(
-                        margin: const EdgeInsets.only(left: 20, right: 20),
+                        margin: const EdgeInsets.only(left: 10, right: 10),
                         child: Row(children: [
                           Container(
                             //width: 150,
-                            height: 50,
+                            height: 40,
                             child: ElevatedButton(
                               onPressed: () {
                                 showDialog(
@@ -797,8 +634,11 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                                 );
                               },
                               style: ButtonStyle(
+                                elevation: MaterialStateProperty.all(8),
+                                minimumSize: const MaterialStatePropertyAll(
+                                    Size(100, 40)),
                                 backgroundColor: MaterialStateProperty.all(
-                                    const Color.fromARGB(255, 0, 59, 108)),
+                                    const Color.fromRGBO(0, 106, 252, 1.000)),
                               ),
                               child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -806,16 +646,16 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                                   Icon(
                                     Icons
                                         .attach_money_outlined, // Reemplaza con el icono que desees
-                                    size: 24,
+                                    size: 25,
                                     color: Colors.white,
                                   ),
                                   SizedBox(
                                       width:
                                           8), // Ajusta el espacio entre el icono y el texto según tus preferencias
                                   Text(
-                                    " Aquí ",
+                                    "Aquí",
                                     style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.w400,
                                         color: Colors.white),
                                   ),
@@ -826,7 +666,7 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                           Expanded(child: Container()),
                           Container(
                             width: 200,
-                            height: 50,
+                            height: 40,
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
@@ -836,25 +676,39 @@ class _HolaState extends State<Hola> with TickerProviderStateMixin {
                                 );
                               },
                               style: ButtonStyle(
+                                elevation: MaterialStateProperty.all(8),
+                                minimumSize: const MaterialStatePropertyAll(
+                                    Size(100, 40)),
                                 backgroundColor: MaterialStateProperty.all(
-                                    const Color.fromARGB(255, 0, 59, 108)),
+                                    const Color.fromRGBO(0, 106, 252, 1.000)),
                               ),
                               child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons
-                                        .face, // Reemplaza con el icono que desees
-                                    size: 28,
-                                    color: Colors.white,
+                                  Stack(
+                                    children: [
+                                      Icon(
+                                        Icons
+                                            .person, // Reemplaza con el icono que desees
+                                        size: 25,
+                                        color: Colors.white,
+                                      ),
+                                      Icon(
+                                        Icons
+                                            .question_mark_rounded, // Reemplaza con el icono que desees
+                                        size: 12,
+                                        color: Colors.white,
+                                      )
+                                    ],
                                   ),
+
                                   SizedBox(
                                       width:
                                           8), // Ajusta el espacio entre el icono y el texto según tus preferencias
                                   Text(
-                                    "¿ Asistencia ?",
+                                    "Asistencia",
                                     style: TextStyle(
-                                        fontSize: 15,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.w400,
                                         color: Colors.white),
                                   ),
