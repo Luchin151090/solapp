@@ -1,21 +1,13 @@
-/*
-import 'package:app_final/components/test/fin.dart';
-import 'package:app_final/components/test/promos.dart';
+import 'package:appsol_final/components/fin.dart';
+import 'package:appsol_final/components/productos.dart';
+import 'package:appsol_final/components/promos.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:app_final/components/test/productos.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
-  }
-}
-
 class Pedido extends StatefulWidget {
-  // ATRIBUTOS DE LA CLASE - datos inmutables con FINAL
   final List<Producto> seleccionados;
   final List<Promo> seleccionadosPromo;
   final double total;
@@ -41,20 +33,11 @@ class _PedidoState extends State<Pedido> {
 
   int clienteId = 9;
   DateTime tiempoActual = DateTime.now();
-String apiUrl = dotenv.env['API_URL'] ?? '';
-  String apiPedidos = 'http://10.0.2.2:8004/api/pedido';
-  String apiDetallePedido = 'http://10.0.2.2:8004/api/detallepedido';
-  String apiLastPedido = 'http://10.0.2.2:8004/api/pedido_last';
-  /*
-  String apiPedidos = 'https://aguasolfinal-dev-qngg.2.us-1.fl0.io/api/pedido';
-  String apiDetallePedido =
-      'https://aguasolfinal-dev-qngg.2.us-1.fl0.io/api/detallepedido';
-  String apiLastPedido =
-      'https://aguasolfinal-dev-qngg.2.us-1.fl0.io/api/pedido_last';*/
+  String apiUrl = dotenv.env['API_URL'] ?? '';
 
   Future<dynamic> datosCreadoPedido(
       clienteId, fecha, montoTotal, tipo, estado) async {
-    await http.post(Uri.parse(apiUrl+'/api/pedido'),
+    await http.post(Uri.parse(apiUrl + '/api/pedido'),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
           "cliente_id": clienteId,
@@ -69,7 +52,7 @@ String apiUrl = dotenv.env['API_URL'] ?? '';
 
   Future<dynamic> detallePedido(
       clienteId, productoId, cantidad, promoID) async {
-    await http.post(Uri.parse(apiUrl+'/api/detallepedido'),
+    await http.post(Uri.parse(apiUrl + '/api/detallepedido'),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
           "cliente_id": clienteId,
@@ -99,254 +82,379 @@ String apiUrl = dotenv.env['API_URL'] ?? '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      bottomSheet: BottomSheet(
+          backgroundColor: const Color.fromRGBO(88, 184, 249, 1.000),
+          shadowColor: Colors.black,
+          elevation: 10,
+          enableDrag: false,
+          onClosing: () {},
+          builder: (context) {
+            return Expanded(
+              child: Container(
+                height: 100,
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text('Total'),
+                    SizedBox(
+                      width: 400,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ButtonStyle(
+                          elevation: MaterialStateProperty.all(5),
+                          minimumSize:
+                              const MaterialStatePropertyAll(Size(350, 38)),
+                          backgroundColor: MaterialStateProperty.all(
+                              const Color.fromRGBO(0, 82, 164, 1.000)),
+                        ),
+                        child: const Text(
+                          'Confirmar Pedido',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
       appBar: AppBar(
-        title: const Text(""),
+        backgroundColor: Colors.white,
       ),
       body: SafeArea(
           child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                //mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 110,
-                    margin: const EdgeInsets.only(top: 0, left: 20),
-                    // color:Colors.grey,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(left: 20),
-                          padding: const EdgeInsets.all(10),
-                          height: 90,
-                          width: 130,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              image: const DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: AssetImage('lib/imagenes/mañana.png')),
-                              color: const Color.fromARGB(255, 24, 157, 104)),
-                        ),
-                        //Expanded(child: Container()),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                                margin: const EdgeInsets.only(right: 20),
-                                //color: Colors.blue,
-                                child: const Text(
-                                  "Tu pedido",
-                                  style: TextStyle(
-                                      color: Color.fromARGB(255, 17, 62, 98),
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.w300),
+              padding: const EdgeInsets.all(10.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10, left: 20),
+                      child: const Text(
+                        "Tu pedido",
+                        style: TextStyle(
+                            color: Color.fromARGB(255, 1, 42, 76),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 225,
+                      child: Card(
+                        surfaceTintColor: Colors.white,
+                        color: Colors.white,
+                        elevation: 8,
+                        margin: const EdgeInsets.only(
+                            bottom: 10, left: 10, right: 10),
+                        child: ListView.builder(
+                            itemCount: widget.seleccionados.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                alignment: Alignment.center,
+                                margin: const EdgeInsets.only(
+                                    bottom: 10, left: 10, right: 10),
+                                decoration: const BoxDecoration(
+                                    //color: Colors.amber,
+                                    border: Border(
+                                  bottom: BorderSide(
+                                      style: BorderStyle.solid,
+                                      color: Colors.black26),
                                 )),
-                            Container(
-                              margin: const EdgeInsets.only(right: 20),
-                              child: const Text(
-                                "se agendó",
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    color: Color.fromARGB(255, 3, 39, 68)),
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.only(right: 20),
-                              child: const Text(
-                                "aquí esta el detalle",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.w400),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    height: 170,
-                    decoration: BoxDecoration(
-                        //color:Color.fromARGB(255, 83, 231, 147),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                            width: 4,
-                            color: const Color.fromARGB(255, 218, 222, 3))),
-                    child: ListView.builder(
-                        itemCount: widget.seleccionados.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            margin: const EdgeInsets.only(
-                                left: 10, right: 10, top: 10),
-                            //padding: const EdgeInsets.all(2),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.water_drop_outlined,
-                                  color: Color.fromARGB(255, 2, 77, 138),
-                                  size: 25,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 10),
+                                          height: 50,
+                                          width: 50,
+                                          decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                              image: DecorationImage(
+                                                image: NetworkImage(widget
+                                                    .seleccionados[index].foto),
+                                                //fit: BoxFit.cover,
+                                              )),
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              widget.seleccionados[index].nombre
+                                                  .capitalize(),
+                                              style: const TextStyle(
+                                                  fontSize: 15,
+                                                  color: Color.fromARGB(
+                                                      255, 1, 75, 135)),
+                                            ),
+                                            Text(
+                                              widget.seleccionados[index]
+                                                  .descripcion
+                                                  .capitalize(),
+                                              style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color: Color.fromARGB(
+                                                      255, 1, 75, 135)),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                    Container(
+                                      margin: const EdgeInsets.only(right: 10),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Text(
+                                            "S/. ${widget.seleccionados[index].precio}",
+                                            style: const TextStyle(
+                                                fontSize: 15,
+                                                color: Color.fromARGB(
+                                                    255, 1, 75, 135)),
+                                          ),
+                                          Text(
+                                            "Cant. ${widget.seleccionados[index].cantidad}",
+                                            style: const TextStyle(
+                                                fontSize: 15,
+                                                color: Color.fromARGB(
+                                                    255, 1, 75, 135)),
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
                                 ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Container(
-                                  width: 233,
-                                  margin: const EdgeInsets.only(right: 20),
-                                  child: Text(
-                                    "${widget.seleccionados[index].nombre}-${widget.seleccionados[index].descripcion}"
-                                        .capitalize(),
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color.fromARGB(255, 1, 75, 135)),
-                                  ),
-                                )
-                              ],
-                            ),
-                          );
-                        }),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 20),
-                    //color:Colors.grey,
-                    height: 50,
-                    child: Text(
-                      "El total es de: S/.${widget.total}",
-                      style: const TextStyle(
-                          color: Color.fromARGB(255, 0, 70, 123),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500),
+                              );
+                            }),
+                      ),
                     ),
-                  ),
-                  Container(
-                      margin: const EdgeInsets.only(left: 20),
-                      height: 40,
-                      //color:Colors.grey,
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10, left: 20),
+                      child: const Text(
+                        "Cupones",
+                        style: TextStyle(
+                            color: Color.fromARGB(255, 1, 42, 76),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 20),
+                      ),
+                    ),
+                    Card(
+                      surfaceTintColor: Colors.white,
+                      color: Colors.white,
+                      elevation: 8,
+                      margin: const EdgeInsets.only(
+                          left: 10, right: 10, bottom: 30),
                       child: Row(
                         children: [
                           Container(
-                            width: 120,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                await crearPedidoyDetallePedido(
-                                    "normal", widget.total);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Fin()),
-                                );
-                              },
-                              style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(
-                                      const Color.fromARGB(255, 0, 68, 120))),
-                              child: const Text(
-                                "Listo !",
-                                style: TextStyle(
-                                    fontSize: 22, color: Colors.white),
+                            margin: const EdgeInsets.only(
+                                top: 10, bottom: 10, left: 25),
+                            height: 46,
+                            width: 46,
+                            decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(0),
+                                image: const DecorationImage(
+                                  image: AssetImage('lib/imagenes/cupon.png'),
+                                  //fit: BoxFit.cover,
+                                )),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          SizedBox(
+                            width: 130,
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Ingresar cupón',
+                                hintStyle: TextStyle(
+                                    color: Color.fromARGB(255, 1, 75, 135),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400),
                               ),
+                              validator: (value) {},
                             ),
                           ),
-                          Container(
-                            margin: const EdgeInsets.only(left: 15),
-                            width: 182,
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          ElevatedButton(
+                            onPressed: () {},
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all(5),
+                              minimumSize:
+                                  const MaterialStatePropertyAll(Size(40, 38)),
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color.fromRGBO(0, 82, 164, 1.000)),
+                            ),
                             child: const Text(
-                              "Si lo pides después de la 1:00 P.M se agenda para mañana.",
+                              'Validar',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 20),
+                      //color:Colors.grey,
+                      height: 50,
+                      child: Text(
+                        "El total es de: S/.${widget.total}",
+                        style: const TextStyle(
+                            color: Color.fromARGB(255, 0, 70, 123),
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    Container(
+                        margin: const EdgeInsets.only(left: 20),
+                        height: 40,
+                        //color:Colors.grey,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 120,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  await crearPedidoyDetallePedido(
+                                      "normal", widget.total);
+                                  /*Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Fin()),
+                                  );*/
+                                },
+                                style: ButtonStyle(
+                                    backgroundColor: MaterialStateProperty.all(
+                                        const Color.fromARGB(255, 0, 68, 120))),
+                                child: const Text(
+                                  "Listo !",
+                                  style: TextStyle(
+                                      fontSize: 22, color: Colors.white),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(left: 15),
+                              width: 182,
+                              child: const Text(
+                                "Si lo pides después de la 1:00 P.M se agenda para mañana.",
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color.fromARGB(255, 3, 39, 68)),
+                              ),
+                            )
+                          ],
+                        )),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 20),
+                      child: const Text(
+                        "Lo necesitas",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w300),
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 20),
+                      child: const Text(
+                        "YA ?",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 20),
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 60,
+                            width: 60,
+                            decoration: BoxDecoration(
+                                color: Colors.amber,
+                                borderRadius: BorderRadius.circular(15)),
+                            child: Lottie.asset('lib/imagenes/anim_13.json'),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(left: 20),
+                            width: 240,
+                            child: const Text(
+                              "Por S/. 4.00 convierte tu pedido a Express y recíbelo ya!",
                               style: TextStyle(
                                   fontSize: 13,
                                   color: Color.fromARGB(255, 3, 39, 68)),
                             ),
-                          )
-                        ],
-                      )),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 20),
-                    child: const Text(
-                      "Lo necesitas",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w300),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 20),
-                    child: const Text(
-                      "YA ?",
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 20),
-                    child: Row(
-                      children: [
-                        Container(
-                          height: 60,
-                          width: 60,
-                          decoration: BoxDecoration(
-                              color: Colors.amber,
-                              borderRadius: BorderRadius.circular(15)),
-                          child: Lottie.asset('lib/imagenes/anim_13.json'),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(left: 20),
-                          width: 240,
-                          child: const Text(
-                            "Por S/. 4.00 convierte tu pedido a Express y recíbelo ya!",
-                            style: TextStyle(
-                                fontSize: 13,
-                                color: Color.fromARGB(255, 3, 39, 68)),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 20),
-                    height: 40,
-                    //color:Colors.grey,
-                    width: 160,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        //POR AHORA EL CLIENTE ES MANUAL!!""
-
-                        setState(() {
-                          totalVenta = widget.total + express;
-                        });
-
-                        await crearPedidoyDetallePedido("express", totalVenta);
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Fin()),
-                        );
-                      },
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                              const Color.fromARGB(255, 219, 214, 214))),
-                      child: const Text(
-                        "Express >>",
-                        style: TextStyle(
-                            fontSize: 22,
-                            color: Color.fromARGB(255, 2, 78, 140)),
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 20),
+                      height: 40,
+                      //color:Colors.grey,
+                      width: 160,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          //POR AHORA EL CLIENTE ES MANUAL!!""
+
+                          setState(() {
+                            totalVenta = widget.total + express;
+                          });
+
+                          await crearPedidoyDetallePedido(
+                              "express", totalVenta);
+
+                          /* Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const Fin()),
+                          );*/
+                        },
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color.fromARGB(255, 219, 214, 214))),
+                        child: const Text(
+                          "Express >>",
+                          style: TextStyle(
+                              fontSize: 22,
+                              color: Color.fromARGB(255, 2, 78, 140)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ))),
     );
   }
 }
-*/

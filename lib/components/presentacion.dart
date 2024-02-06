@@ -1,4 +1,3 @@
-/*import 'package:app_final/components/test/dise%C3%B1o.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
@@ -10,24 +9,20 @@ class Presenta extends StatefulWidget {
   State<Presenta> createState() => _PresentaState();
 }
 
-
-
 class _PresentaState extends State<Presenta> {
+  DateTime now = DateTime.now();
 
-@override
-void initState(){
-  //navegar al login despues de 3 segundos
-  super.initState();
-  Future.delayed(Duration(seconds: 6), () {
-      Navigator.pushReplacement(
+  @override
+  void initState() {
+    //navegar al login despues de 3 segundos
+    super.initState();
+    Future.delayed(Duration(seconds: 6), () {
+      /*Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Login2()), // Reemplaza OtraVista con el nombre de tu vista destino
-      );
+      );*/
     });
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -42,37 +37,39 @@ void initState(){
                       Expanded(
                         child: Stack(
                           children: [
-                            
-                            
                             Center(
                               child: Container(
                                 height: 300,
                                 width: 200,
-                                child: Lottie.asset('lib/imagenes/redondito.json'),
+                                child:
+                                    Lottie.asset('lib/imagenes/redondito.json'),
                               ),
                             ),
                             Center(
                               child: Container(
                                 width: 100,
-                                height:300,
+                                height: 300,
                                 child: Image.asset('lib/imagenes/logo_sol.png'),
                               ),
-                            ).animate()
-                            .fade(duration: 1000.ms)
-                            .slideY()
-                            .then()
-                            .shake(),
+                            )
+                                .animate()
+                                .fade(duration: 1000.ms)
+                                .slideY()
+                                .then()
+                                .shake(),
                           ],
                         ),
                       ),
                       Container(
-                        margin: const EdgeInsets.only(bottom: 100),
-                        child: Text("Copyright \u00a9 COTECSA - 2024",
-                        style: TextStyle(fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Color.fromARGB(255, 9, 74, 126)),),
+                        margin: const EdgeInsets.only(bottom: 40),
+                        child: Text(
+                          "Copyright \u00a9 COTECSA - ${now.year}",
+                          style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w500,
+                              color: Color.fromRGBO(71, 152, 176, 1.000)),
+                        ),
                       ).animate().fade(duration: 2000.ms),
                     ]))));
   }
 }
-*/

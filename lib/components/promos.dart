@@ -1,14 +1,9 @@
-/*
-//import 'package:app_final/components/test/pedido.dart';
-import 'package:app_final/components/test/productos.dart';
-import 'package:app_final/components/test/pedido.dart';
+import 'package:appsol_final/components/productos.dart';
+import 'package:appsol_final/components/pedido.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-
-import 'package:lottie/lottie.dart';
 
 class Promo {
   final int id;
@@ -51,10 +46,8 @@ class Promos extends StatefulWidget {
 
 class _PromosState extends State<Promos> {
   String apiUrl = dotenv.env['API_URL'] ?? '';
+  DateTime fechaLim = DateTime.now();
 
-  //String apiPromociones = 'https://aguasol-30pw.onrender.com/api/promocion';
-  //String apiProductoPromocion ='https://aguasol-30pw.onrender.com/api/prod_prom';
-  //String apiProducto = 'https://aguasol-30pw.onrender.com/api/products';
   List<Producto> productosContabilizados = [];
   List<Promo> promocionesContabilizadas = [];
   List<Promo> listPromociones = [];
@@ -67,6 +60,11 @@ class _PromosState extends State<Promos> {
   void initState() {
     super.initState();
     getPromociones();
+  }
+
+  DateTime mesyAnio(String fecha) {
+    fechaLim = DateTime.parse(fecha);
+    return fechaLim;
   }
 
   Future<dynamic> getPromociones() async {
@@ -84,8 +82,7 @@ class _PromosState extends State<Promos> {
               precio: mapa['precio'].toDouble(),
               descripcion: mapa['descripcion'],
               fechaLimite: mapa['fecha_limite'],
-              foto:
-                  '$apiUrl/images/${mapa['foto'].replaceAll(r'\\', '/')}');
+              foto: '$apiUrl/images/${mapa['foto'].replaceAll(r'\\', '/')}');
         }).toList();
 
         setState(() {
@@ -102,7 +99,7 @@ class _PromosState extends State<Promos> {
   Future<dynamic> getProductoPromocion(promocionID, cantidadPromo) async {
     print("cantidad promo----${cantidadPromo}");
     var res = await http.get(
-      Uri.parse('$apiUrl/api/prod_prom/'+ promocionID.toString()),
+      Uri.parse('$apiUrl/api/prod_prom/' + promocionID.toString()),
       headers: {"Content-type": "application/json"},
     );
     try {
@@ -228,259 +225,259 @@ class _PromosState extends State<Promos> {
     //final TabController _tabController = TabController(length: 2, vsync: this);
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text(""),
-        ),
+        backgroundColor: Colors.white,
+        appBar: AppBar(),
         body: SafeArea(
             child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(10.0),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        margin: const EdgeInsets.only(top: 10, left: 20),
+                        margin: const EdgeInsets.only(top: 0, left: 20),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    child: const Text(
-                                      "Llévate !",
-                                      style: TextStyle(
-                                          color: Color.fromARGB(255, 7, 55, 95),
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w300),
-                                    ),
-                                  ),
-                                  Container(
-                                    child: const Text(
-                                      "las mejores promos",
-                                      style: TextStyle(fontSize: 22),
-                                    ),
+                                  const Text(
+                                    "Llévate las mejores promos!",
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 1, 42, 76),
+                                        fontWeight: FontWeight.w200,
+                                        fontSize: 20),
                                   ),
                                   Container(
                                     child: const Text(
                                       "Solo para tí",
-                                      style: TextStyle(fontSize: 27),
+                                      style: TextStyle(
+                                          color: Color.fromARGB(255, 1, 46, 84),
+                                          fontSize: 19,
+                                          fontWeight: FontWeight.w500),
                                     ),
                                   ),
                                 ],
                               ),
-                              Container(
-                                margin: const EdgeInsets.only(right: 20),
-                                height: 100,
-                                width: 100,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                    color: Colors.blue,
-                                    image: const DecorationImage(
-                                      image: AssetImage(
-                                          'lib/imagenes/gotitapastel.jpg'),
-                                      fit: BoxFit.fill,
-                                    )),
-                              )
                             ]),
-                      ),
-                      const SizedBox(
-                        height: 30,
                       ),
 
                       //CONTAINER CON LIST BUILDER
                       Container(
-                          margin: const EdgeInsets.only(left: 20),
-                          padding: const EdgeInsets.all(8),
-                          height: 300,
-                          decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 51, 106, 99),
-                              borderRadius: BorderRadius.circular(20)),
+                          height: 455,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: listPromociones.length,
                             itemBuilder: (context, index) {
                               Promo promocion = listPromociones[index];
-                              return Container(
-                                margin: const EdgeInsets.only(left: 10),
-                                padding: const EdgeInsets.all(10),
-                                width: 330,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
+                              return Card(
+                                surfaceTintColor: Colors.white,
+                                color: Colors.white,
+                                elevation: 8,
+                                margin: const EdgeInsets.only(
+                                    top: 20, left: 10, right: 10, bottom: 30),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Container(
-                                      width: 390,
-                                      height: 160,
+                                      height: 230,
+                                      width: 200,
+                                      margin: const EdgeInsets.only(top: 10),
                                       decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                          color: Colors.white,
                                           image: DecorationImage(
                                               image:
                                                   NetworkImage(promocion.foto),
                                               fit: BoxFit.scaleDown)),
                                     ),
                                     Container(
-                                      height: 90,
-                                      margin: const EdgeInsets.only(left: 0),
-                                      // color:Colors.blue,
+                                      width: 230,
+                                      margin: const EdgeInsets.only(
+                                          top: 10, right: 15, left: 15),
                                       child: Column(
-                                        //crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
-
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
-                                          Text(promocion.nombre,
-                                              style: const TextStyle(
-                                                  fontSize: 15,
-                                                  color: Color.fromARGB(
-                                                      255, 255, 255, 255))),
-                                          Text(promocion.descripcion,
-                                              style: const TextStyle(
-                                                  fontSize: 13,
-                                                  color: Color.fromARGB(
-                                                      255, 255, 255, 255))),
-                                          Container(
-                                            height: 40,
-                                            width: 160,
-                                            //color:Colors.pink,
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                IconButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        disminuir(index);
-                                                        print(
-                                                            "disminuir ${promocion.cantidad}");
-                                                      });
-                                                    },
-                                                    iconSize: 27,
-                                                    color: Colors.amber,
-                                                    icon: const Icon(Icons
-                                                        .remove_circle_outline)),
-                                                Text(
-                                                  promocion.cantidad.toString(),
-                                                  style: const TextStyle(
-                                                      color: Color.fromARGB(
-                                                          255, 255, 255, 255),
-                                                      fontSize: 20),
+                                          Text(
+                                            promocion.nombre,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 15,
+                                                color: Color.fromARGB(
+                                                    255, 4, 62, 107)),
+                                          ),
+                                          Flex(
+                                            direction: Axis.vertical,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: <Widget>[
+                                              Text(
+                                                promocion.descripcion
+                                                    .capitalize(),
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.w300,
+                                                    fontSize: 13,
+                                                    color: Color.fromARGB(
+                                                        255, 4, 62, 107)),
+                                              ),
+                                            ],
+                                          ),
+                                          Text(
+                                            "Val. Hasta: ${mesyAnio(promocion.fechaLimite).day.toString()}/${mesyAnio(promocion.fechaLimite).month.toString()}/${mesyAnio(promocion.fechaLimite).year.toString()}",
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w300,
+                                                fontSize: 12,
+                                                color: Color.fromARGB(
+                                                    255, 4, 62, 107)),
+                                          ),
+                                          Text(
+                                            "S/.${promocion.precio} ",
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w400,
+                                                fontSize: 16,
+                                                color: Color.fromARGB(
+                                                    255, 4, 62, 107)),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            // mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              IconButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    // cantidadP = producto.cantidad++;
+                                                    disminuir(index);
+                                                    print(
+                                                        "disminuir ${promocion.cantidad}");
+                                                  });
+                                                },
+                                                iconSize: 30,
+                                                color: const Color.fromARGB(
+                                                    255, 0, 57, 103),
+                                                icon: const Icon(
+                                                  Icons.remove_circle,
+                                                  color: Color.fromRGBO(
+                                                      0, 170, 219, 1.000),
                                                 ),
-                                                IconButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        incrementar(index);
-                                                        print(
-                                                            "incrementar ${promocion.cantidad}");
-                                                      });
-                                                    },
-                                                    iconSize: 27,
-                                                    color: const Color.fromARGB(
-                                                        255, 224, 41, 206),
-                                                    icon: const Icon(Icons
-                                                        .add_circle_outline))
-                                              ],
-                                            ),
-                                          )
+                                              ),
+                                              Text(
+                                                "${promocion.cantidad}",
+                                                style: const TextStyle(
+                                                    color: Color.fromARGB(
+                                                        255, 4, 62, 107),
+                                                    fontSize: 25,
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  setState(() {
+                                                    // cantidadP = producto.cantidad++;
+                                                    incrementar(index);
+                                                    print(
+                                                        "incrementar ${promocion.cantidad}");
+                                                  });
+                                                },
+                                                iconSize: 30,
+                                                color: const Color.fromARGB(
+                                                    255, 0, 49, 89),
+                                                icon: const Icon(
+                                                  Icons.add_circle,
+                                                  color: Color.fromRGBO(
+                                                      0, 170, 219, 1.000),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ],
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
                               );
                             },
                           )),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 20),
-                        child: const Text(
-                          "Su importe es de:",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w300,
-                            fontSize: 18,
-                            color: Color.fromARGB(255, 1, 25, 44),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 20),
-                        child: Text(
-                          "S/.${total}",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                              color: Color.fromARGB(255, 4, 62, 107)),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 20),
-                        child: const Text(
-                          "¿Quieres la promo?",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 18,
-                              color: Color.fromARGB(255, 1, 32, 56)),
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 20),
-                        width: 200,
-                        height: 100,
-                        child: Row(
-                          children: [
-                            ElevatedButton(
-                              onPressed: almenosUno
-                                  ? () async {
-                                      await obtenerProducto();
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Pedido(
-                                                  seleccionados:
-                                                      productosContabilizados,
-                                                  seleccionadosPromo:
-                                                      promocionesContabilizadas,
-                                                  total: obtenerTotal(),
-                                                )),
-                                      );
-                                    }
-                                  : null,
-                              style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(
-                                const Color.fromARGB(255, 48, 107, 100),
-                              )),
-                              child: const Text(
-                                "Si!",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w300,
-                                    fontSize: 25,
-                                    color: Colors.white),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(left: 20),
+                                child: const Text(
+                                  "Subtotal:",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 16,
+                                      color: Color.fromARGB(255, 1, 25, 44)),
+                                ),
                               ),
-                            ),
-                            const SizedBox(
-                              width: 20,
-                            ),
-                            Container(
-                                height: 80,
-                                width: 80,
-                                child: Stack(
-                                  children: [
-                                    Lottie.asset('lib/imagenes/party.json'),
-                                    Lottie.asset('lib/animatios/anim_16.json'),
-                                  ],
-                                ))
-                          ],
-                        ),
-                      )
+                              Container(
+                                margin: const EdgeInsets.only(left: 20),
+                                child: Text(
+                                  "S/.${total}",
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 20,
+                                      color: Color.fromARGB(255, 4, 62, 107)),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(right: 20),
+                                child: const Text(
+                                  "Agregar al carrito",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 16,
+                                      color: Color.fromARGB(255, 1, 32, 56)),
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(right: 20),
+                                child: ElevatedButton(
+                                    onPressed: almenosUno
+                                        ? () async {
+                                            await obtenerProducto();
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) => Pedido(
+                                                        seleccionados:
+                                                            productosContabilizados,
+                                                        seleccionadosPromo:
+                                                            promocionesContabilizadas,
+                                                        total: obtenerTotal(),
+                                                      )),
+                                            );
+                                          }
+                                        : null,
+                                    style: ButtonStyle(
+                                        elevation: MaterialStateProperty.all(8),
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                const Color.fromRGBO(
+                                                    120, 251, 99, 1.000))),
+                                    child: const Icon(
+                                      Icons.add_shopping_cart_rounded,
+                                      color: Colors.white,
+                                    )),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ]))));
   }
 }
-
-*/
