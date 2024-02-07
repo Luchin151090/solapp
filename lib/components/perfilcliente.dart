@@ -343,6 +343,49 @@ class _PerfilCliente extends State<PerfilCliente> {
               ),
             ),
           ),
+          Container(
+            margin: const EdgeInsets.only(right: 10, left: 10),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ButtonStyle(
+                elevation: MaterialStateProperty.all(8),
+                surfaceTintColor: MaterialStateProperty.all(
+                    const Color.fromARGB(255, 255, 255, 255)),
+                minimumSize: const MaterialStatePropertyAll(Size(350, 38)),
+                backgroundColor: MaterialStateProperty.all(
+                    const Color.fromARGB(255, 255, 255, 255)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.storefront_rounded,
+                        size: 25,
+                        color: colorLetra,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        'Registra tu tienda',
+                        style: TextStyle(
+                            color: colorLetra,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14),
+                      ),
+                    ],
+                  ),
+                  Icon(
+                    Icons.arrow_right_rounded,
+                    color: colorLetra,
+                  )
+                ],
+              ),
+            ),
+          ),
         ]),
       )),
     );

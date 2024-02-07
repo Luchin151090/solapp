@@ -1,33 +1,14 @@
 import 'package:appsol_final/components/pedido.dart';
+import 'package:appsol_final/components/navegador.dart';
+import 'package:appsol_final/models/producto_model.dart';
+import 'package:appsol_final/provider/pedido_provider.dart';
+import 'package:appsol_final/models/pedido_model.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
-  }
-}
-
-class Producto {
-  final int id;
-  final String nombre;
-  final double precio;
-  final String descripcion;
-  final String foto;
-  final int? promoID;
-  int cantidad;
-
-  Producto(
-      {required this.id,
-      required this.nombre,
-      required this.precio,
-      required this.descripcion,
-      required this.foto,
-      required this.promoID,
-      this.cantidad = 0});
-}
+import 'package:flutter_animate/flutter_animate.dart';
 
 class Productos extends StatefulWidget {
   const Productos({super.key});
@@ -37,11 +18,14 @@ class Productos extends StatefulWidget {
 }
 
 class _ProductosState extends State<Productos> {
+  late PedidoModel pedidoMio;
   String apiUrl = dotenv.env['API_URL'] ?? '';
   List<Producto> listProducto = [];
   int cantidadP = 0;
   bool almenosUno = false;
   List<Producto> productosContabilizados = [];
+  int cantCarrito = 0;
+  Color colorCantidadCarrito = Colors.black;
 
   @override
   void initState() {
@@ -119,19 +103,78 @@ class _ProductosState extends State<Productos> {
     return stotal;
   }
 
+  void esVacio(PedidoModel? pedido) {
+    if (pedido is PedidoModel) {
+      print('ES PEDIDOOO');
+      cantCarrito = pedido.cantidadProd;
+      if (pedido.cantidadProd > 0) {
+        setState(() {
+          colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
+        });
+      } else {
+        setState(() {
+          colorCantidadCarrito = Colors.grey;
+        });
+      }
+    } else {
+      print('no es pedido');
+      setState(() {
+        cantCarrito = 0;
+        colorCantidadCarrito = Colors.grey;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double total = obtenerTotal();
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
+    final pedidoProvider = context.watch<PedidoProvider>();
+    esVacio(pedidoProvider.pedido);
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
           backgroundColor: Colors.white,
+          toolbarHeight: largoActual * 0.08,
+          actions: [
+            Container(
+              margin: EdgeInsets.only(
+                  top: largoActual * 0.018, right: anchoActual * 0.045),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: const Color.fromRGBO(0, 106, 252, 1.000),
+                  borderRadius: BorderRadius.circular(50)),
+              height: largoActual * 0.059,
+              width: largoActual * 0.059,
+              child: Badge(
+                largeSize: 18,
+                backgroundColor: colorCantidadCarrito,
+                label: Text(cantCarrito.toString(),
+                    style: const TextStyle(fontSize: 12)),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Pedido()
+                          //const Promos()
+                          ),
+                    );
+                  },
+                  icon: const Icon(Icons.shopping_cart_rounded),
+                  color: Colors.white,
+                  iconSize: largoActual * 0.030,
+                ).animate().shakeY(
+                      duration: Duration(milliseconds: 300),
+                    ),
+              ),
+            ),
+          ],
         ),
         body: SafeArea(
             child: Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding:
+                    const EdgeInsets.only(left: 10.0, right: 10, bottom: 10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -327,7 +370,7 @@ class _ProductosState extends State<Productos> {
                               margin:
                                   EdgeInsets.only(left: anchoActual * 0.055),
                               child: Text(
-                                "S/.${total}",
+                                "S/.$total",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w400,
                                     fontSize: largoActual * 0.027,
@@ -359,15 +402,27 @@ class _ProductosState extends State<Productos> {
                                   onPressed: almenosUno
                                       ? () {
                                           print("Agregar al carrito");
+                                          pedidoMio = PedidoModel(
+                                              seleccionados:
+                                                  productosContabilizados,
+                                              seleccionadosPromo: [],
+                                              cantidadProd:
+                                                  productosContabilizados
+                                                      .length,
+                                              total: obtenerTotal());
+                                          Provider.of<PedidoProvider>(context,
+                                                  listen: false)
+                                              .updatePedido(pedidoMio);
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                                builder: (context) => Pedido(
-                                                      seleccionados:
-                                                          productosContabilizados,
-                                                      seleccionadosPromo: const [],
-                                                      total: obtenerTotal(),
-                                                    )),
+                                                builder: (context) =>
+                                                    const BarraNavegacion(
+                                                      indice: 0,
+                                                      subIndice: 1,
+                                                    )
+                                                //const Promos()
+                                                ),
                                           );
                                         }
                                       : null,

@@ -1,6 +1,9 @@
-//import 'package:appsol_final/components/fin.dart';
-import 'package:appsol_final/components/productos.dart';
-import 'package:appsol_final/components/promos.dart';
+import 'package:appsol_final/models/pedido_model.dart';
+import 'package:appsol_final/models/promocion_model.dart';
+import 'package:appsol_final/models/producto_model.dart';
+import 'package:appsol_final/provider/pedido_provider.dart';
+import 'package:appsol_final/components/fin.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
@@ -8,31 +11,33 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
+  }
+}
+
 class Pedido extends StatefulWidget {
-  final List<Producto> seleccionados;
-  final List<Promo> seleccionadosPromo;
-  final double total;
-
-  const Pedido({
-    Key? key,
-    required this.seleccionados,
-    required this.seleccionadosPromo,
-    required this.total,
-  }) : super(key: key);
-
+  const Pedido({Key? key}) : super(key: key);
   @override
   State<Pedido> createState() => _PedidoState();
 }
 
 class _PedidoState extends State<Pedido> {
+  late PedidoModel pedidoMio;
   bool light0 = false;
   int numero = 0;
   double envio = 0.0;
   double ahorro = 0.0;
   double totalVenta = 0.0;
+  double totalProvider = 0.0;
+  List<Producto> seleccionadosProvider = [];
+  List<Promo> selecciondosPromosProvider = [];
   String tipoPedido = "normal";
   int lastPedido = 0;
   Color color = Colors.white;
+  int cantCarrito = 0;
+  Color colorCantidadCarrito = Colors.black;
   //POR AHORA EL CLIENTE ES MANUAL!!""
   int clienteId = 1;
   String direccion = 'Av. Las Flores 137 - Cayma';
@@ -67,25 +72,59 @@ class _PedidoState extends State<Pedido> {
         }));
   }
 
-  Future<void> crearPedidoyDetallePedido(tipo, monto) async {
+  Future<void> crearPedidoyDetallePedido(tipo, monto, seleccionados) async {
     DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 5));
     await datosCreadoPedido(
         clienteId, tiempoActual.toString(), monto, tipo, "pendiente");
     print(tiempoGMTPeru.toString());
     print(tiempoActual.timeZoneName);
     print("creando detalles de pedidos----------");
-    for (var i = 0; i < widget.seleccionados.length; i++) {
-      print("longitud de seleccinados--------${widget.seleccionados.length}");
+    for (var i = 0; i < seleccionados.length; i++) {
+      print("longitud de seleccinados--------${seleccionados.length}");
       print(i);
       print("est es la promocion ID---------");
-      print(widget.seleccionados[i].promoID);
-      await detallePedido(clienteId, widget.seleccionados[i].id,
-          widget.seleccionados[i].cantidad, widget.seleccionados[i].promoID);
+      print(seleccionados[i].promoID);
+      await detallePedido(clienteId, seleccionados[i].id,
+          seleccionados[i].cantidad, seleccionados[i].promoID);
+    }
+  }
+
+  void esVacio(PedidoModel? pedido) {
+    if (pedido is PedidoModel) {
+      print('ES PEDIDOOO');
+      setState(() {
+        totalProvider = pedido.total;
+        seleccionadosProvider = pedido.seleccionados;
+        selecciondosPromosProvider = pedido.seleccionadosPromo;
+        cantCarrito = pedido.cantidadProd;
+        if (pedido.cantidadProd > 0) {
+          setState(() {
+            colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
+          });
+        } else {
+          setState(() {
+            colorCantidadCarrito = Colors.grey;
+          });
+        }
+      });
+    } else {
+      print('no es pedido');
+      setState(() {
+        totalProvider = 0;
+        seleccionadosProvider = [];
+        selecciondosPromosProvider = [];
+        cantCarrito = 0;
+        colorCantidadCarrito = Colors.grey;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final anchoActual = MediaQuery.of(context).size.width;
+    final largoActual = MediaQuery.of(context).size.height;
+    final pedidoProvider = context.watch<PedidoProvider>();
+    esVacio(pedidoProvider.pedido);
     return Scaffold(
       backgroundColor: Colors.white,
       bottomSheet: BottomSheet(
@@ -97,57 +136,68 @@ class _PedidoState extends State<Pedido> {
           builder: (context) {
             return Expanded(
               child: SizedBox(
-                height: 100,
+                height: largoActual * 0.16,
                 child: Container(
-                  margin: const EdgeInsets.only(
-                      top: 15, bottom: 10, left: 25, right: 25),
+                  margin: EdgeInsets.only(
+                      top: largoActual * 0.02,
+                      bottom: largoActual * 0.013,
+                      left: anchoActual * 0.069,
+                      right: anchoActual * 0.069),
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Total',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 17),
+                                fontSize: largoActual * (17 / 736)),
                           ),
                           Text(
                             'S/.$totalVenta',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 17),
+                                fontSize: largoActual * (17 / 736)),
                           )
                         ],
                       ),
-                      SizedBox(
-                        width: 400,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await crearPedidoyDetallePedido(
-                                tipoPedido, totalVenta);
-                            /* Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const Fin()),
-                            );*/
-                          },
-                          style: ButtonStyle(
-                            elevation: MaterialStateProperty.all(8),
-                            surfaceTintColor: MaterialStateProperty.all(
-                                const Color.fromARGB(255, 255, 255, 255)),
-                            minimumSize:
-                                const MaterialStatePropertyAll(Size(350, 38)),
-                            backgroundColor: MaterialStateProperty.all(
-                                const Color.fromARGB(255, 255, 255, 255)),
-                          ),
-                          child: const Text(
-                            'Confirmar Pedido',
-                            style: TextStyle(
-                                color: Color.fromRGBO(0, 106, 252, 1.000),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500),
+                      Container(
+                        margin: EdgeInsets.only(top: largoActual * (8 / 736)),
+                        child: SizedBox(
+                          width: anchoActual * (400 / 360),
+                          child: ElevatedButton(
+                            onPressed: totalVenta > 0.0
+                                ? () async {
+                                    await crearPedidoyDetallePedido(tipoPedido,
+                                        totalVenta, seleccionadosProvider);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const Fin()),
+                                    );
+                                  }
+                                : null,
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all(8),
+                              surfaceTintColor: MaterialStateProperty.all(
+                                  const Color.fromARGB(255, 255, 255, 255)),
+                              minimumSize: MaterialStatePropertyAll(Size(
+                                  anchoActual * (350 / 360),
+                                  largoActual * (38 / 736))),
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color.fromARGB(255, 255, 255, 255)),
+                            ),
+                            child: Text(
+                              'Confirmar Pedido',
+                              style: TextStyle(
+                                  color:
+                                      const Color.fromRGBO(0, 106, 252, 1.000),
+                                  fontSize: largoActual * (14 / 736),
+                                  fontWeight: FontWeight.w500),
+                            ),
                           ),
                         ),
                       ),
@@ -158,7 +208,48 @@ class _PedidoState extends State<Pedido> {
             );
           }),
       appBar: AppBar(
+        surfaceTintColor: Colors.white,
         backgroundColor: Colors.white,
+        toolbarHeight: largoActual * 0.08,
+        actions: [
+          Container(
+            margin: EdgeInsets.only(
+                top: largoActual * 0.018, right: anchoActual * 0.045),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(50)),
+            height: largoActual * 0.059,
+            width: largoActual * 0.059,
+            child: Badge(
+              largeSize: 18,
+              backgroundColor: colorCantidadCarrito,
+              label: Text(cantCarrito.toString(),
+                  style: const TextStyle(fontSize: 12)),
+              child: IconButton(
+                onPressed: () {
+                  setState(() {
+                    totalProvider = 0;
+                    seleccionadosProvider = [];
+                    selecciondosPromosProvider = [];
+                    cantCarrito = 0;
+                  });
+                  pedidoMio = PedidoModel(
+                      seleccionados: seleccionadosProvider,
+                      seleccionadosPromo: selecciondosPromosProvider,
+                      cantidadProd: cantCarrito,
+                      total: totalProvider);
+                  Provider.of<PedidoProvider>(context, listen: false)
+                      .updatePedido(pedidoMio);
+                },
+                icon: const Icon(Icons.delete_rounded),
+                color: const Color.fromRGBO(0, 106, 252, 1.000),
+                iconSize: largoActual * 0.035,
+              ).animate().shakeY(
+                    duration: Duration(milliseconds: 300),
+                  ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
           child: Padding(
@@ -169,30 +260,37 @@ class _PedidoState extends State<Pedido> {
                   children: [
                     //TU PEDIDO
                     Container(
-                      margin: const EdgeInsets.only(bottom: 10, left: 20),
-                      child: const Text(
+                      margin: EdgeInsets.only(
+                          bottom: largoActual * 0.013,
+                          left: anchoActual * 0.055),
+                      child: Text(
                         "Tu pedido",
                         style: TextStyle(
-                            color: Color.fromARGB(255, 1, 42, 76),
+                            color: const Color.fromARGB(255, 1, 42, 76),
                             fontWeight: FontWeight.w600,
-                            fontSize: 17),
+                            fontSize: largoActual * 0.023),
                       ),
                     ),
                     SizedBox(
-                      height: 180,
+                      height: largoActual * 0.24,
                       child: Card(
                         surfaceTintColor: Colors.white,
                         color: Colors.white,
                         elevation: 8,
-                        margin: const EdgeInsets.only(
-                            top: 5, bottom: 10, left: 10, right: 10),
+                        margin: EdgeInsets.only(
+                            top: largoActual * 0.0068,
+                            bottom: largoActual * 0.013,
+                            left: anchoActual * 0.028,
+                            right: anchoActual * 0.028),
                         child: ListView.builder(
-                            itemCount: widget.seleccionados.length,
+                            itemCount: seleccionadosProvider.length,
                             itemBuilder: (context, index) {
                               return Container(
                                 alignment: Alignment.center,
-                                margin: const EdgeInsets.only(
-                                    bottom: 5, left: 10, right: 10),
+                                margin: EdgeInsets.only(
+                                    bottom: largoActual * 0.0068,
+                                    left: anchoActual * 0.028,
+                                    right: anchoActual * 0.028),
                                 decoration: const BoxDecoration(
                                     border: Border(
                                   bottom: BorderSide(
@@ -209,42 +307,44 @@ class _PedidoState extends State<Pedido> {
                                           MainAxisAlignment.center,
                                       children: [
                                         Container(
-                                          margin:
-                                              const EdgeInsets.only(left: 10),
-                                          height: 47,
-                                          width: 47,
+                                          margin: EdgeInsets.only(
+                                              left: anchoActual * 0.028),
+                                          height: largoActual * 0.064,
+                                          width: anchoActual * 0.13,
                                           decoration: BoxDecoration(
                                               color: Colors.transparent,
                                               borderRadius:
                                                   BorderRadius.circular(0),
                                               image: DecorationImage(
-                                                image: NetworkImage(widget
-                                                    .seleccionados[index].foto),
+                                                image: NetworkImage(
+                                                    seleccionadosProvider[index]
+                                                        .foto),
                                                 //fit: BoxFit.cover,
                                               )),
                                         ),
-                                        const SizedBox(
-                                          width: 10,
+                                        SizedBox(
+                                          width: anchoActual * 0.028,
                                         ),
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              widget.seleccionados[index].nombre
+                                              seleccionadosProvider[index]
+                                                  .nombre
                                                   .capitalize(),
-                                              style: const TextStyle(
-                                                  fontSize: 14,
-                                                  color: Color.fromARGB(
+                                              style: TextStyle(
+                                                  fontSize: largoActual * 0.019,
+                                                  color: const Color.fromARGB(
                                                       255, 1, 75, 135)),
                                             ),
                                             Text(
-                                              widget.seleccionados[index]
+                                              seleccionadosProvider[index]
                                                   .descripcion
                                                   .capitalize(),
-                                              style: const TextStyle(
-                                                  fontSize: 11,
-                                                  color: Color.fromARGB(
+                                              style: TextStyle(
+                                                  fontSize: largoActual * 0.015,
+                                                  color: const Color.fromARGB(
                                                       255, 1, 75, 135)),
                                             ),
                                           ],
@@ -252,30 +352,31 @@ class _PedidoState extends State<Pedido> {
                                       ],
                                     ),
                                     Container(
-                                      margin: const EdgeInsets.only(right: 10),
+                                      margin: EdgeInsets.only(
+                                          right: anchoActual * 0.028),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.end,
                                         children: [
-                                          const SizedBox(
-                                            height: 4,
+                                          SizedBox(
+                                            height: largoActual * 0.0054,
                                           ),
                                           Text(
-                                            "S/. ${widget.seleccionados[index].precio}",
-                                            style: const TextStyle(
-                                                fontSize: 13,
-                                                color: Color.fromARGB(
+                                            "S/. ${seleccionadosProvider[index].precio}",
+                                            style: TextStyle(
+                                                fontSize: largoActual * 0.018,
+                                                color: const Color.fromARGB(
                                                     255, 1, 75, 135)),
                                           ),
                                           Text(
-                                            "Cant. ${widget.seleccionados[index].cantidad}",
-                                            style: const TextStyle(
-                                                fontSize: 13,
-                                                color: Color.fromARGB(
+                                            "Cant. ${seleccionadosProvider[index].cantidad}",
+                                            style: TextStyle(
+                                                fontSize: largoActual * 0.018,
+                                                color: const Color.fromARGB(
                                                     255, 1, 75, 135)),
                                           ),
                                           SizedBox(
-                                            height: 6,
+                                            height: largoActual * 0.0081,
                                           ),
                                         ],
                                       ),
@@ -288,74 +389,83 @@ class _PedidoState extends State<Pedido> {
                     ),
                     //CUPONES
                     Container(
-                      margin: const EdgeInsets.only(bottom: 10, left: 20),
-                      child: const Text(
+                      margin: EdgeInsets.only(
+                          bottom: largoActual * 0.013,
+                          left: anchoActual * 0.055),
+                      child: Text(
                         "Cupones",
                         style: TextStyle(
-                            color: Color.fromARGB(255, 1, 42, 76),
+                            color: const Color.fromARGB(255, 1, 42, 76),
                             fontWeight: FontWeight.w600,
-                            fontSize: 17),
+                            fontSize: largoActual * 0.023),
                       ),
                     ),
                     Card(
                       surfaceTintColor: Colors.white,
                       color: Colors.white,
                       elevation: 8,
-                      margin: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 10),
+                      margin: EdgeInsets.only(
+                          left: anchoActual * 0.028,
+                          right: anchoActual * 0.028,
+                          bottom: largoActual * 0.013),
                       child: Row(
                         children: [
                           Container(
-                            margin: const EdgeInsets.only(
-                                top: 5, bottom: 5, left: 25),
-                            height: 48,
-                            width: 48,
+                            margin: EdgeInsets.only(
+                                top: largoActual * 0.0068,
+                                bottom: largoActual * 0.0068,
+                                left: anchoActual * 0.069),
+                            height: largoActual * 0.065,
+                            width: anchoActual * 0.13,
                             decoration: BoxDecoration(
                               color: Colors.transparent,
                               borderRadius: BorderRadius.circular(0),
                             ),
                             child: Lottie.asset('lib/imagenes/cupon4.json'),
                           ),
-                          const SizedBox(
-                            width: 30,
+                          SizedBox(
+                            width: anchoActual * 0.03,
                           ),
                           SizedBox(
-                            width: 130,
+                            width: anchoActual * 0.36,
                             child: TextFormField(
                               cursorColor:
                                   const Color.fromRGBO(0, 106, 252, 1.000),
                               enableInteractiveSelection: false,
-                              style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color.fromARGB(255, 1, 75, 135)),
-                              decoration: const InputDecoration(
+                              style: TextStyle(
+                                  fontSize: largoActual * 0.018,
+                                  color: const Color.fromARGB(255, 1, 75, 135)),
+                              decoration: InputDecoration(
                                 border: InputBorder.none,
                                 hintText: 'Ingresar cupón',
                                 hintStyle: TextStyle(
-                                    color: Color.fromARGB(255, 195, 195, 195),
-                                    fontSize: 13,
+                                    color: const Color.fromARGB(
+                                        255, 195, 195, 195),
+                                    fontSize: largoActual * 0.018,
                                     fontWeight: FontWeight.w400),
                               ),
-                              validator: (value) {},
+                              /*validator: (value) {
+
+                              },*/
                             ),
                           ),
-                          const SizedBox(
-                            width: 20,
+                          SizedBox(
+                            width: anchoActual * 0.03,
                           ),
                           ElevatedButton(
                             onPressed: () {},
                             style: ButtonStyle(
                               elevation: MaterialStateProperty.all(5),
-                              minimumSize:
-                                  const MaterialStatePropertyAll(Size(40, 38)),
+                              minimumSize: MaterialStatePropertyAll(Size(
+                                  anchoActual * 0.247, largoActual * 0.052)),
                               backgroundColor: MaterialStateProperty.all(
                                   const Color.fromRGBO(255, 0, 93, 1.000)),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Validar',
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 13,
+                                  fontSize: largoActual * 0.018,
                                   fontWeight: FontWeight.w500),
                             ),
                           ),
@@ -364,49 +474,58 @@ class _PedidoState extends State<Pedido> {
                     ),
                     //TIPO DE ENVIO
                     Container(
-                      margin: const EdgeInsets.only(bottom: 10, left: 20),
-                      child: const Text(
+                      margin: EdgeInsets.only(
+                          bottom: largoActual * 0.013,
+                          left: anchoActual * 0.055),
+                      child: Text(
                         "Tipo de envio",
                         style: TextStyle(
-                            color: Color.fromARGB(255, 1, 42, 76),
+                            color: const Color.fromARGB(255, 1, 42, 76),
                             fontWeight: FontWeight.w600,
-                            fontSize: 17),
+                            fontSize: largoActual * 0.023),
                       ),
                     ),
                     Card(
                       surfaceTintColor: color,
                       color: Colors.white,
                       elevation: 8,
-                      margin: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 10),
+                      margin: EdgeInsets.only(
+                          left: anchoActual * 0.028,
+                          right: anchoActual * 0.028,
+                          bottom: largoActual * 0.013),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            width: 120,
-                            margin: const EdgeInsets.only(
-                                left: 15, right: 15, top: 10, bottom: 10),
+                            width: anchoActual * 0.28,
+                            margin: EdgeInsets.only(
+                                left: anchoActual * 0.042,
+                                right: anchoActual * 0.042,
+                                top: largoActual * 0.013,
+                                bottom: largoActual * 0.013),
                             child: Column(
                               children: [
-                                const Text(
+                                Text(
                                   'Normal',
                                   style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: largoActual * 0.019,
                                       fontWeight: FontWeight.w500,
                                       color: Color.fromARGB(255, 1, 75, 135)),
                                 ),
-                                const Text(
+                                Text(
                                   'GRATIS',
                                   style: TextStyle(
-                                      fontSize: 10,
-                                      color: Color.fromARGB(255, 1, 75, 135)),
+                                      fontSize: largoActual * 0.013,
+                                      color: const Color.fromARGB(
+                                          255, 1, 75, 135)),
                                 ),
-                                const Text(
+                                Text(
                                   "Si lo pides después de la 1:00 P.M se agenda para mañana.",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 10,
-                                      color: Color.fromARGB(255, 1, 75, 135)),
+                                      fontSize: largoActual * 0.013,
+                                      color: const Color.fromARGB(
+                                          255, 1, 75, 135)),
                                 ).animate().shake(),
                               ],
                             ),
@@ -464,35 +583,40 @@ class _PedidoState extends State<Pedido> {
                               }
 
                               setState(() {
-                                totalVenta = widget.total + envio;
+                                totalVenta = totalProvider + envio;
                                 print(totalVenta);
                               });
                             },
                           ),
                           Container(
-                            width: 120,
-                            margin: const EdgeInsets.only(
-                                left: 10, right: 10, top: 10, bottom: 10),
-                            child: const Column(
+                            width: anchoActual * 0.28,
+                            margin: EdgeInsets.only(
+                                left: anchoActual * 0.028,
+                                right: anchoActual * 0.028,
+                                top: largoActual * 0.013,
+                                bottom: largoActual * 0.013),
+                            child: Column(
                               children: [
                                 Text(
                                   'Express',
                                   style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: largoActual * 0.019,
                                       fontWeight: FontWeight.w500,
-                                      color: Color.fromARGB(255, 1, 75, 135)),
+                                      color: const Color.fromARGB(
+                                          255, 1, 75, 135)),
                                 ),
                                 Text('+ S/. 4.00',
                                     style: TextStyle(
-                                        fontSize: 10,
-                                        color:
-                                            Color.fromARGB(255, 1, 75, 135))),
+                                        fontSize: largoActual * 0.013,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135))),
                                 Text(
-                                  "Recive tu producto más rapido, solo hasta las 4:00 P.M.",
+                                  "Recive tu producto más rapido y disfrútalo lo antes posible",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 10,
-                                      color: Color.fromARGB(255, 1, 75, 135)),
+                                      fontSize: largoActual * 0.013,
+                                      color: const Color.fromARGB(
+                                          255, 1, 75, 135)),
                                 ),
                               ],
                             ),
@@ -502,50 +626,55 @@ class _PedidoState extends State<Pedido> {
                     ),
                     //DIRECCION DE ENVIO
                     Container(
-                      margin: const EdgeInsets.only(bottom: 10, left: 20),
-                      child: const Text(
+                      margin: EdgeInsets.only(
+                          bottom: largoActual * 0.013,
+                          left: anchoActual * 0.055),
+                      child: Text(
                         "Direccion",
                         style: TextStyle(
                             color: Color.fromARGB(255, 1, 42, 76),
                             fontWeight: FontWeight.w600,
-                            fontSize: 17),
+                            fontSize: largoActual * 0.023),
                       ),
                     ),
                     Card(
                         surfaceTintColor: Colors.white,
                         color: Colors.white,
                         elevation: 8,
-                        margin: const EdgeInsets.only(
-                            left: 10, right: 10, bottom: 10),
+                        margin: EdgeInsets.only(
+                            left: anchoActual * 0.028,
+                            right: anchoActual * 0.028,
+                            bottom: largoActual * 0.013),
                         child: Container(
-                            margin: const EdgeInsets.only(
-                                left: 20, right: 20, top: 5, bottom: 5),
+                            margin: EdgeInsets.only(
+                                left: anchoActual * 0.055,
+                                right: anchoActual * 0.055,
+                                top: largoActual * 0.0068,
+                                bottom: largoActual * 0.0068),
                             //AQUI SE PONDRA LA DIRECCION QUE ELIGIO EL CLIENTE
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   direccion,
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      color: Color.fromARGB(255, 1, 75, 135)),
+                                  style: TextStyle(
+                                      fontSize: largoActual * 0.018,
+                                      color: const Color.fromARGB(
+                                          255, 1, 75, 135)),
                                 ),
-                                const SizedBox(
-                                  width: 10,
+                                SizedBox(
+                                  width: anchoActual * 0.028,
                                 ),
                                 Container(
-                                  margin: const EdgeInsets.only(
-                                      top: 1, bottom: 1, left: 25),
-                                  height: 45,
-                                  width: 45,
+                                  margin: EdgeInsets.only(
+                                      top: largoActual * 0.0013,
+                                      bottom: largoActual * 0.0013,
+                                      left: anchoActual * 0.069),
+                                  height: largoActual * 0.061,
+                                  width: largoActual * 0.061,
                                   decoration: BoxDecoration(
                                     color: Colors.transparent,
                                     borderRadius: BorderRadius.circular(0),
-                                    /*image: const DecorationImage(
-
-                                  image: AssetImage('lib/imagenes/cupon.png'),
-                                  //fit: BoxFit.cover,
-                                )*/
                                   ),
                                   child: Lottie.asset('lib/imagenes/ubi4.json'),
                                 ),
@@ -553,85 +682,100 @@ class _PedidoState extends State<Pedido> {
                             ))),
                     //NOTAS PARA EL REPARTIDOR
                     Container(
-                      margin: const EdgeInsets.only(bottom: 10, left: 20),
-                      child: const Text(
+                      margin: EdgeInsets.only(
+                          bottom: largoActual * 0.013,
+                          left: anchoActual * 0.055),
+                      child: Text(
                         "Notas para el repartidor",
                         style: TextStyle(
-                            color: Color.fromARGB(255, 1, 42, 76),
+                            color: const Color.fromARGB(255, 1, 42, 76),
                             fontWeight: FontWeight.w600,
-                            fontSize: 17),
+                            fontSize: largoActual * 0.023),
                       ),
                     ),
                     Card(
                       surfaceTintColor: Colors.white,
                       color: Colors.white,
                       elevation: 8,
-                      margin: const EdgeInsets.only(
-                          left: 10, right: 10, bottom: 10),
+                      margin: EdgeInsets.only(
+                          left: anchoActual * 0.028,
+                          right: anchoActual * 0.028,
+                          bottom: anchoActual * 0.013),
                       child: Container(
-                        margin: const EdgeInsets.only(
-                            left: 20, right: 20, bottom: 5),
+                        margin: EdgeInsets.only(
+                            left: anchoActual * 0.055,
+                            right: anchoActual * 0.055,
+                            bottom: largoActual * 0.0068),
                         child: TextFormField(
                           cursorColor: const Color.fromRGBO(0, 106, 252, 1.000),
                           enableInteractiveSelection: false,
-                          style: const TextStyle(
-                              fontSize: 13,
-                              color: Color.fromARGB(255, 1, 75, 135)),
-                          decoration: const InputDecoration(
+                          style: TextStyle(
+                              fontSize: largoActual * 0.018,
+                              color: const Color.fromARGB(255, 1, 75, 135)),
+                          decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText:
                                 'Ej. Casa con porton azúl, tocar tercer piso',
                             hintStyle: TextStyle(
-                                color: Color.fromARGB(255, 195, 195, 195),
-                                fontSize: 13,
+                                color: const Color.fromARGB(255, 195, 195, 195),
+                                fontSize: largoActual * 0.018,
                                 fontWeight: FontWeight.w400),
                           ),
-                          validator: (value) {},
+                          /*validator: (value) {
+
+                          },*/
                         ),
                       ),
                     ),
                     //RESUMEN
                     Container(
-                      margin: const EdgeInsets.only(bottom: 10, left: 20),
-                      child: const Text(
+                      margin: EdgeInsets.only(
+                          bottom: largoActual * 0.013,
+                          left: anchoActual * 0.055),
+                      child: Text(
                         "Resumen de Pedido",
                         style: TextStyle(
-                            color: Color.fromARGB(255, 1, 42, 76),
+                            color: const Color.fromARGB(255, 1, 42, 76),
                             fontWeight: FontWeight.w600,
-                            fontSize: 17),
+                            fontSize: largoActual * 0.023),
                       ),
                     ),
                     Card(
                       surfaceTintColor: Colors.white,
                       color: Colors.white,
                       elevation: 8,
-                      margin: const EdgeInsets.only(
-                        left: 10,
-                        right: 10,
-                        bottom: 10,
+                      margin: EdgeInsets.only(
+                        left: anchoActual * (10 / 360),
+                        right: anchoActual * (10 / 360),
+                        bottom: largoActual * (10 / 736),
                       ),
                       child: Container(
-                          margin: const EdgeInsets.only(
-                              left: 20, right: 20, bottom: 8, top: 8),
+                          margin: EdgeInsets.only(
+                              left: anchoActual * (20 / 360),
+                              right: anchoActual * (20 / 360),
+                              bottom: largoActual * (8 / 736),
+                              top: largoActual * (8 / 736)),
                           child: Column(
                             children: [
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Productos',
                                     style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color.fromARGB(255, 1, 75, 135)),
+                                        fontSize: largoActual * (13 / 736),
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
                                   ),
                                   Text(
-                                    'S/.${widget.total}',
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color.fromARGB(255, 1, 75, 135)),
+                                    'S/.$totalProvider',
+                                    style: TextStyle(
+                                        fontSize: largoActual * (13 / 736),
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
                                   )
                                 ],
                               ),
@@ -639,19 +783,21 @@ class _PedidoState extends State<Pedido> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Envio',
                                     style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color.fromARGB(255, 1, 75, 135)),
+                                        fontSize: largoActual * (13 / 736),
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
                                   ),
                                   Text(
                                     'S/.$envio',
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color.fromARGB(255, 1, 75, 135)),
+                                    style: TextStyle(
+                                        fontSize: largoActual * (13 / 736),
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
                                   )
                                 ],
                               ),
@@ -659,29 +805,29 @@ class _PedidoState extends State<Pedido> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Ahorro',
                                     style: TextStyle(
-                                        fontSize: 13,
+                                        fontSize: largoActual * (13 / 736),
                                         fontWeight: FontWeight.w500,
-                                        color:
-                                            Color.fromRGBO(234, 51, 98, 1.000)),
+                                        color: const Color.fromRGBO(
+                                            234, 51, 98, 1.000)),
                                   ),
                                   Text(
                                     'S/.$ahorro',
-                                    style: const TextStyle(
-                                        fontSize: 13,
+                                    style: TextStyle(
+                                        fontSize: largoActual * (13 / 736),
                                         fontWeight: FontWeight.w500,
-                                        color:
-                                            Color.fromRGBO(234, 51, 98, 1.000)),
+                                        color: const Color.fromRGBO(
+                                            234, 51, 98, 1.000)),
                                   )
                                 ],
                               )
                             ],
                           )),
                     ),
-                    const SizedBox(
-                      height: 95,
+                    SizedBox(
+                      height: largoActual * (95 / 630),
                     ),
                   ],
                 ),

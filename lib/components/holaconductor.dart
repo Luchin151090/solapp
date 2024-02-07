@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+//import 'package:url_launcher/url_launcher.dart';
 //import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
@@ -314,7 +314,7 @@ class _HolaConductorState extends State<HolaConductor> {
 
   @override
   Widget build(BuildContext context) {
-    double anchoPantalla = MediaQuery.of(context).size.width;
+    //double anchoPantalla = MediaQuery.of(context).size.width;
     int numeroTotalPedidos = listPedidosbyRuta.length;
     final userProvider = context.watch<UserProvider>();
     print('16) Esta es la longitud de Pedidos $numeroTotalPedidos');
@@ -551,7 +551,7 @@ class _HolaConductorState extends State<HolaConductor> {
                                   userAgentPackageName: 'com.example.app',
                                 )
                               ]),
-                         /* Positioned(
+                          /* Positioned(
                             bottom:
                                 16.0, // Ajusta la posición vertical según tus necesidades
                             right:
@@ -734,8 +734,8 @@ class _HolaConductorState extends State<HolaConductor> {
                       height: 10,
                     ),
                   ]))),
-     // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-   /*  
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      /*  
      Container(
         height: 45,
         width: anchoPantalla - 30,

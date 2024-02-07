@@ -1,15 +1,18 @@
 import 'package:appsol_final/components/asistencia.dart';
-import 'package:appsol_final/components/promos.dart';
+import 'package:appsol_final/components/navegador.dart';
+import 'package:appsol_final/components/pedido.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:geocoding/geocoding.dart';
-import 'package:appsol_final/components/productos.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
+import 'package:appsol_final/provider/pedido_provider.dart';
+import 'package:appsol_final/models/pedido_model.dart';
 
 class Producto {
   final String nombre;
@@ -27,14 +30,14 @@ class Producto {
 
 class Hola2 extends StatefulWidget {
   final String? url;
-  final String? LoggedInWith;
+  final String? loggedInWith;
   final String direccion;
   //final double? latitud;
   // final double? longitud;
 
   const Hola2({
     this.url,
-    this.LoggedInWith,
+    this.loggedInWith,
     this.direccion = '',
     // this.latitud, // Nuevo campo
     // this.longitud, // Nuevo campo
@@ -50,6 +53,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   List<Producto> listProducto = [];
   late List<String> listUbicaciones = [];
   late String dropdownValue = listUbicaciones.first;
+  int cantCarrito = 0;
+  Color colorCantidadCarrito = Colors.black;
 
   ScrollController _scrollController1 = ScrollController();
   ScrollController _scrollController2 = ScrollController();
@@ -83,7 +88,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   Future<dynamic> getProducts() async {
     print("-------get products---------");
     var res = await http.get(
-      Uri.parse(apiUrl + '/api/products'),
+      Uri.parse("$apiUrl/api/products"),
       headers: {"Content-type": "application/json"},
     );
     try {
@@ -244,6 +249,28 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     }
   }
 
+  void esVacio(PedidoModel? pedido) {
+    if (pedido is PedidoModel) {
+      print('ES PEDIDOOO');
+      cantCarrito = pedido.cantidadProd;
+      if (pedido.cantidadProd > 0) {
+        setState(() {
+          colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
+        });
+      } else {
+        setState(() {
+          colorCantidadCarrito = Colors.grey;
+        });
+      }
+    } else {
+      print('no es pedido');
+      setState(() {
+        cantCarrito = 0;
+        colorCantidadCarrito = Colors.grey;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _scrollController1.dispose();
@@ -258,6 +285,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     final largoActual = MediaQuery.of(context).size.height;
     final TabController _tabController = TabController(length: 2, vsync: this);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final pedidoProvider = context.watch<PedidoProvider>();
+    esVacio(pedidoProvider.pedido);
     return Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
@@ -276,6 +305,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                             right: anchoActual * 0.028),
                         //color: Colors.red,
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             SizedBox(
@@ -287,7 +317,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                   color:
                                       const Color.fromRGBO(83, 176, 68, 1.000),
                                   borderRadius: BorderRadius.circular(40)),
-                              height: largoActual * 0.061,
+                              height: largoActual * 0.059,
                               width: anchoActual * 0.7,
                               child: DropdownMenu<String>(
                                 hintText: '¿Dónde lo entregamos?',
@@ -424,15 +454,34 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
 
                             // USER PHOTO
                             Container(
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 84, 81, 81),
-                                  borderRadius: BorderRadius.circular(40)),
-                              height: largoActual * 0.068,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(40),
-                                child: widget.url != null
-                                    ? Image.network(widget.url!)
-                                    : Image.asset('lib/imagenes/chica.jpg'),
+                                  color:
+                                      const Color.fromRGBO(0, 106, 252, 1.000),
+                                  borderRadius: BorderRadius.circular(50)),
+                              height: largoActual * 0.059,
+                              width: largoActual * 0.059,
+                              child: Badge(
+                                largeSize: 18,
+                                backgroundColor: colorCantidadCarrito,
+                                label: Text(cantCarrito.toString(),
+                                    style: const TextStyle(fontSize: 12)),
+                                child: IconButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const Pedido()
+                                          //const Promos()
+                                          ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.shopping_cart_rounded),
+                                  color: Colors.white,
+                                  iconSize: largoActual * 0.030,
+                                ).animate().shakeY(
+                                      duration: Duration(milliseconds: 300),
+                                    ),
                               ),
                             ),
                           ],
@@ -513,7 +562,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                const Promos()),
+                                                const BarraNavegacion(
+                                                  indice: 0,
+                                                  subIndice: 1,
+                                                )
+                                            //const Promos()
+                                            ),
                                       );
                                     },
                                     child: Container(
@@ -545,7 +599,13 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) => Productos()),
+                                            builder: (context) =>
+                                                BarraNavegacion(
+                                                  indice: 0,
+                                                  subIndice: 2,
+                                                )
+                                            //const Productos()
+                                            ),
                                       );
                                     },
                                     child: Container(
@@ -714,21 +774,11 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Stack(
-                                    children: [
-                                      Icon(
-                                        Icons
-                                            .person, // Reemplaza con el icono que desees
-                                        size: largoActual * 0.034,
-                                        color: Colors.white,
-                                      ),
-                                      Icon(
-                                        Icons
-                                            .question_mark_rounded, // Reemplaza con el icono que desees
-                                        size: largoActual * 0.016,
-                                        color: Colors.white,
-                                      )
-                                    ],
+                                  Icon(
+                                    Icons
+                                        .support_agent_rounded, // Reemplaza con el icono que desees
+                                    size: largoActual * 0.028,
+                                    color: Colors.white,
                                   ),
 
                                   SizedBox(

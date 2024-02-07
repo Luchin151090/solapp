@@ -1,28 +1,14 @@
-import 'package:appsol_final/components/productos.dart';
+import 'package:appsol_final/models/producto_model.dart';
 import 'package:appsol_final/components/pedido.dart';
+import 'package:appsol_final/models/promocion_model.dart';
+import 'package:appsol_final/provider/pedido_provider.dart';
+import 'package:appsol_final/models/pedido_model.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-class Promo {
-  final int id;
-  final String nombre;
-  final double precio;
-  final String descripcion;
-  final String fechaLimite;
-  final String foto;
-  int cantidad;
-
-  Promo(
-      {required this.id,
-      required this.nombre,
-      required this.precio,
-      required this.descripcion,
-      required this.fechaLimite,
-      required this.foto,
-      this.cantidad = 0});
-}
+import 'package:flutter_animate/flutter_animate.dart';
 
 class ProductoPromocion {
   final int promocionId;
@@ -45,6 +31,7 @@ class Promos extends StatefulWidget {
 }
 
 class _PromosState extends State<Promos> {
+  late PedidoModel pedidoMio;
   String apiUrl = dotenv.env['API_URL'] ?? '';
   DateTime fechaLim = DateTime.now();
 
@@ -55,6 +42,8 @@ class _PromosState extends State<Promos> {
   List<ProductoPromocion> listProdProm = [];
   int cantidadP = 0;
   bool almenosUno = false;
+  int cantCarrito = 0;
+  Color colorCantidadCarrito = Colors.black;
 
   @override
   void initState() {
@@ -219,18 +208,79 @@ class _PromosState extends State<Promos> {
     }
   }
 
+  void esVacio(PedidoModel? pedido) {
+    if (pedido is PedidoModel) {
+      print('ES PEDIDOOO');
+      cantCarrito = pedido.cantidadProd;
+      if (pedido.cantidadProd > 0) {
+        setState(() {
+          colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
+        });
+      } else {
+        setState(() {
+          colorCantidadCarrito = Colors.grey;
+        });
+      }
+    } else {
+      print('no es pedido');
+      setState(() {
+        cantCarrito = 0;
+        colorCantidadCarrito = Colors.grey;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double total = obtenerTotal();
     //final TabController _tabController = TabController(length: 2, vsync: this);
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
+    final pedidoProvider = context.watch<PedidoProvider>();
+    esVacio(pedidoProvider.pedido);
     return Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          toolbarHeight: largoActual * 0.08,
+          actions: [
+            Container(
+              margin: EdgeInsets.only(
+                  top: largoActual * 0.018, right: anchoActual * 0.045),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: const Color.fromRGBO(0, 106, 252, 1.000),
+                  borderRadius: BorderRadius.circular(50)),
+              height: largoActual * 0.059,
+              width: largoActual * 0.059,
+              child: Badge(
+                largeSize: 18,
+                backgroundColor: colorCantidadCarrito,
+                label: Text(cantCarrito.toString(),
+                    style: const TextStyle(fontSize: 12)),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Pedido()
+                          //const Promos()
+                          ),
+                    );
+                  },
+                  icon: const Icon(Icons.shopping_cart_rounded),
+                  color: Colors.white,
+                  iconSize: largoActual * 0.030,
+                ).animate().shakeY(
+                      duration: Duration(milliseconds: 300),
+                    ),
+              ),
+            ),
+          ],
+        ),
         body: SafeArea(
             child: Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding:
+                    const EdgeInsets.only(left: 10.0, right: 10, bottom: 10),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -267,8 +317,8 @@ class _PromosState extends State<Promos> {
                       ),
 
                       //CONTAINER CON LIST BUILDER
-                      Container(
-                          height: largoActual * 0.62,
+                      SizedBox(
+                          height: largoActual * 0.60,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: listPromociones.length,
@@ -469,17 +519,18 @@ class _PromosState extends State<Promos> {
                                     onPressed: almenosUno
                                         ? () async {
                                             await obtenerProducto();
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) => Pedido(
-                                                        seleccionados:
-                                                            productosContabilizados,
-                                                        seleccionadosPromo:
-                                                            promocionesContabilizadas,
-                                                        total: obtenerTotal(),
-                                                      )),
-                                            );
+                                            pedidoMio = PedidoModel(
+                                                seleccionados:
+                                                    productosContabilizados,
+                                                seleccionadosPromo:
+                                                    promocionesContabilizadas,
+                                                cantidadProd:
+                                                    productosContabilizados
+                                                        .length,
+                                                total: obtenerTotal());
+                                            Provider.of<PedidoProvider>(context,
+                                                    listen: false)
+                                                .updatePedido(pedidoMio);
                                           }
                                         : null,
                                     style: ButtonStyle(

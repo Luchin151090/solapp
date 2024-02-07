@@ -1,7 +1,7 @@
 import 'package:appsol_final/components/hola.dart';
 import 'package:appsol_final/components/holaconductor.dart';
 import 'package:appsol_final/components/prueba.dart';
-import 'package:appsol_final/modeluser/user_model.dart';
+import 'package:appsol_final/models/user_model.dart';
 import 'package:appsol_final/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 //import 'package:flutter_animate/flutter_animate.dart';
