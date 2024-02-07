@@ -1,6 +1,5 @@
-
 import 'package:flutter/material.dart';
-import 'package:appsol_final/modeluser/user_model.dart';
+import 'package:appsol_final/models/user_model.dart';
 
 class UserProvider extends ChangeNotifier {
   // CREAS UNA INSTANCIA DE LA CLASE
