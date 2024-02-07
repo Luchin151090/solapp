@@ -254,7 +254,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
-
+    final anchoActual = MediaQuery.of(context).size.width;
+    final largoActual = MediaQuery.of(context).size.height;
     final TabController _tabController = TabController(length: 2, vsync: this);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
@@ -268,15 +269,17 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                     children: [
                       Container(
                         //color: Colors.amberAccent,
-                        width: MediaQuery.of(context).size.width,
-                        margin:
-                            const EdgeInsets.only(top: 10, left: 10, right: 10),
+                        width: anchoActual,
+                        margin: EdgeInsets.only(
+                            top: largoActual * 0.013,
+                            left: anchoActual * 0.028,
+                            right: anchoActual * 0.028),
                         //color: Colors.red,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             SizedBox(
-                              width: 10,
+                              width: anchoActual * 0.028,
                             ),
                             //LOCATION
                             Container(
@@ -284,13 +287,13 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                   color:
                                       const Color.fromRGBO(83, 176, 68, 1.000),
                                   borderRadius: BorderRadius.circular(40)),
-                              height: 45,
-                              width: 251,
+                              height: largoActual * 0.061,
+                              width: anchoActual * 0.7,
                               child: DropdownMenu<String>(
                                 hintText: '¿Dónde lo entregamos?',
-                                trailingIcon: const Icon(
+                                trailingIcon: Icon(
                                   Icons.arrow_drop_down,
-                                  size: 23,
+                                  size: largoActual * 0.031,
                                   color: Colors.white,
                                 ),
                                 leadingIcon: IconButton(
@@ -300,26 +303,28 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       context: context,
                                       builder: (BuildContext context) {
                                         return Container(
-                                          margin: const EdgeInsets.only(
-                                              top: 30, left: 20, right: 20),
-                                          height: 130,
-                                          width:
-                                              MediaQuery.of(context).size.width,
+                                          margin: EdgeInsets.only(
+                                              top: largoActual * 0.041,
+                                              left: anchoActual * 0.055,
+                                              right: anchoActual * 0.055),
+                                          height: largoActual * 0.18,
+                                          width: anchoActual,
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              const Text(
+                                              Text(
                                                 'Agregar Ubicación',
                                                 style: TextStyle(
-                                                  color: Color.fromARGB(
+                                                  color: const Color.fromARGB(
                                                       255, 3, 34, 60),
-                                                  fontSize: 17,
+                                                  fontSize: largoActual * 0.023,
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),
-                                              const SizedBox(height: 10),
+                                              SizedBox(
+                                                  height: largoActual * 0.013),
                                               ElevatedButton(
                                                 onPressed: () async {
                                                   print("ubi añadidda");
@@ -328,14 +333,21 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                 },
                                                 style: ButtonStyle(
                                                   minimumSize:
-                                                      const MaterialStatePropertyAll(
-                                                          Size(100, 40)),
+                                                      MaterialStatePropertyAll(
+                                                          Size(
+                                                              anchoActual *
+                                                                  0.28,
+                                                              largoActual *
+                                                                  0.054)),
                                                   backgroundColor:
                                                       MaterialStateProperty.all(
-                                                          Color.fromRGBO(88,
-                                                              184, 249, 1.000)),
+                                                          const Color.fromRGBO(
+                                                              88,
+                                                              184,
+                                                              249,
+                                                              1.000)),
                                                 ),
-                                                child: const Row(
+                                                child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment.center,
                                                   children: [
@@ -343,12 +355,14 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                       Icons
                                                           .add_location_alt_rounded,
                                                       color: Colors.white,
-                                                      size: 25,
+                                                      size: largoActual * 0.034,
                                                     ),
                                                     Text(
                                                       ' Agregar ubicación actual',
                                                       style: TextStyle(
-                                                          fontSize: 18,
+                                                          fontSize:
+                                                              largoActual *
+                                                                  0.024,
                                                           fontWeight:
                                                               FontWeight.w400,
                                                           color: Colors.white),
@@ -362,17 +376,16 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       },
                                     );
                                   },
-                                  icon: const Icon(
-                                      Icons.add_location_alt_rounded,
-                                      size: 23,
+                                  icon: Icon(Icons.add_location_alt_rounded,
+                                      size: largoActual * 0.031,
                                       color: Colors.white),
                                 ),
                                 inputDecorationTheme: InputDecorationTheme(
                                     fillColor:
                                         Color.fromRGBO(83, 176, 68, 1.000),
-                                    hintStyle: const TextStyle(
+                                    hintStyle: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 13,
+                                      fontSize: largoActual * 0.018,
                                       //fontWeight: FontWeight.w400
                                     ),
                                     enabledBorder: OutlineInputBorder(
@@ -414,7 +427,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                               decoration: BoxDecoration(
                                   color: const Color.fromARGB(255, 84, 81, 81),
                                   borderRadius: BorderRadius.circular(40)),
-                              height: 50,
+                              height: largoActual * 0.068,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(40),
                                 child: widget.url != null
@@ -426,41 +439,46 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                         ),
                       ),
                       Container(
-                        width: MediaQuery.of(context).size.width,
-                        margin: const EdgeInsets.only(left: 20, top: 30),
+                        width: anchoActual,
+                        margin: EdgeInsets.only(
+                            left: anchoActual * 0.055,
+                            top: largoActual * 0.041),
                         child: Text(
                           "Bienvenid@, ${userProvider.user?.nombre}",
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.w200,
-                              fontSize: 18,
-                              color: Color.fromARGB(255, 3, 34, 60)),
+                              fontSize: largoActual * 0.024,
+                              color: const Color.fromARGB(255, 3, 34, 60)),
                         ),
                       ),
                       Container(
-                        margin: const EdgeInsets.only(left: 20),
-                        child: const Text(
+                        margin: EdgeInsets.only(left: anchoActual * 0.055),
+                        child: Text(
                           "Disfruta de Agua Sol!",
                           style: TextStyle(
                               fontWeight: FontWeight.w400,
-                              fontSize: 18,
-                              color: Color.fromARGB(255, 3, 34, 60)),
+                              fontSize: largoActual * 0.024,
+                              color: const Color.fromARGB(255, 3, 34, 60)),
                         ),
                       ),
                       Container(
-                        height: 50,
-                        width: MediaQuery.of(context).size.width,
-                        margin:
-                            const EdgeInsets.only(top: 10, left: 10, right: 10),
+                        height: largoActual * 0.068,
+                        width: anchoActual,
+                        margin: EdgeInsets.only(
+                            top: largoActual * 0.013,
+                            left: anchoActual * 0.028,
+                            right: anchoActual * 0.028),
                         child: TabBar(
                             controller: _tabController,
                             indicatorWeight: 10,
-                            labelStyle: const TextStyle(
-                                fontSize: 18,
+                            labelStyle: TextStyle(
+                                fontSize: largoActual * 0.024,
                                 fontWeight: FontWeight
                                     .w400), // Ajusta el tamaño del texto de la pestaña seleccionada
-                            unselectedLabelStyle: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w300),
-                            labelColor: Color.fromARGB(255, 3, 34, 60),
+                            unselectedLabelStyle: TextStyle(
+                                fontSize: largoActual * 0.022,
+                                fontWeight: FontWeight.w300),
+                            labelColor: const Color.fromARGB(255, 3, 34, 60),
                             unselectedLabelColor:
                                 const Color.fromARGB(255, 3, 34, 60),
                             indicatorColor:
@@ -475,9 +493,11 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                             ]),
                       ),
                       Container(
-                        margin:
-                            const EdgeInsets.only(top: 10, left: 10, right: 10),
-                        height: MediaQuery.of(context).size.height / 2.5,
+                        margin: EdgeInsets.only(
+                            top: largoActual * 0.013,
+                            left: anchoActual * 0.028,
+                            right: anchoActual * 0.028),
+                        height: largoActual / 2.5,
                         width: double.maxFinite,
                         child: TabBarView(
                           controller: _tabController,
@@ -497,9 +517,10 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       );
                                     },
                                     child: Container(
-                                      margin: const EdgeInsets.only(left: 10),
-                                      height: 300,
-                                      width: 300,
+                                      margin: EdgeInsets.only(
+                                          left: anchoActual * 0.028),
+                                      height: anchoActual * 0.83,
+                                      width: anchoActual * 0.83,
                                       decoration: BoxDecoration(
                                           color:
                                               Color.fromARGB(255, 71, 106, 133),
@@ -528,9 +549,10 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       );
                                     },
                                     child: Container(
-                                      margin: const EdgeInsets.only(left: 10),
-                                      height: 300,
-                                      width: 300,
+                                      margin: EdgeInsets.only(
+                                          left: anchoActual * 0.028),
+                                      height: anchoActual * 0.83,
+                                      width: anchoActual * 0.83,
                                       decoration: BoxDecoration(
                                           color:
                                               Color.fromARGB(255, 75, 108, 134),
@@ -546,11 +568,13 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        height: 20,
+                      SizedBox(
+                        height: largoActual * 0.027,
                       ),
                       Container(
-                        margin: const EdgeInsets.only(left: 20, right: 20),
+                        margin: EdgeInsets.only(
+                            left: anchoActual * 0.055,
+                            right: anchoActual * 0.055),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -558,42 +582,47 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Container(
-                                    child: const Text(
+                                    child: Text(
                                   "Mejora",
                                   style: TextStyle(
-                                      fontSize: 17,
+                                      fontSize: largoActual * 0.023,
                                       fontWeight: FontWeight.w400,
-                                      color: Color.fromARGB(255, 3, 34, 60)),
+                                      color:
+                                          const Color.fromARGB(255, 3, 34, 60)),
                                 )),
                                 Container(
-                                    child: const Text(
+                                    child: Text(
                                   "tú vida!",
                                   style: TextStyle(
                                       fontWeight: FontWeight.w300,
-                                      fontSize: 17,
-                                      color: Color.fromARGB(255, 3, 34, 60)),
+                                      fontSize: largoActual * 0.023,
+                                      color:
+                                          const Color.fromARGB(255, 3, 34, 60)),
                                 )),
                               ],
                             ),
                             Container(
-                              margin: const EdgeInsets.only(top: 20),
-                              child: const Text(
+                              margin: EdgeInsets.only(top: largoActual * 0.027),
+                              child: Text(
                                 "Necesitas",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w300,
-                                    fontSize: 17,
-                                    color: Color.fromARGB(255, 6, 46, 78)),
+                                    fontSize: largoActual * 0.023,
+                                    color:
+                                        const Color.fromARGB(255, 6, 46, 78)),
                               ),
                             )
                           ],
                         ),
                       ),
                       Container(
-                        margin: const EdgeInsets.only(left: 10, right: 10),
+                        margin: EdgeInsets.only(
+                            left: anchoActual * 0.028,
+                            right: anchoActual * 0.028),
                         child: Row(children: [
                           Container(
                             //width: 150,
-                            height: 40,
+                            height: largoActual * 0.054,
                             child: ElevatedButton(
                               onPressed: () {
                                 showDialog(
@@ -607,10 +636,10 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                             color: Color.fromARGB(
                                                 255, 4, 80, 143)),
                                       ),
-                                      content: const Text(
+                                      content: Text(
                                         'Muy pronto te sorprenderemos!',
                                         style: TextStyle(
-                                            fontSize: 20,
+                                            fontSize: largoActual * 0.027,
                                             fontWeight: FontWeight.w600),
                                       ),
                                       actions: <Widget>[
@@ -619,12 +648,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                             Navigator.of(context)
                                                 .pop(); // Cierra el AlertDialog
                                           },
-                                          child: const Text(
+                                          child: Text(
                                             'OK',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 25,
-                                                color: Color.fromARGB(
+                                                fontSize: largoActual * 0.034,
+                                                color: const Color.fromARGB(
                                                     255, 13, 58, 94)),
                                           ),
                                         ),
@@ -635,27 +664,27 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                               },
                               style: ButtonStyle(
                                 elevation: MaterialStateProperty.all(8),
-                                minimumSize: const MaterialStatePropertyAll(
-                                    Size(100, 40)),
+                                minimumSize: MaterialStatePropertyAll(Size(
+                                    anchoActual * 0.28, largoActual * 0.054)),
                                 backgroundColor: MaterialStateProperty.all(
                                     const Color.fromRGBO(0, 106, 252, 1.000)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     Icons
                                         .attach_money_outlined, // Reemplaza con el icono que desees
-                                    size: 25,
+                                    size: largoActual * 0.034,
                                     color: Colors.white,
                                   ),
                                   SizedBox(
-                                      width:
-                                          8), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                      width: anchoActual *
+                                          0.022), // Ajusta el espacio entre el icono y el texto según tus preferencias
                                   Text(
                                     "Aquí",
                                     style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: largoActual * 0.022,
                                         fontWeight: FontWeight.w400,
                                         color: Colors.white),
                                   ),
@@ -665,8 +694,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           ),
                           Expanded(child: Container()),
                           Container(
-                            width: 200,
-                            height: 40,
+                            width: anchoActual * 0.55,
+                            height: largoActual * 0.054,
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
@@ -677,12 +706,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                               },
                               style: ButtonStyle(
                                 elevation: MaterialStateProperty.all(8),
-                                minimumSize: const MaterialStatePropertyAll(
-                                    Size(100, 40)),
+                                minimumSize: MaterialStatePropertyAll(Size(
+                                    anchoActual * 0.28, largoActual * 0.054)),
                                 backgroundColor: MaterialStateProperty.all(
                                     const Color.fromRGBO(0, 106, 252, 1.000)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Stack(
@@ -690,25 +719,25 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       Icon(
                                         Icons
                                             .person, // Reemplaza con el icono que desees
-                                        size: 25,
+                                        size: largoActual * 0.034,
                                         color: Colors.white,
                                       ),
                                       Icon(
                                         Icons
                                             .question_mark_rounded, // Reemplaza con el icono que desees
-                                        size: 12,
+                                        size: largoActual * 0.016,
                                         color: Colors.white,
                                       )
                                     ],
                                   ),
 
                                   SizedBox(
-                                      width:
-                                          8), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                      width: anchoActual *
+                                          0.022), // Ajusta el espacio entre el icono y el texto según tus preferencias
                                   Text(
                                     "Asistencia",
                                     style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: largoActual * 0.022,
                                         fontWeight: FontWeight.w400,
                                         color: Colors.white),
                                   ),

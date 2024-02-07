@@ -34,9 +34,10 @@ class _PedidoState extends State<Pedido> {
   int lastPedido = 0;
   Color color = Colors.white;
   //POR AHORA EL CLIENTE ES MANUAL!!""
-  int clienteId = 9;
+  int clienteId = 1;
   String direccion = 'Av. Las Flores 137 - Cayma';
   DateTime tiempoActual = DateTime.now();
+  late DateTime tiempoPeru;
   String apiUrl = dotenv.env['API_URL'] ?? '';
 
   Future<dynamic> datosCreadoPedido(
@@ -67,9 +68,9 @@ class _PedidoState extends State<Pedido> {
   }
 
   Future<void> crearPedidoyDetallePedido(tipo, monto) async {
-    DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 10));
+    DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 5));
     await datosCreadoPedido(
-        clienteId, tiempoGMTPeru.toString(), monto, tipo, "pendiente");
+        clienteId, tiempoActual.toString(), monto, tipo, "pendiente");
     print(tiempoGMTPeru.toString());
     print(tiempoActual.timeZoneName);
     print("creando detalles de pedidos----------");
@@ -133,7 +134,7 @@ class _PedidoState extends State<Pedido> {
                             );*/
                           },
                           style: ButtonStyle(
-                            elevation: MaterialStateProperty.all(5),
+                            elevation: MaterialStateProperty.all(8),
                             surfaceTintColor: MaterialStateProperty.all(
                                 const Color.fromARGB(255, 255, 255, 255)),
                             minimumSize:
@@ -423,28 +424,45 @@ class _PedidoState extends State<Pedido> {
                                 Colors.transparent),
                             value: light0,
                             onChanged: (bool value) {
-                              //AGREGAR FUNCIONALIDAD AL BOTONCITOOOOO
                               setState(() {
                                 light0 = value;
+                                tiempoPeru = tiempoActual
+                                    .subtract(const Duration(hours: 5));
                                 print(value);
+                                print('hora acrtual ${tiempoPeru.hour}');
                               });
                               if (light0 == false) {
+                                //ES NORMAL
                                 setState(() {
-                                  tipoPedido = 'normal';
                                   color = Colors.white;
+                                  tipoPedido = 'normal';
                                   envio = 0;
                                   print(tipoPedido);
                                   print(envio);
                                 });
                               } else {
-                                setState(() {
-                                  tipoPedido = 'express';
-                                  color = Color.fromRGBO(120, 251, 99, 1.000);
-                                  envio = 4;
-                                  print(tipoPedido);
-                                  print(envio);
-                                });
+                                //ES EXPRESS
+                                if (tiempoActual.hour <= 16) {
+                                  print('son mas de las 16');
+                                  setState(() {
+                                    tipoPedido = 'normal';
+                                    light0 = false;
+                                    color = Colors.white;
+                                    envio = 0;
+                                  });
+                                } else {
+                                  print('son menos de las 16');
+                                  setState(() {
+                                    tipoPedido = 'express';
+                                    color = const Color.fromRGBO(
+                                        120, 251, 99, 1.000);
+                                    envio = 4;
+                                    print(tipoPedido);
+                                    print(envio);
+                                  });
+                                }
                               }
+
                               setState(() {
                                 totalVenta = widget.total + envio;
                                 print(totalVenta);
@@ -470,7 +488,7 @@ class _PedidoState extends State<Pedido> {
                                         color:
                                             Color.fromARGB(255, 1, 75, 135))),
                                 Text(
-                                  "Recive tu producto más rapido y disfrútalo lo antes posible",
+                                  "Recive tu producto más rapido, solo hasta las 4:00 P.M.",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 10,
@@ -533,7 +551,6 @@ class _PedidoState extends State<Pedido> {
                                 ),
                               ],
                             ))),
-
                     //NOTAS PARA EL REPARTIDOR
                     Container(
                       margin: const EdgeInsets.only(bottom: 10, left: 20),
@@ -573,7 +590,6 @@ class _PedidoState extends State<Pedido> {
                         ),
                       ),
                     ),
-
                     //RESUMEN
                     Container(
                       margin: const EdgeInsets.only(bottom: 10, left: 20),
@@ -607,14 +623,14 @@ class _PedidoState extends State<Pedido> {
                                     'Productos',
                                     style: TextStyle(
                                         fontSize: 13,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w400,
                                         color: Color.fromARGB(255, 1, 75, 135)),
                                   ),
                                   Text(
                                     'S/.${widget.total}',
                                     style: const TextStyle(
                                         fontSize: 13,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w400,
                                         color: Color.fromARGB(255, 1, 75, 135)),
                                   )
                                 ],
@@ -627,14 +643,14 @@ class _PedidoState extends State<Pedido> {
                                     'Envio',
                                     style: TextStyle(
                                         fontSize: 13,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w400,
                                         color: Color.fromARGB(255, 1, 75, 135)),
                                   ),
                                   Text(
                                     'S/.$envio',
                                     style: const TextStyle(
                                         fontSize: 13,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.w400,
                                         color: Color.fromARGB(255, 1, 75, 135)),
                                   )
                                 ],

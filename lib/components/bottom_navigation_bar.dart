@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:appsol_final/components/hola.dart';
-import 'package:appsol_final/components/promos.dart';
+import 'package:appsol_final/components/perfilcliente.dart';
+/*import 'package:appsol_final/components/promos.dart';
 import 'package:appsol_final/components/pedido.dart';
-import 'package:appsol_final/components/productos.dart';
+import 'package:appsol_final/components/productos.dart';*/
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class BarraNavegacion extends StatefulWidget {
@@ -12,11 +13,12 @@ class BarraNavegacion extends StatefulWidget {
 }
 
 class _BarraNavegacion extends State<BarraNavegacion> {
-  final navigationKey = GlobalKey<CurvedNavigationBarState>();
   int indexSelecionado = 0;
   int numeroProductos = 0;
   final screens = [
     Hola2(),
+    PerfilCliente(),
+    PerfilCliente(),
   ];
 
   @override
@@ -50,8 +52,6 @@ class _BarraNavegacion extends State<BarraNavegacion> {
           setState(() {
             indexSelecionado = index;
           });
-          final navigationState = navigationKey.currentState!;
-          navigationState.setPage(index);
         },
         index: indexSelecionado,
         items: items,

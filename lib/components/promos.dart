@@ -223,7 +223,8 @@ class _PromosState extends State<Promos> {
   Widget build(BuildContext context) {
     double total = obtenerTotal();
     //final TabController _tabController = TabController(length: 2, vsync: this);
-
+    final anchoActual = MediaQuery.of(context).size.width;
+    final largoActual = MediaQuery.of(context).size.height;
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(),
@@ -234,26 +235,29 @@ class _PromosState extends State<Promos> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        margin: const EdgeInsets.only(top: 0, left: 20),
+                        margin:
+                            EdgeInsets.only(top: 0, left: anchoActual * 0.055),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     "Llévate las mejores promos!",
                                     style: TextStyle(
-                                        color: Color.fromARGB(255, 1, 42, 76),
+                                        color: const Color.fromARGB(
+                                            255, 1, 42, 76),
                                         fontWeight: FontWeight.w200,
-                                        fontSize: 20),
+                                        fontSize: largoActual * 0.027),
                                   ),
                                   Container(
-                                    child: const Text(
+                                    child: Text(
                                       "Solo para tí",
                                       style: TextStyle(
-                                          color: Color.fromARGB(255, 1, 46, 84),
-                                          fontSize: 19,
+                                          color: const Color.fromARGB(
+                                              255, 1, 46, 84),
+                                          fontSize: largoActual * 0.026,
                                           fontWeight: FontWeight.w500),
                                     ),
                                   ),
@@ -264,7 +268,7 @@ class _PromosState extends State<Promos> {
 
                       //CONTAINER CON LIST BUILDER
                       Container(
-                          height: 455,
+                          height: largoActual * 0.62,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: listPromociones.length,
@@ -274,15 +278,19 @@ class _PromosState extends State<Promos> {
                                 surfaceTintColor: Colors.white,
                                 color: Colors.white,
                                 elevation: 8,
-                                margin: const EdgeInsets.only(
-                                    top: 20, left: 10, right: 10, bottom: 30),
+                                margin: EdgeInsets.only(
+                                    top: largoActual * 0.027,
+                                    left: anchoActual * 0.028,
+                                    right: anchoActual * 0.028,
+                                    bottom: largoActual * 0.041),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Container(
-                                      height: 230,
-                                      width: 200,
-                                      margin: const EdgeInsets.only(top: 10),
+                                      height: largoActual * 0.31,
+                                      width: anchoActual * 0.55,
+                                      margin: EdgeInsets.only(
+                                          top: largoActual * 0.013),
                                       decoration: BoxDecoration(
                                           color: Colors.white,
                                           image: DecorationImage(
@@ -291,9 +299,11 @@ class _PromosState extends State<Promos> {
                                               fit: BoxFit.scaleDown)),
                                     ),
                                     Container(
-                                      width: 230,
-                                      margin: const EdgeInsets.only(
-                                          top: 10, right: 15, left: 15),
+                                      width: anchoActual * 0.64,
+                                      margin: EdgeInsets.only(
+                                          top: largoActual * 0.013,
+                                          right: anchoActual * 0.042,
+                                          left: anchoActual * 0.042),
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -302,10 +312,10 @@ class _PromosState extends State<Promos> {
                                         children: [
                                           Text(
                                             promocion.nombre,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 fontWeight: FontWeight.w400,
-                                                fontSize: 15,
-                                                color: Color.fromARGB(
+                                                fontSize: largoActual * 0.02,
+                                                color: const Color.fromARGB(
                                                     255, 4, 62, 107)),
                                           ),
                                           Flex(
@@ -319,28 +329,29 @@ class _PromosState extends State<Promos> {
                                                 promocion.descripcion
                                                     .capitalize(),
                                                 textAlign: TextAlign.center,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                     fontWeight: FontWeight.w300,
-                                                    fontSize: 13,
-                                                    color: Color.fromARGB(
+                                                    fontSize:
+                                                        largoActual * 0.018,
+                                                    color: const Color.fromARGB(
                                                         255, 4, 62, 107)),
                                               ),
                                             ],
                                           ),
                                           Text(
                                             "Val. Hasta: ${mesyAnio(promocion.fechaLimite).day.toString()}/${mesyAnio(promocion.fechaLimite).month.toString()}/${mesyAnio(promocion.fechaLimite).year.toString()}",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 fontWeight: FontWeight.w300,
-                                                fontSize: 12,
-                                                color: Color.fromARGB(
+                                                fontSize: largoActual * 0.012,
+                                                color: const Color.fromARGB(
                                                     255, 4, 62, 107)),
                                           ),
                                           Text(
                                             "S/.${promocion.precio} ",
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 fontWeight: FontWeight.w400,
-                                                fontSize: 16,
-                                                color: Color.fromARGB(
+                                                fontSize: largoActual * 0.022,
+                                                color: const Color.fromARGB(
                                                     255, 4, 62, 107)),
                                           ),
                                           Row(
@@ -357,7 +368,7 @@ class _PromosState extends State<Promos> {
                                                         "disminuir ${promocion.cantidad}");
                                                   });
                                                 },
-                                                iconSize: 30,
+                                                iconSize: largoActual * 0.041,
                                                 color: const Color.fromARGB(
                                                     255, 0, 57, 103),
                                                 icon: const Icon(
@@ -368,10 +379,11 @@ class _PromosState extends State<Promos> {
                                               ),
                                               Text(
                                                 "${promocion.cantidad}",
-                                                style: const TextStyle(
-                                                    color: Color.fromARGB(
+                                                style: TextStyle(
+                                                    color: const Color.fromARGB(
                                                         255, 4, 62, 107),
-                                                    fontSize: 25,
+                                                    fontSize:
+                                                        largoActual * 0.034,
                                                     fontWeight:
                                                         FontWeight.w500),
                                               ),
@@ -384,7 +396,7 @@ class _PromosState extends State<Promos> {
                                                         "incrementar ${promocion.cantidad}");
                                                   });
                                                 },
-                                                iconSize: 30,
+                                                iconSize: largoActual * 0.041,
                                                 color: const Color.fromARGB(
                                                     255, 0, 49, 89),
                                                 icon: const Icon(
@@ -410,23 +422,27 @@ class _PromosState extends State<Promos> {
                           Column(
                             children: [
                               Container(
-                                margin: const EdgeInsets.only(left: 20),
-                                child: const Text(
+                                margin:
+                                    EdgeInsets.only(left: anchoActual * 0.055),
+                                child: Text(
                                   "Subtotal:",
                                   style: TextStyle(
                                       fontWeight: FontWeight.w300,
-                                      fontSize: 16,
-                                      color: Color.fromARGB(255, 1, 25, 44)),
+                                      fontSize: largoActual * 0.022,
+                                      color:
+                                          const Color.fromARGB(255, 1, 25, 44)),
                                 ),
                               ),
                               Container(
-                                margin: const EdgeInsets.only(left: 20),
+                                margin:
+                                    EdgeInsets.only(left: anchoActual * 0.055),
                                 child: Text(
                                   "S/.${total}",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontWeight: FontWeight.w400,
-                                      fontSize: 20,
-                                      color: Color.fromARGB(255, 4, 62, 107)),
+                                      fontSize: largoActual * 0.027,
+                                      color: const Color.fromARGB(
+                                          255, 4, 62, 107)),
                                 ),
                               ),
                             ],
@@ -435,17 +451,20 @@ class _PromosState extends State<Promos> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Container(
-                                margin: const EdgeInsets.only(right: 20),
-                                child: const Text(
+                                margin:
+                                    EdgeInsets.only(right: anchoActual * 0.055),
+                                child: Text(
                                   "Agregar al carrito",
                                   style: TextStyle(
                                       fontWeight: FontWeight.w300,
-                                      fontSize: 16,
-                                      color: Color.fromARGB(255, 1, 32, 56)),
+                                      fontSize: largoActual * 0.022,
+                                      color:
+                                          const Color.fromARGB(255, 1, 32, 56)),
                                 ),
                               ),
                               Container(
-                                margin: const EdgeInsets.only(right: 20),
+                                margin:
+                                    EdgeInsets.only(right: anchoActual * 0.055),
                                 child: ElevatedButton(
                                     onPressed: almenosUno
                                         ? () async {
