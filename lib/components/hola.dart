@@ -52,11 +52,13 @@ class Hola2 extends StatefulWidget {
 class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   String apiUrl = dotenv.env['API_URL'] ?? '';
   List<Producto> listProducto = [];
-  List<Ubicacion> listUbicacionesObjetos=[];
+  List<UbicacionModel> listUbicacionesObjetos = [];
   //late List<String> listUbicaciones = [];
-  late String dropdownValue = listUbicacionesObjetos.first.direccion;
+  late String? dropdownValue;
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
+  Color colorTextos = Color.fromARGB(255, 3, 34, 60);
+  //
   late String direccion;
 
   ScrollController _scrollController1 = ScrollController();
@@ -64,8 +66,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    getProducts();
-    getUbicaciones(widget.clienteId);
+    ordenarFuncionesInit();
     /* if (widget.latitud != null && widget.longitud != null) {
     obtenerDireccion(widget.latitud!, widget.longitud!).then((res2) {
       setState(() {
@@ -88,17 +89,24 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     });
   }
 
+  Future<void> ordenarFuncionesInit() async {
+    await getUbicaciones(widget.clienteId);
+    await getProducts();
+  }
+
   Future<dynamic> getUbicaciones(clienteID) async {
-    print("-------get ubicaciones---------");
+    print("1) get ubicaciones---------");
+    print("$apiUrl/api/ubicacion/$clienteID");
     var res = await http.get(
-      Uri.parse("$apiUrl/api/ubicacion/"),
+      Uri.parse("$apiUrl/api/ubicacion/$clienteID"),
       headers: {"Content-type": "application/json"},
     );
     try {
       if (res.statusCode == 200) {
+        print("2) entro al try de get ubicaciones---------");
         var data = json.decode(res.body);
-        List<Ubicacion> tempUbicacion = data.map<Ubicacion>((mapa) {
-          return Ubicacion(
+        List<UbicacionModel> tempUbicacion = data.map<UbicacionModel>((mapa) {
+          return UbicacionModel(
             id: mapa['id'],
             latitud: mapa['latitud'].toDouble(),
             longitud: mapa['longitud'].toDouble(),
@@ -108,10 +116,9 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
             distrito: mapa['distrito'],
           );
         }).toList();
-
         setState(() {
           listUbicacionesObjetos = tempUbicacion;
-          //conductores = tempConductor;
+          print(listUbicacionesObjetos);
         });
       }
     } catch (e) {
@@ -120,7 +127,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     }
   }
 
-  Future<dynamic> creadoUbicacion(latitudUser,longitudUser,direccion,clienteId, distrito) async {
+  Future<dynamic> creadoUbicacion(
+      latitudUser, longitudUser, direccion, clienteId, distrito) async {
     await http.post(Uri.parse("$apiUrl/api/ubicacion"),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
@@ -132,9 +140,9 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
           "distrito": distrito,
         }));
   }
-  
+
   Future<dynamic> getProducts() async {
-    print("-------get products---------");
+    print("3) get products---------");
     var res = await http.get(
       Uri.parse("$apiUrl/api/products"),
       headers: {"Content-type": "application/json"},
@@ -155,7 +163,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
           listProducto = tempProducto;
           //conductores = tempConductor;
         });
-        print("....lista productos");
+        print("4) ....lista productos");
         print(listProducto[0].foto);
       }
     } catch (e) {
@@ -258,7 +266,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     if (placemark.isNotEmpty) {
       Placemark lugar = placemark.first;
       setState(() {
-        direccion="${lugar.locality},${lugar.subAdministrativeArea},${lugar.street}";
+        direccion =
+            "${lugar.locality},${lugar.subAdministrativeArea},${lugar.street}";
         creadoUbicacion(x, y, direccion, widget.clienteId, lugar.locality);
       });
       //  return '${lugar.locality},${lugar.subAdministrativeArea},${lugar.street}';
@@ -319,6 +328,14 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     }
   }
 
+  void direccionesVacias() {
+    if (listUbicacionesObjetos.isEmpty) {
+      dropdownValue = "";
+    } else {
+      dropdownValue = listUbicacionesObjetos.first.direccion;
+    }
+  }
+
   @override
   void dispose() {
     _scrollController1.dispose();
@@ -335,19 +352,22 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     final pedidoProvider = context.watch<PedidoProvider>();
     esVacio(pedidoProvider.pedido);
+    direccionesVacias();
+    print("ya esta corriendo el widget");
+    print(listUbicacionesObjetos);
     return Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
             key: _scaffoldKey,
             child: Padding(
-                padding: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(15.0),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      //CONTAINER DE UBICACION Y CARRITO
                       Container(
                         width: anchoActual,
                         margin: EdgeInsets.only(
-                            top: largoActual * 0.013,
                             left: anchoActual * 0.028,
                             right: anchoActual * 0.028),
                         //color: Colors.red,
@@ -357,6 +377,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           children: [
                             //LOCATION
                             Container(
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
                                   color:
                                       const Color.fromRGBO(83, 176, 68, 1.000),
@@ -364,6 +385,10 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                               height: largoActual * 0.059,
                               width: anchoActual * 0.7,
                               child: DropdownMenu<String>(
+                                textStyle: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: largoActual * 0.018,
+                                    fontWeight: FontWeight.w500),
                                 hintText: '¿Dónde lo entregamos?',
                                 trailingIcon: Icon(
                                   Icons.arrow_drop_down,
@@ -373,7 +398,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                 leadingIcon: IconButton(
                                   onPressed: () {
                                     showModalBottomSheet(
-                                      backgroundColor: Colors.white,
+                                      backgroundColor:
+                                          Color.fromRGBO(0, 106, 252, 1.000),
                                       context: context,
                                       builder: (BuildContext context) {
                                         return Container(
@@ -381,20 +407,24 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                               top: largoActual * 0.041,
                                               left: anchoActual * 0.055,
                                               right: anchoActual * 0.055),
-                                          height: largoActual * 0.18,
+                                          height: largoActual * 0.17,
                                           width: anchoActual,
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(
-                                                'Agregar Ubicación',
-                                                style: TextStyle(
-                                                  color: const Color.fromARGB(
-                                                      255, 3, 34, 60),
-                                                  fontSize: largoActual * 0.023,
-                                                  fontWeight: FontWeight.w500,
+                                              Container(
+                                                margin: const EdgeInsets.only(
+                                                    left: 10),
+                                                child: Text(
+                                                  'Agregar Ubicación',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize:
+                                                        largoActual * 0.023,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
                                                 ),
                                               ),
                                               SizedBox(
@@ -403,10 +433,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                 onPressed: () async {
                                                   print("ubi añadidda");
                                                   await currentLocation();
-                                                
                                                   Navigator.of(context).pop();
                                                 },
                                                 style: ButtonStyle(
+                                                  elevation:
+                                                      MaterialStateProperty.all(
+                                                          8),
                                                   minimumSize:
                                                       MaterialStatePropertyAll(
                                                           Size(
@@ -416,11 +448,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                                   0.054)),
                                                   backgroundColor:
                                                       MaterialStateProperty.all(
-                                                          const Color.fromRGBO(
-                                                              88,
-                                                              184,
-                                                              249,
-                                                              1.000)),
+                                                          Colors.white),
                                                 ),
                                                 child: Row(
                                                   mainAxisAlignment:
@@ -429,7 +457,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                     Icon(
                                                       Icons
                                                           .add_location_alt_rounded,
-                                                      color: Colors.white,
+                                                      color:
+                                                          const Color.fromRGBO(
+                                                              0,
+                                                              106,
+                                                              252,
+                                                              1.000),
                                                       size: largoActual * 0.034,
                                                     ),
                                                     Text(
@@ -437,10 +470,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                       style: TextStyle(
                                                           fontSize:
                                                               largoActual *
-                                                                  0.024,
+                                                                  0.021,
                                                           fontWeight:
-                                                              FontWeight.w400,
-                                                          color: Colors.white),
+                                                              FontWeight.w500,
+                                                          color: const Color
+                                                              .fromRGBO(0, 106,
+                                                              252, 1.000)),
                                                     ),
                                                   ],
                                                 ),
@@ -456,41 +491,41 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       color: Colors.white),
                                 ),
                                 inputDecorationTheme: InputDecorationTheme(
-                                    fillColor:
-                                        Color.fromRGBO(83, 176, 68, 1.000),
-                                    hintStyle: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: largoActual * 0.018,
-                                      //fontWeight: FontWeight.w400
-                                    ),
                                     enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(30),
                                         borderSide: const BorderSide(
                                             width: 0, color: Colors.white))),
                                 expandedInsets: EdgeInsets.zero,
                                 menuStyle: MenuStyle(
+                                  surfaceTintColor: MaterialStateProperty.all(
+                                      Color.fromARGB(255, 252, 255, 255)),
                                   backgroundColor: MaterialStateProperty.all(
                                       Color.fromARGB(255, 252, 255, 255)),
                                 ),
-                                initialSelection: listUbicacionesObjetos.first.direccion,
+                                initialSelection: dropdownValue,
                                 onSelected: (String? value) {
                                   // This is called when the user selects an item.
                                   print("valor");
                                   print(value);
                                   setState(() {
-                                    for(var i=0; i<listUbicacionesObjetos.length;i++){
-                                      if (listUbicacionesObjetos[i].direccion==value){
-                                        listUbicacionesObjetos[i].remove(value);
-                                        listUbicacionesObjetos.insert(0, value!);
+                                    for (var i = 0;
+                                        i < listUbicacionesObjetos.length;
+                                        i++) {
+                                      if (listUbicacionesObjetos[i].direccion ==
+                                          value) {
+                                        listUbicacionesObjetos
+                                            .remove(listUbicacionesObjetos[i]);
+                                        listUbicacionesObjetos.insert(
+                                            0, listUbicacionesObjetos[i]);
                                         dropdownValue = value;
+                                      }
                                     }
-                                    }
-                                    
                                   });
                                 },
                                 dropdownMenuEntries: List.generate(
                                     listUbicacionesObjetos.length, (index) {
-                                  final value = listUbicacionesObjetos[index].direccion;
+                                  final value =
+                                      listUbicacionesObjetos[index].direccion;
                                   return DropdownMenuEntry<String>(
                                       value: value,
                                       label: value.length > 20
@@ -500,7 +535,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                               ),
                             ),
 
-                            // USER PHOTO
+                            //CARRITO
                             Container(
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
@@ -535,17 +570,18 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
+
+                      //BIENVENIDA DEL CLIENTE
                       Container(
                         width: anchoActual,
                         margin: EdgeInsets.only(
-                            left: anchoActual * 0.055,
-                            top: largoActual * 0.02),
+                            left: anchoActual * 0.055, top: largoActual * 0.03),
                         child: Text(
                           "Bienvenid@, ${userProvider.user?.nombre}",
                           style: TextStyle(
                               fontWeight: FontWeight.w200,
-                              fontSize: largoActual * 0.021,
-                              color: const Color.fromARGB(255, 3, 34, 60)),
+                              fontSize: largoActual * 0.020,
+                              color: colorTextos),
                         ),
                       ),
                       Container(
@@ -554,34 +590,37 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           "Disfruta de Agua Sol!",
                           style: TextStyle(
                               fontWeight: FontWeight.w400,
-                              fontSize: largoActual * 0.021,
-                              color: const Color.fromARGB(255, 3, 34, 60)),
+                              fontSize: largoActual * 0.020,
+                              color: colorTextos),
                         ),
                       ),
+                      SizedBox(
+                        height: largoActual * 0.02,
+                      ),
+                      //TAB BAR PRODUCTOS/PROMOCIONES
                       Container(
-                        height: largoActual * 0.05,
+                        height: largoActual * 0.045,
                         width: anchoActual,
                         margin: EdgeInsets.only(
-                            top: largoActual * 0.013,
-                           ),
+                          top: largoActual * 0.013,
+                        ),
                         child: TabBar(
-                          indicatorSize: TabBarIndicatorSize.tab,
+                            indicatorSize: TabBarIndicatorSize.tab,
                             controller: _tabController,
                             //indicatorWeight: 10,
                             indicator: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Color.fromRGBO(120,251,99,0.3),
+                              borderRadius: BorderRadius.circular(20),
+                              color: Color.fromRGBO(120, 251, 99, 0.5),
                             ),
                             labelStyle: TextStyle(
-                                fontSize: largoActual * 0.0203,
+                                fontSize: largoActual * 0.020,
                                 fontWeight: FontWeight
                                     .w400), // Ajusta el tamaño del texto de la pestaña seleccionada
                             unselectedLabelStyle: TextStyle(
                                 fontSize: largoActual * 0.020,
                                 fontWeight: FontWeight.w300),
-                            labelColor: const Color.fromARGB(255, 3, 34, 60),
-                            unselectedLabelColor:
-                                const Color.fromARGB(255, 3, 34, 60),
+                            labelColor: colorTextos,
+                            unselectedLabelColor: colorTextos,
                             indicatorColor:
                                 const Color.fromRGBO(83, 176, 68, 1.000),
                             tabs: const [
@@ -593,10 +632,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                               ),
                             ]),
                       ),
+                      //IMAGENES DE PRODUCTOS Y PROMOCIONES TAB BAR
                       Container(
                         margin: EdgeInsets.only(
-                            top: largoActual * 0.013,),
-                        height: largoActual / 2.2,
+                          top: largoActual * 0.013,
+                        ),
+                        height: largoActual / 2.13,
                         width: double.maxFinite,
                         child: TabBarView(
                           controller: _tabController,
@@ -678,9 +719,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                      SizedBox(
-                        height: largoActual * 0.02,
-                      ),
+                      Expanded(child: Container()),
+                      //TEXTOS MEJORA TU VIDA Y ASISTENCIA
                       Container(
                         margin: EdgeInsets.only(
                             left: anchoActual * 0.055,
@@ -688,50 +728,33 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                    child: Text(
-                                  "Mejora",
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.021,
-                                      fontWeight: FontWeight.w400,
-                                      color:
-                                          const Color.fromARGB(255, 3, 34, 60)),
-                                )),
-                                Container(
-                                    child: Text(
-                                  "tú vida!",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w300,
-                                      fontSize: largoActual * 0.021,
-                                      color:
-                                          const Color.fromARGB(255, 3, 34, 60)),
-                                )),
-                              ],
-                            ),
                             Container(
-                              margin: EdgeInsets.only(top: largoActual * 0.027),
+                                child: Text(
+                              "Mejora tu vida!",
+                              style: TextStyle(
+                                  fontSize: largoActual * 0.0198,
+                                  fontWeight: FontWeight.w300,
+                                  color: colorTextos),
+                            )),
+                            Container(
                               child: Text(
                                 "Necesitas",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w300,
                                     fontSize: largoActual * 0.021,
-                                    color:
-                                        const Color.fromARGB(255, 6, 46, 78)),
+                                    color: colorTextos),
                               ),
                             )
                           ],
                         ),
                       ),
+                      //BOTONES MEJORA TU VIDA Y ASISTENCIA
                       Container(
                         margin: EdgeInsets.only(
-                            left: anchoActual * 0.028,
-                            right: anchoActual * 0.028),
+                            left: anchoActual * 0.02,
+                            right: anchoActual * 0.02),
                         child: Row(children: [
                           Container(
-                            //width: 150,
                             height: largoActual * 0.054,
                             child: ElevatedButton(
                               onPressed: () {

@@ -1,6 +1,7 @@
-import 'package:appsol_final/components/hola.dart';
 import 'package:appsol_final/components/holaconductor.dart';
+import 'package:appsol_final/components/navegador.dart';
 import 'package:appsol_final/components/prueba.dart';
+import 'package:appsol_final/components/ubicacion.dart';
 import 'package:appsol_final/models/user_model.dart';
 import 'package:appsol_final/provider/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
-
+import 'package:appsol_final/models/ubicacion_model.dart';
 import 'package:provider/provider.dart';
 
 class Login extends StatefulWidget {
@@ -26,10 +27,10 @@ class _LoginState extends State<Login> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _usuario = TextEditingController();
   final TextEditingController _contrasena = TextEditingController();
-
   late int status = 0;
   late int rol = 0;
   late UserModel userData;
+  bool yaTieneUbicaciones = false;
 
   @override
   void initState() {
@@ -123,6 +124,45 @@ class _LoginState extends State<Login> {
     }
   }
 
+  Future<dynamic> tieneUbicaciones(clienteID) async {
+    print("-------get ubicaciones---------");
+    print("$apiUrl/api/ubicacion/$clienteID");
+    var res = await http.get(
+      Uri.parse("$apiUrl/api/ubicacion/$clienteID"),
+      headers: {"Content-type": "application/json"},
+    );
+    try {
+      if (res.statusCode == 200) {
+        print("-------entro al try de get ubicaciones---------");
+        var data = json.decode(res.body);
+        List<UbicacionModel> tempUbicacion = data.map<UbicacionModel>((mapa) {
+          return UbicacionModel(
+            id: mapa['id'],
+            latitud: mapa['latitud'].toDouble(),
+            longitud: mapa['longitud'].toDouble(),
+            direccion: mapa['direccion'],
+            clienteID: mapa['cliente_id'],
+            clienteNrID: null,
+            distrito: mapa['distrito'],
+          );
+        }).toList();
+        setState(() {
+          if (tempUbicacion.isEmpty) {
+            print("${tempUbicacion.length}");
+            //NOT TIENE UBIS
+            yaTieneUbicaciones = false;
+          } else {
+            //SI TIENE UBISSS
+            yaTieneUbicaciones = true;
+          }
+        });
+      }
+    } catch (e) {
+      print('Error en la solicitud: $e');
+      throw Exception('Error en la solicitud: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final anchoActual = MediaQuery.of(context).size.width;
@@ -135,8 +175,6 @@ class _LoginState extends State<Login> {
           Colors.white,
           Color.fromRGBO(0, 106, 252, 1.000),
           Color.fromRGBO(0, 106, 252, 1.000),
-          //Color.fromRGBO(47, 76, 245, 1.000),
-          //Color.fromRGBO(88, 184, 249, 1.000),
         ], begin: Alignment.topLeft, end: Alignment.bottomCenter)),
         child: SafeArea(
           child: Padding(
@@ -268,12 +306,31 @@ class _LoginState extends State<Login> {
                               Navigator.of(context)
                                   .pop(); // Cerrar el primer AlertDialog
 
+                              //SI ES CLIENTE
                               if (rol == 4) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Hola2()),
-                                );
+                                await tieneUbicaciones(userData.id);
+                                //SI YA TIENE UBICACIONES INGRESA DIRECTAMENTE A LA BARRA DE AVEGACION
+                                if (yaTieneUbicaciones == true) {
+                                  print("YA tiene unibicaciones");
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const BarraNavegacion(
+                                                indice: 0, subIndice: 0)),
+                                  );
+                                  //SI NO TIENE UBICACIONES INGRESA A UBICACION
+                                } else {
+                                  print("NO tiene unibicaciones");
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const Ubicacion()),
+                                  );
+                                }
+
+                                //SI ES CONDUCTOR
                               } else if (rol == 5) {
                                 Navigator.push(
                                   context,
@@ -281,6 +338,8 @@ class _LoginState extends State<Login> {
                                       builder: (context) =>
                                           const HolaConductor()),
                                 );
+
+                                //SI ES GERENTE
                               } else if (rol == 3) {
                                 Navigator.push(
                                   context,
@@ -288,6 +347,7 @@ class _LoginState extends State<Login> {
                                       builder: (context) => const Prueba()),
                                 );
                               }
+                              //SI NO ESTA REGISTRADO
                             } else if (status == 401) {
                               Navigator.of(context)
                                   .pop(); // Cerrar el primer AlertDialog
@@ -328,6 +388,8 @@ class _LoginState extends State<Login> {
                       },
                       style: ButtonStyle(
                         elevation: MaterialStateProperty.all(8),
+                        surfaceTintColor:
+                            MaterialStateProperty.all(Colors.white),
                         backgroundColor:
                             MaterialStateProperty.all(Colors.white),
                       ),
@@ -359,7 +421,7 @@ class _LoginState extends State<Login> {
                             );*/
                       },
                       style: ButtonStyle(
-                        elevation: MaterialStateProperty.all(8),
+                          elevation: MaterialStateProperty.all(8),
                           backgroundColor: MaterialStateProperty.all(
                               Color.fromRGBO(0, 106, 252, 1.000))),
                       child: const Text(
