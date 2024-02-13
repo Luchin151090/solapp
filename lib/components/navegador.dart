@@ -53,25 +53,30 @@ class _BarraNavegacion extends State<BarraNavegacion> {
       subIndex = 0;
     }
     //SOLO UNA IDEA NADA DE CODIGO
-    return Scaffold(
-      body: screens[indexSelecionado][subIndex],
-      bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.white,
-        color: const Color.fromRGBO(0, 106, 252, 1.000),
-        animationDuration: const Duration(milliseconds: 400),
-        onTap: (index) {
-          setState(() {
-            subIndex = 0;
-            indexSelecionado = index;
-            print('------  onTAPP ------------');
-            print('------  INDICEEEE');
-            print(indexSelecionado);
-            print('------SUBINDICE');
-            print(subIndex);
-          });
-        },
-        index: indexSelecionado,
-        items: items,
+    return SafeArea(
+      bottom: false,
+      top: false,
+      child: Scaffold(
+        body: screens[indexSelecionado][subIndex],
+        bottomNavigationBar: CurvedNavigationBar(
+          height: 68,
+          backgroundColor: Colors.white,
+          color: const Color.fromRGBO(0, 106, 252, 1.000),
+          animationDuration: const Duration(milliseconds: 400),
+          onTap: (index) {
+            setState(() {
+              subIndex = 0;
+              indexSelecionado = index;
+              print('------  onTAPP ------------');
+              print('------  INDICEEEE');
+              print(indexSelecionado);
+              print('------SUBINDICE');
+              print(subIndex);
+            });
+          },
+          index: indexSelecionado,
+          items: items,
+        ),
       ),
     );
   }

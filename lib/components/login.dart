@@ -327,16 +327,9 @@ class _LoginState extends State<Login> {
                         }
                       },
                       style: ButtonStyle(
+                        elevation: MaterialStateProperty.all(8),
                         backgroundColor:
                             MaterialStateProperty.all(Colors.white),
-                        shadowColor: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                            if (states.contains(MaterialState.pressed)) {
-                              return Colors.black;
-                            }
-                            return Colors.transparent;
-                          },
-                        ),
                       ),
                       child: const Text(
                         "Ingresa",
@@ -366,6 +359,7 @@ class _LoginState extends State<Login> {
                             );*/
                       },
                       style: ButtonStyle(
+                        elevation: MaterialStateProperty.all(8),
                           backgroundColor: MaterialStateProperty.all(
                               Color.fromRGBO(0, 106, 252, 1.000))),
                       child: const Text(

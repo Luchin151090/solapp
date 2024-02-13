@@ -1,10 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:lottie/lottie.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class Asistencia extends StatefulWidget {
   const Asistencia({super.key});
@@ -15,19 +12,6 @@ class Asistencia extends StatefulWidget {
 
 class _AsistenciaState extends State<Asistencia> {
 
-  Future<void> _launchPhone() async {
-    const phoneNumber = 'tel:955372038'; // Reemplaza esto con el número de teléfono real
-
-    try {
-      if (await canLaunchUrlString(phoneNumber)) {
-        await launchUrlString(phoneNumber);
-      } else {
-        throw 'No se pudo abrir el marcador de teléfono';
-      }
-    } catch (e) {
-      throw 'Error al intentar abrir el marcador de teléfono: $e';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,31 +20,26 @@ class _AsistenciaState extends State<Asistencia> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(""),
       ),
       body: SafeArea(
         child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(30.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 //Text("Ancho X largo: ${anchoActual}x ${largoActual.toStringAsFixed(2)}"),
                 Container(
-                  margin: const EdgeInsets.only(top: 20,left: 20,bottom: 0),
                   child: Text("Estamos aquí",
-                  style: TextStyle(fontSize: 40,color: const Color.fromARGB(255, 2, 73, 132)),),
+                  style: TextStyle(fontSize: largoActual*0.04,color: const Color.fromARGB(255, 2, 73, 132)),),
                 ),
                 Container(
-                  margin: const EdgeInsets.only(left: 20),
-                  child: Text("para ayudarte",style: TextStyle(fontSize: 30),),
+                  child: Text("para ayudarte",style: TextStyle(fontSize: largoActual*0.04),),
                 ),
                  
                 Container(
-                  margin: const EdgeInsets.only(left: 20),
-                  child: Text("Llámanos a este número ",style: TextStyle(fontSize: 30),),
+                  child: Text("Llámanos a este número ",style: TextStyle(fontSize: largoActual*0.04),),
                 ),
                 Container(
-                  margin: const EdgeInsets.only(left: 20,top: 50),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -70,34 +49,30 @@ class _AsistenciaState extends State<Asistencia> {
                           color: Colors.amber,
                           borderRadius: BorderRadius.circular(20)
                         ),
-                        child: TextButton(onPressed: (){
-                          print("s");
-                           _launchPhone();
-                        }, child:const Text("955372038",
-                        style: TextStyle(fontSize: 30,color:Color.fromARGB(255, 6, 57, 100)),)
+                        child: TextButton(
+                          onPressed: () async {
+                                  final Uri url = Uri(
+                                    scheme: 'tel',
+                                    path: '955372038',
+                                  ); // Acciones al hacer clic en el FloatingActionButton
+                                  if (await canLaunchUrl(url)) {
+                                    await launchUrl(url);
+                                  } else {
+                                    print('no se puede llamar');
+                                  }
+                                },
+                        
+                        child: Text("955372038",
+                        style: TextStyle(fontSize: largoActual*0.04,color:Color.fromARGB(255, 6, 57, 100)),)
                         ).animate().fade(delay: 000.ms).shake(),
                       ),
                       Container(
                         margin: const EdgeInsets.only(right: 40),
-                        width: 200,
-                        height: 200,
+                        height: largoActual*0.1,
                         child: Lottie.asset('lib/imagenes/callcenter.json'),
                       )
                     ],
                   )
-                ),
-                Center(
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    padding: const EdgeInsets.all(8),
-                    margin: const EdgeInsets.only(top: 80,left: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.amber
-                    ),
-                    child: Image.asset('lib/imagenes/logo_sol_tiny.png')
-                  ),
                 ),
               ]
             )

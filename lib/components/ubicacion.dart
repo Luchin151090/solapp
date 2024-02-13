@@ -1,11 +1,13 @@
-/*
-import 'package:app_final/components/test/hola.dart';
+import 'package:appsol_final/components/navegador.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:geocoding/geocoding.dart';
-
+import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:appsol_final/provider/user_provider.dart';
 
 class Ubicacion extends StatefulWidget {
   const Ubicacion({super.key});
@@ -15,73 +17,30 @@ class Ubicacion extends StatefulWidget {
 }
 
 class _UbicacionState extends State<Ubicacion> {
+  String apiUrl = dotenv.env['API_URL'] ?? '';
   bool _isloading = false;
   double? latitudUser = 0.0;
   double? longitudUser = 0.0;
+  int? clienteID=0;
   String apiCliente = '';
   late String direccion;
+  late String? distrito;
 
   // GET UBICACIÓN
-  Future<void> currentLocation() async {
-    var location = location_package.Location();
-
-    // bool _serviceEnabled;
-    location_package.PermissionStatus _permissionGranted;
-    location_package.LocationData _locationData;
-
-    setState(() {
-      _isloading = true;
-    });
-    // Verificar si el servicio de ubicación está habilitado
-    var _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      // Solicitar habilitación del servicio de ubicación
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        // Mostrar mensaje al usuario indicando que el servicio de ubicación es necesario
-        setState(() {
-          _isloading = true;
-        });
-        return;
-      }
-    }
-
-    // Verificar si se otorgaron los permisos de ubicación
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == location_package.PermissionStatus.denied) {
-      // Solicitar permisos de ubicación
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != location_package.PermissionStatus.granted) {
-        // Mostrar mensaje al usuario indicando que los permisos de ubicación son necesarios
-        return;
-      }
-    }
-
-    // Obtener la ubicación
-    try {
-      _locationData = await location.getLocation();
-      //updateLocation(_locationData);
-      await obtenerDireccion(_locationData.latitude, _locationData.longitude);
-      // setState(() {
-      /// latitudUser = _locationData.latitude;
-      // longitudUser = _locationData.longitude;
-
-      //});
-
-      print("----ubicación--");
-      print(_locationData);
-      print(latitudUser);
-      print(longitudUser);
-      // Aquí puedes utilizar la ubicación obtenida (_locationData)
-    } catch (e) {
-      // Manejo de errores, puedes mostrar un mensaje al usuario indicando que hubo un problema al obtener la ubicación.
-      print("Error al obtener la ubicación: $e");
-    }
+  Future<dynamic> creadoUbicacion(clienteId, distrito) async {
+    await http.post(Uri.parse("$apiUrl/api/ubicacion"),
+        headers: {"Content-type": "application/json"},
+        body: jsonEncode({
+          "latitud": latitudUser,
+          "longitud": longitudUser,
+          "direccion": direccion,
+          "cliente_id": clienteId,
+          "cliente_nr_id": null,
+          "distrito": distrito,
+        }));
   }
-
+  
   Future<void> obtenerDireccion(x, y) async {
-    //double latitud = widget.latitud ?? 0.0; // Accede a widget.latitud
-    //double longitud = widget.longitud ?? 0.0;
     List<Placemark> placemark = await placemarkFromCoordinates(x, y);
     try {
       if (placemark.isNotEmpty) {
@@ -89,9 +48,10 @@ class _UbicacionState extends State<Ubicacion> {
         setState(() {
           direccion =
               "${lugar.locality},${lugar.subAdministrativeArea},${lugar.street}";
+          setState(() {
+            distrito=lugar.locality;
+          });
         });
-
-        //  return '${lugar.locality},${lugar.subAdministrativeArea},${lugar.street}';
       } else {
         direccion = "Default";
       }
@@ -133,20 +93,26 @@ class _UbicacionState extends State<Ubicacion> {
       );
     } finally {
       setState(() {
+        latitudUser=x;
+        longitudUser=y;
         _isloading = false;
+        creadoUbicacion(clienteID, distrito);
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.white,
               title: const Text(
                 'Ubicación',
                 style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 4, 80, 143)),
+                  fontSize: 25,
+                    fontWeight: FontWeight.w400,
+                    color:Colors.black),
               ),
               content: const Text(
                 'Gracias por compartir tu ubicación!',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
               ),
               actions: <Widget>[
                 TextButton(
@@ -155,119 +121,190 @@ class _UbicacionState extends State<Ubicacion> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => Hola(direccion: direccion)),
+                          builder: (context) => const BarraNavegacion(
+                                                  indice: 0,
+                                                  subIndice: 0,
+                                                )),
                     );
                   },
                   child: const Text(
                     'OK',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w400,
                         fontSize: 25,
-                        color: Color.fromARGB(255, 13, 58, 94)),
+                        color: Colors.black),
                   ),
                 ),
               ],
             );
           },
         );
+      
+      
       });
+      
     }
   }
 
+  Future<void> currentLocation() async {
+    var location = location_package.Location();
+    location_package.PermissionStatus permissionGranted;
+    location_package.LocationData locationData;
+
+    setState(() {
+      _isloading = true;
+    });
+
+    // Verificar si el servicio de ubicación está habilitado
+    var serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      // Solicitar habilitación del servicio de ubicación
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        // Mostrar mensaje al usuario indicando que el servicio de ubicación es necesario
+        setState(() {
+          _isloading = true;
+        });
+        return;
+      }
+    }
+
+    // Verificar si se otorgaron los permisos de ubicación
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == location_package.PermissionStatus.denied) {
+      // Solicitar permisos de ubicación
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != location_package.PermissionStatus.granted) {
+        // Mostrar mensaje al usuario indicando que los permisos de ubicación son necesarios
+        return;
+      }
+    }
+
+    // Obtener la ubicación
+    try {
+      locationData = await location.getLocation();
+      
+      //updateLocation(locationData);
+      await obtenerDireccion(locationData.latitude, locationData.longitude);
+
+
+
+
+
+      print("----ubicación--");
+      print(locationData);
+      print("----latitud--");
+      print(latitudUser);
+      print("----longitud--");
+      print(longitudUser);
+      
+      // Aquí puedes utilizar la ubicación obtenida (locationData)
+    } catch (e) {
+      // Manejo de errores, puedes mostrar un mensaje al usuario indicando que hubo un problema al obtener la ubicación.
+      print("Error al obtener la ubicación: $e");
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = context.watch<UserProvider>();
+    final anchoActual = MediaQuery.of(context).size.width;
+    final largoActual = MediaQuery.of(context).size.height;
+    clienteID=userProvider.user?.id;
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Container(
-              //width: 200,
-              margin: const EdgeInsets.only(top: 80, right: 20),
-              // color: Colors.red,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(),
-                  ),
-                  const Text("Mejora!",
-                      style:
-                          TextStyle(fontSize: 40, fontWeight: FontWeight.w400)),
-                ],
+        body: DecoratedBox(
+        decoration: const BoxDecoration(
+            gradient: LinearGradient(colors: [
+          Colors.white,
+          Color.fromRGBO(0, 106, 252, 1.000),
+          Color.fromRGBO(0, 106, 252, 1.000),
+        ], begin: Alignment.topLeft, end: Alignment.bottomCenter)),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center, 
+              children: [
+              Container(
+                margin: const EdgeInsets.only(top: 80),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(),
+                    ),
+                    Text("Mejora tu experiencia",
+                        style:
+                            TextStyle(fontSize: largoActual*0.03
+                            , fontWeight: FontWeight.w400,
+                            color: Colors.white)),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 0,
-            ),
-            Container(
-              //width: 200,
-              margin: const EdgeInsets.only(right: 20),
-              //color: Colors.red,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(),
-                  ),
-                  const Text("Tú experiencia de entrega",
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.w300)),
-                ],
+              Container(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(),
+                    ),
+                    Text("Déjanos saber tu ubicación",
+                        style:
+                            TextStyle(fontSize: largoActual*0.03, fontWeight: FontWeight.w200,
+                            color: Colors.white)),
+                  ],
+                ),
               ),
-            ),
-            Container(
-              //width: 200,
-              margin: const EdgeInsets.only(right: 20),
-              //color: Colors.red,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(),
-                  ),
-                  const Text("Déjanos saber tu ubicación",
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.w200)),
-                ],
+        
+              SizedBox(
+                height: largoActual * 0.05,
               ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            Container(
-                width: 150,
-                height: 60,
-                margin: const EdgeInsets.only(right: 20),
-                //color: Colors.red,
-                child: ElevatedButton(
-                  onPressed: () {
-                    currentLocation();
-                  },
-                  child: _isloading
-                      ? CircularProgressIndicator()
-                      : const Text(
-                          ">> Aquí",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400),
-                        ),
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                          const Color.fromARGB(255, 1, 59, 107))),
-                )),
-            //Expanded(child: Container()),
-            const SizedBox(
-              height: 80,
-            ),
-            Container(
-              child: Opacity(
-                  opacity: 0.9,
-                  child: Image.asset('lib/imagenes/ubicacion.jpg')),
-            ),
-          ]),
+              Container(
+        
+                              height: largoActual * 0.5,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(0),
+                              ),
+                              child: Lottie.asset('lib/imagenes/ubi4.json'),
+                            ),
+        
+              SizedBox(
+                height: largoActual * 0.05,
+              ),
+              SizedBox(
+                  width: anchoActual * (350 / 500),
+                  height: largoActual * (38 / 600),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      currentLocation();
+                    },
+                    
+                    style: ButtonStyle(
+                      elevation: MaterialStateProperty.all(8),
+                      minimumSize: MaterialStatePropertyAll(Size(
+                                    anchoActual * (350 / 500),
+                                    largoActual * (38 / 600))),
+                        surfaceTintColor: MaterialStateProperty.all(
+                            const Color.fromARGB(255, 255, 255, 255)),
+                        backgroundColor: MaterialStateProperty.all(
+                            const Color.fromARGB(255, 255, 255, 255))),
+                    child: _isloading
+                        ? const CircularProgressIndicator(color: Color.fromRGBO(0,106,252,1.000),strokeWidth: 3,)
+                        : const Text(
+                            "Aquí",
+                            style: TextStyle(
+                                color: Color.fromRGBO(0,106,252,1.000),
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500),
+                          ),
+                  )),
+            
+        
+            ]),
+          ),
         ),
       ),
     );
   }
 }
 
-*/
