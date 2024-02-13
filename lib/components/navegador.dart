@@ -3,8 +3,11 @@ import 'package:appsol_final/components/hola.dart';
 import 'package:appsol_final/components/perfilcliente.dart';
 import 'package:appsol_final/components/promos.dart';
 import 'package:appsol_final/components/pedido.dart';
+import 'package:appsol_final/components/estado_pedido.dart';
 import 'package:appsol_final/components/productos.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:appsol_final/provider/user_provider.dart';
 
 class BarraNavegacion extends StatefulWidget {
   final int indice;
@@ -19,27 +22,34 @@ class BarraNavegacion extends StatefulWidget {
 
 class _BarraNavegacion extends State<BarraNavegacion> {
   int indexSelecionado = 0;
-  final screensHola = [
-    const Hola2(),
-    const Promos(),
-    const Productos(),
-    const Pedido(),
-  ];
-
+  int clienteID = 0;
   final screensMiPerfil = [
     const PerfilCliente(),
+  ];
+  final screensMisPedidos = [
+    const EstadoPedido(),
   ];
   //TODO ESTO ES MIOOIOOO
   @override
   Widget build(BuildContext context) {
+    final userProvider = context.watch<UserProvider>();
     int subIndex = widget.subIndice;
-    final screens = [screensHola, screensMiPerfil];
+    final screensHola = [
+      Hola2(
+        clienteId: userProvider.user?.id,
+      ),
+      const Promos(),
+      const Productos(),
+      const Pedido(),
+    ];
+    final screens = [screensHola, screensMiPerfil, screensMisPedidos];
     final items = <Widget>[
       const Icon(
         Icons.home_rounded,
         color: Colors.white,
       ),
       const Icon(Icons.person, color: Colors.white),
+      const Icon(Icons.assignment_rounded, color: Colors.white),
     ];
     print('------  INICIALIZADOOO ------------');
     print('------  INDICEEEE');
