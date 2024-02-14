@@ -1,7 +1,9 @@
 import 'package:appsol_final/models/pedido_model.dart';
 import 'package:appsol_final/models/promocion_model.dart';
 import 'package:appsol_final/models/producto_model.dart';
+import 'package:appsol_final/models/ubicacion_model.dart';
 import 'package:appsol_final/provider/pedido_provider.dart';
+import 'package:appsol_final/provider/ubicacion_provider.dart';
 import 'package:appsol_final/components/fin.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +33,7 @@ class _PedidoState extends State<Pedido> {
   double ahorro = 0.0;
   double totalVenta = 0.0;
   double totalProvider = 0.0;
+  List<dynamic> seleccionadosTodos = [];
   List<Producto> seleccionadosProvider = [];
   List<Promo> selecciondosPromosProvider = [];
   String tipoPedido = "normal";
@@ -43,10 +46,12 @@ class _PedidoState extends State<Pedido> {
   String direccion = 'Av. Las Flores 137 - Cayma';
   DateTime tiempoActual = DateTime.now();
   late DateTime tiempoPeru;
+  int ubicacionSelectID = 0;
   String apiUrl = dotenv.env['API_URL'] ?? '';
 
   Future<dynamic> datosCreadoPedido(
-      clienteId, fecha, montoTotal, tipo, estado) async {
+      clienteId, fecha, montoTotal, tipo, estado, ubicacionID) async {
+    print("-----------------------creandoPEDIDOO");
     await http.post(Uri.parse(apiUrl + '/api/pedido'),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
@@ -57,6 +62,7 @@ class _PedidoState extends State<Pedido> {
           "fecha": fecha,
           "tipo": tipo,
           "estado": estado,
+          "ubicacion_id": ubicacionID,
         }));
   }
 
@@ -74,8 +80,8 @@ class _PedidoState extends State<Pedido> {
 
   Future<void> crearPedidoyDetallePedido(tipo, monto, seleccionados) async {
     DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 5));
-    await datosCreadoPedido(
-        clienteId, tiempoActual.toString(), monto, tipo, "pendiente");
+    await datosCreadoPedido(clienteId, tiempoActual.toString(), monto, tipo,
+        "pendiente", ubicacionSelectID);
     print(tiempoGMTPeru.toString());
     print(tiempoActual.timeZoneName);
     print("creando detalles de pedidos----------");
@@ -94,9 +100,18 @@ class _PedidoState extends State<Pedido> {
       print('ES PEDIDOOO');
       setState(() {
         totalProvider = pedido.total;
+        totalVenta = totalProvider + envio;
+        cantCarrito = pedido.cantidadProd;
         seleccionadosProvider = pedido.seleccionados;
         selecciondosPromosProvider = pedido.seleccionadosPromo;
-        cantCarrito = pedido.cantidadProd;
+        for (var i = 0; i < seleccionadosProvider.length; i++) {
+          if (seleccionadosProvider[i].promoID == null) {
+            seleccionadosTodos.add(seleccionadosProvider[i]);
+          }
+        }
+        for (var i = 0; i < selecciondosPromosProvider.length; i++) {
+          seleccionadosTodos.add(selecciondosPromosProvider[i]);
+        }
         if (pedido.cantidadProd > 0) {
           setState(() {
             colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
@@ -113,8 +128,25 @@ class _PedidoState extends State<Pedido> {
         totalProvider = 0;
         seleccionadosProvider = [];
         selecciondosPromosProvider = [];
+        seleccionadosTodos = [];
         cantCarrito = 0;
         colorCantidadCarrito = Colors.grey;
+      });
+    }
+  }
+
+  void esUbicacion(UbicacionModel? ubicacion) {
+    if (ubicacion is UbicacionModel) {
+      print('ES UBIIIII');
+      setState(() {
+        ubicacionSelectID = ubicacion.id;
+        direccion = ubicacion.direccion;
+      });
+    } else {
+      print('no es ubi');
+      setState(() {
+        ubicacionSelectID = 0;
+        direccion = "";
       });
     }
   }
@@ -124,7 +156,14 @@ class _PedidoState extends State<Pedido> {
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
     final pedidoProvider = context.watch<PedidoProvider>();
+    final ubicacionProvider = context.watch<UbicacionProvider>();
+    esUbicacion(ubicacionProvider.ubicacion);
+    setState(() {
+      seleccionadosTodos = [];
+    });
     esVacio(pedidoProvider.pedido);
+    print("SELECCIONADOS TODOS");
+    print(seleccionadosTodos);
     return Scaffold(
       backgroundColor: Colors.white,
       bottomSheet: BottomSheet(
@@ -229,6 +268,7 @@ class _PedidoState extends State<Pedido> {
                 onPressed: () {
                   setState(() {
                     totalProvider = 0;
+                    seleccionadosTodos = [];
                     seleccionadosProvider = [];
                     selecciondosPromosProvider = [];
                     cantCarrito = 0;
@@ -283,7 +323,7 @@ class _PedidoState extends State<Pedido> {
                             left: anchoActual * 0.028,
                             right: anchoActual * 0.028),
                         child: ListView.builder(
-                            itemCount: seleccionadosProvider.length,
+                            itemCount: seleccionadosTodos.length,
                             itemBuilder: (context, index) {
                               return Container(
                                 alignment: Alignment.center,
@@ -317,7 +357,7 @@ class _PedidoState extends State<Pedido> {
                                                   BorderRadius.circular(0),
                                               image: DecorationImage(
                                                 image: NetworkImage(
-                                                    seleccionadosProvider[index]
+                                                    seleccionadosTodos[index]
                                                         .foto),
                                                 //fit: BoxFit.cover,
                                               )),
@@ -330,22 +370,28 @@ class _PedidoState extends State<Pedido> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              seleccionadosProvider[index]
+                                              seleccionadosTodos[index]
                                                   .nombre
+                                                  .toString()
                                                   .capitalize(),
                                               style: TextStyle(
                                                   fontSize: largoActual * 0.019,
                                                   color: const Color.fromARGB(
                                                       255, 1, 75, 135)),
                                             ),
-                                            Text(
-                                              seleccionadosProvider[index]
-                                                  .descripcion
-                                                  .capitalize(),
-                                              style: TextStyle(
-                                                  fontSize: largoActual * 0.015,
-                                                  color: const Color.fromARGB(
-                                                      255, 1, 75, 135)),
+                                            SizedBox(
+                                              width: anchoActual * 0.45,
+                                              child: Text(
+                                                seleccionadosTodos[index]
+                                                    .descripcion
+                                                    .toString()
+                                                    .capitalize(),
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        largoActual * 0.015,
+                                                    color: const Color.fromARGB(
+                                                        255, 1, 75, 135)),
+                                              ),
                                             ),
                                           ],
                                         )
@@ -362,14 +408,14 @@ class _PedidoState extends State<Pedido> {
                                             height: largoActual * 0.0054,
                                           ),
                                           Text(
-                                            "S/. ${seleccionadosProvider[index].precio}",
+                                            "S/. ${seleccionadosTodos[index].precio}",
                                             style: TextStyle(
                                                 fontSize: largoActual * 0.018,
                                                 color: const Color.fromARGB(
                                                     255, 1, 75, 135)),
                                           ),
                                           Text(
-                                            "Cant. ${seleccionadosProvider[index].cantidad}",
+                                            "Cant. ${seleccionadosTodos[index].cantidad}",
                                             style: TextStyle(
                                                 fontSize: largoActual * 0.018,
                                                 color: const Color.fromARGB(
@@ -646,6 +692,7 @@ class _PedidoState extends State<Pedido> {
                             right: anchoActual * 0.028,
                             bottom: largoActual * 0.013),
                         child: Container(
+                            //height: largoActual * 0.2,
                             margin: EdgeInsets.only(
                                 left: anchoActual * 0.055,
                                 right: anchoActual * 0.055,
@@ -655,21 +702,25 @@ class _PedidoState extends State<Pedido> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  direccion,
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.018,
-                                      color: const Color.fromARGB(
-                                          255, 1, 75, 135)),
+                                SizedBox(
+                                  width: anchoActual * 0.62,
+                                  child: Text(
+                                    direccion,
+                                    textAlign: TextAlign.start,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.017,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
+                                  ),
                                 ),
                                 SizedBox(
-                                  width: anchoActual * 0.028,
+                                  width: anchoActual * 0.013,
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(
-                                      top: largoActual * 0.0013,
-                                      bottom: largoActual * 0.0013,
-                                      left: anchoActual * 0.069),
+                                    top: largoActual * 0.0013,
+                                    bottom: largoActual * 0.0013,
+                                  ),
                                   height: largoActual * 0.061,
                                   width: largoActual * 0.061,
                                   decoration: BoxDecoration(

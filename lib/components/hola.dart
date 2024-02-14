@@ -12,6 +12,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
 import 'package:appsol_final/provider/pedido_provider.dart';
+import 'package:appsol_final/provider/ubicacion_provider.dart';
 import 'package:appsol_final/models/pedido_model.dart';
 import 'package:appsol_final/models/ubicacion_model.dart';
 
@@ -58,8 +59,11 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
   Color colorTextos = Color.fromARGB(255, 3, 34, 60);
-  //
   late String direccion;
+  late UbicacionModel miUbicacion;
+  Timer? _timer;
+  bool _disposed = false;
+  bool _autoScrollInProgress = false;
 
   ScrollController _scrollController1 = ScrollController();
   ScrollController _scrollController2 = ScrollController();
@@ -129,6 +133,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
 
   Future<dynamic> creadoUbicacion(
       latitudUser, longitudUser, direccion, clienteId, distrito) async {
+    print("cREANDO UBIIIIIIIIII");
     await http.post(Uri.parse("$apiUrl/api/ubicacion"),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
@@ -172,17 +177,18 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     }
   }
 
-  bool _autoScrollInProgress = false;
-
   void _startAutoScroll() {
-    Timer.periodic(Duration(seconds: 1), (Timer timer) {
-      if (!_autoScrollInProgress) {
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+      if (!_disposed) {
         _autoScroll();
+      } else {
+        timer.cancel(); // Stop the timer if disposed
       }
     });
   }
 
   void _autoScroll() async {
+    if (_disposed) return;
     try {
       // Marcar que el desplazamiento automático está en progreso
       _autoScrollInProgress = true;
@@ -267,13 +273,14 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
       Placemark lugar = placemark.first;
       setState(() {
         direccion =
-            "${lugar.locality},${lugar.subAdministrativeArea},${lugar.street}";
-        creadoUbicacion(x, y, direccion, widget.clienteId, lugar.locality);
+            "${lugar.locality}, ${lugar.subAdministrativeArea}, ${lugar.street}";
       });
+      await creadoUbicacion(x, y, direccion, widget.clienteId, lugar.locality);
       //  return '${lugar.locality},${lugar.subAdministrativeArea},${lugar.street}';
     }
     print("x-----y");
     print("${x},${y}");
+
     // return '';
   }
 
@@ -330,14 +337,21 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
 
   void direccionesVacias() {
     if (listUbicacionesObjetos.isEmpty) {
-      dropdownValue = "";
+      setState(() {
+        dropdownValue = "";
+      });
     } else {
-      dropdownValue = listUbicacionesObjetos.first.direccion;
+      setState(() {
+        dropdownValue = listUbicacionesObjetos.first.direccion;
+        miUbicacion = listUbicacionesObjetos.first;
+      });
     }
   }
 
   @override
   void dispose() {
+    _disposed = true; // Mark as disposed
+    _timer?.cancel();
     _scrollController1.dispose();
     _scrollController2.dispose();
     super.dispose();
@@ -345,14 +359,14 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = context.watch<UserProvider>();
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
     final TabController _tabController = TabController(length: 2, vsync: this);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     final pedidoProvider = context.watch<PedidoProvider>();
-    esVacio(pedidoProvider.pedido);
+    final userProvider = context.watch<UserProvider>();
     direccionesVacias();
+    esVacio(pedidoProvider.pedido);
     print("ya esta corriendo el widget");
     print(listUbicacionesObjetos);
     return Scaffold(
@@ -491,6 +505,10 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       color: Colors.white),
                                 ),
                                 inputDecorationTheme: InputDecorationTheme(
+                                    hintStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: largoActual * 0.018,
+                                        fontWeight: FontWeight.w500),
                                     enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(30),
                                         borderSide: const BorderSide(
@@ -498,25 +516,28 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                 expandedInsets: EdgeInsets.zero,
                                 menuStyle: MenuStyle(
                                   surfaceTintColor: MaterialStateProperty.all(
-                                      Color.fromARGB(255, 252, 255, 255)),
+                                      const Color.fromARGB(255, 252, 255, 255)),
                                   backgroundColor: MaterialStateProperty.all(
-                                      Color.fromARGB(255, 252, 255, 255)),
+                                      const Color.fromARGB(255, 252, 255, 255)),
                                 ),
                                 initialSelection: dropdownValue,
                                 onSelected: (String? value) {
                                   // This is called when the user selects an item.
-                                  print("valor");
-                                  print(value);
                                   setState(() {
                                     for (var i = 0;
                                         i < listUbicacionesObjetos.length;
                                         i++) {
                                       if (listUbicacionesObjetos[i].direccion ==
                                           value) {
-                                        listUbicacionesObjetos
-                                            .remove(listUbicacionesObjetos[i]);
+                                        miUbicacion = listUbicacionesObjetos[i];
+                                        Provider.of<UbicacionProvider>(context,
+                                                listen: false)
+                                            .updateUbicacion(miUbicacion);
+
                                         listUbicacionesObjetos.insert(
                                             0, listUbicacionesObjetos[i]);
+                                        listUbicacionesObjetos.remove(
+                                            listUbicacionesObjetos[i + 1]);
                                         dropdownValue = value;
                                       }
                                     }

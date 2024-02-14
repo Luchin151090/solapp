@@ -21,7 +21,7 @@ class _UbicacionState extends State<Ubicacion> {
   bool _isloading = false;
   double? latitudUser = 0.0;
   double? longitudUser = 0.0;
-  int? clienteID=0;
+  int? clienteID = 0;
   String apiCliente = '';
   late String direccion;
   late String? distrito;
@@ -39,7 +39,7 @@ class _UbicacionState extends State<Ubicacion> {
           "distrito": distrito,
         }));
   }
-  
+
   Future<void> obtenerDireccion(x, y) async {
     List<Placemark> placemark = await placemarkFromCoordinates(x, y);
     try {
@@ -47,9 +47,9 @@ class _UbicacionState extends State<Ubicacion> {
         Placemark lugar = placemark.first;
         setState(() {
           direccion =
-              "${lugar.locality},${lugar.subAdministrativeArea},${lugar.street}";
+              "${lugar.locality}, ${lugar.subAdministrativeArea}, ${lugar.street}";
           setState(() {
-            distrito=lugar.locality;
+            distrito = lugar.locality;
           });
         });
       } else {
@@ -93,8 +93,8 @@ class _UbicacionState extends State<Ubicacion> {
       );
     } finally {
       setState(() {
-        latitudUser=x;
-        longitudUser=y;
+        latitudUser = x;
+        longitudUser = y;
         _isloading = false;
         creadoUbicacion(clienteID, distrito);
         showDialog(
@@ -106,9 +106,9 @@ class _UbicacionState extends State<Ubicacion> {
               title: const Text(
                 'Ubicación',
                 style: TextStyle(
-                  fontSize: 25,
+                    fontSize: 25,
                     fontWeight: FontWeight.w400,
-                    color:Colors.black),
+                    color: Colors.black),
               ),
               content: const Text(
                 'Gracias por compartir tu ubicación!',
@@ -122,9 +122,9 @@ class _UbicacionState extends State<Ubicacion> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => const BarraNavegacion(
-                                                  indice: 0,
-                                                  subIndice: 0,
-                                                )),
+                                indice: 0,
+                                subIndice: 0,
+                              )),
                     );
                   },
                   child: const Text(
@@ -139,10 +139,7 @@ class _UbicacionState extends State<Ubicacion> {
             );
           },
         );
-      
-      
       });
-      
     }
   }
 
@@ -183,13 +180,9 @@ class _UbicacionState extends State<Ubicacion> {
     // Obtener la ubicación
     try {
       locationData = await location.getLocation();
-      
+
       //updateLocation(locationData);
       await obtenerDireccion(locationData.latitude, locationData.longitude);
-
-
-
-
 
       print("----ubicación--");
       print(locationData);
@@ -197,7 +190,7 @@ class _UbicacionState extends State<Ubicacion> {
       print(latitudUser);
       print("----longitud--");
       print(longitudUser);
-      
+
       // Aquí puedes utilizar la ubicación obtenida (locationData)
     } catch (e) {
       // Manejo de errores, puedes mostrar un mensaje al usuario indicando que hubo un problema al obtener la ubicación.
@@ -205,15 +198,14 @@ class _UbicacionState extends State<Ubicacion> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
-    clienteID=userProvider.user?.id;
+    clienteID = userProvider.user?.id;
     return Scaffold(
-        body: DecoratedBox(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
             gradient: LinearGradient(colors: [
           Colors.white,
@@ -224,87 +216,84 @@ class _UbicacionState extends State<Ubicacion> {
           child: Padding(
             padding: const EdgeInsets.all(25.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center, 
-              children: [
-              Container(
-                margin: const EdgeInsets.only(top: 80),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(),
-                    ),
-                    Text("Mejora tu experiencia",
-                        style:
-                            TextStyle(fontSize: largoActual*0.03
-                            , fontWeight: FontWeight.w400,
-                            color: Colors.white)),
-                  ],
-                ),
-              ),
-              Container(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(),
-                    ),
-                    Text("Déjanos saber tu ubicación",
-                        style:
-                            TextStyle(fontSize: largoActual*0.03, fontWeight: FontWeight.w200,
-                            color: Colors.white)),
-                  ],
-                ),
-              ),
-        
-              SizedBox(
-                height: largoActual * 0.05,
-              ),
-              Container(
-        
-                              height: largoActual * 0.5,
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(0),
-                              ),
-                              child: Lottie.asset('lib/imagenes/ubi4.json'),
-                            ),
-        
-              SizedBox(
-                height: largoActual * 0.05,
-              ),
-              SizedBox(
-                  width: anchoActual * (350 / 500),
-                  height: largoActual * (38 / 600),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      currentLocation();
-                    },
-                    
-                    style: ButtonStyle(
-                      elevation: MaterialStateProperty.all(8),
-                      minimumSize: MaterialStatePropertyAll(Size(
-                                    anchoActual * (350 / 500),
-                                    largoActual * (38 / 600))),
-                        surfaceTintColor: MaterialStateProperty.all(
-                            const Color.fromARGB(255, 255, 255, 255)),
-                        backgroundColor: MaterialStateProperty.all(
-                            const Color.fromARGB(255, 255, 255, 255))),
-                    child: _isloading
-                        ? const CircularProgressIndicator(color: Color.fromRGBO(0,106,252,1.000),strokeWidth: 3,)
-                        : const Text(
-                            "Aquí",
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 80),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Text("Mejora tu experiencia",
                             style: TextStyle(
-                                color: Color.fromRGBO(0,106,252,1.000),
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500),
-                          ),
-                  )),
-            
-        
-            ]),
+                                fontSize: largoActual * 0.03,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(),
+                        ),
+                        Text("Déjanos saber tu ubicación",
+                            style: TextStyle(
+                                fontSize: largoActual * 0.03,
+                                fontWeight: FontWeight.w200,
+                                color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: largoActual * 0.05,
+                  ),
+                  Container(
+                    height: largoActual * 0.5,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                    child: Lottie.asset('lib/imagenes/ubi4.json'),
+                  ),
+                  SizedBox(
+                    height: largoActual * 0.05,
+                  ),
+                  SizedBox(
+                      width: anchoActual * (350 / 500),
+                      height: largoActual * (38 / 600),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          currentLocation();
+                        },
+                        style: ButtonStyle(
+                            elevation: MaterialStateProperty.all(8),
+                            minimumSize: MaterialStatePropertyAll(Size(
+                                anchoActual * (350 / 500),
+                                largoActual * (38 / 600))),
+                            surfaceTintColor: MaterialStateProperty.all(
+                                const Color.fromARGB(255, 255, 255, 255)),
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color.fromARGB(255, 255, 255, 255))),
+                        child: _isloading
+                            ? const CircularProgressIndicator(
+                                color: Color.fromRGBO(0, 106, 252, 1.000),
+                                strokeWidth: 3,
+                              )
+                            : const Text(
+                                "Aquí",
+                                style: TextStyle(
+                                    color: Color.fromRGBO(0, 106, 252, 1.000),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                      )),
+                ]),
           ),
         ),
       ),
     );
   }
 }
-

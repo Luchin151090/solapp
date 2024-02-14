@@ -1,5 +1,6 @@
 import 'package:appsol_final/components/pedido.dart';
 import 'package:appsol_final/components/navegador.dart';
+import 'package:appsol_final/models/promocion_model.dart';
 import 'package:appsol_final/models/producto_model.dart';
 import 'package:appsol_final/provider/pedido_provider.dart';
 import 'package:appsol_final/models/pedido_model.dart';
@@ -24,6 +25,8 @@ class _ProductosState extends State<Productos> {
   int cantidadP = 0;
   bool almenosUno = false;
   List<Producto> productosContabilizados = [];
+  List<Producto> productosProvider = [];
+  List<Promo> promosProvider = [];
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
 
@@ -107,6 +110,8 @@ class _ProductosState extends State<Productos> {
     if (pedido is PedidoModel) {
       print('ES PEDIDOOO');
       cantCarrito = pedido.cantidadProd;
+      productosProvider = pedido.seleccionados;
+      promosProvider = pedido.seleccionadosPromo;
       if (pedido.cantidadProd > 0) {
         setState(() {
           colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
@@ -120,6 +125,8 @@ class _ProductosState extends State<Productos> {
       print('no es pedido');
       setState(() {
         cantCarrito = 0;
+        productosProvider = [];
+        promosProvider = [];
         colorCantidadCarrito = Colors.grey;
       });
     }
@@ -401,11 +408,16 @@ class _ProductosState extends State<Productos> {
                               child: ElevatedButton(
                                   onPressed: almenosUno
                                       ? () {
+                                          setState(() {
+                                            productosContabilizados
+                                                .addAll(productosProvider);
+                                          });
                                           print("Agregar al carrito");
                                           pedidoMio = PedidoModel(
                                               seleccionados:
                                                   productosContabilizados,
-                                              seleccionadosPromo: [],
+                                              seleccionadosPromo:
+                                                  promosProvider,
                                               cantidadProd:
                                                   productosContabilizados
                                                       .length,

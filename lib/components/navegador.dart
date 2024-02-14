@@ -26,9 +26,7 @@ class _BarraNavegacion extends State<BarraNavegacion> {
   final screensMiPerfil = [
     const PerfilCliente(),
   ];
-  final screensMisPedidos = [
-    const EstadoPedido(),
-  ];
+
   //TODO ESTO ES MIOOIOOO
   @override
   Widget build(BuildContext context) {
@@ -41,6 +39,11 @@ class _BarraNavegacion extends State<BarraNavegacion> {
       const Promos(),
       const Productos(),
       const Pedido(),
+    ];
+    final screensMisPedidos = [
+      EstadoPedido(
+        clienteId: userProvider.user?.id,
+      ),
     ];
     final screens = [screensHola, screensMiPerfil, screensMisPedidos];
     final items = <Widget>[

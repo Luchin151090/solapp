@@ -36,7 +36,9 @@ class _PromosState extends State<Promos> {
   DateTime fechaLim = DateTime.now();
 
   List<Producto> productosContabilizados = [];
+  List<Producto> productosProvider = [];
   List<Promo> promocionesContabilizadas = [];
+  List<Promo> promosProvider = [];
   List<Promo> listPromociones = [];
   List<ProductoPromocion> prodPromContabilizadas = [];
   List<ProductoPromocion> listProdProm = [];
@@ -212,6 +214,8 @@ class _PromosState extends State<Promos> {
     if (pedido is PedidoModel) {
       print('ES PEDIDOOO');
       cantCarrito = pedido.cantidadProd;
+      productosProvider = pedido.seleccionados;
+      promosProvider = pedido.seleccionadosPromo;
       if (pedido.cantidadProd > 0) {
         setState(() {
           colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
@@ -225,6 +229,8 @@ class _PromosState extends State<Promos> {
       print('no es pedido');
       setState(() {
         cantCarrito = 0;
+        productosProvider = [];
+        promosProvider = [];
         colorCantidadCarrito = Colors.grey;
       });
     }
@@ -519,6 +525,23 @@ class _PromosState extends State<Promos> {
                                     onPressed: almenosUno
                                         ? () async {
                                             await obtenerProducto();
+                                            setState(() {
+                                              if (productosProvider
+                                                  .isNotEmpty) {
+                                                if (productosContabilizados
+                                                    .isNotEmpty) {
+                                                  productosContabilizados
+                                                      .addAll(
+                                                          productosProvider);
+                                                } else {
+                                                  productosContabilizados =
+                                                      productosProvider;
+                                                }
+                                              }
+
+                                              promocionesContabilizadas
+                                                  .addAll(promosProvider);
+                                            });
                                             pedidoMio = PedidoModel(
                                                 seleccionados:
                                                     productosContabilizados,
