@@ -1,18 +1,19 @@
-/*
+import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:app_final/components/test/holaconductor.dart';
-import 'package:app_final/main.dart';
+import 'package:appsol_final/components/holaconductor.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class Camara extends StatefulWidget {
-  final int pedidoID;
-  final String problemasOpago;
+  final int? pedidoID;
+  final String? problemasOpago;
   const Camara({
     Key? key,
-    required this.pedidoID,
-    required this.problemasOpago,
+    this.pedidoID,
+    this.problemasOpago,
   }) : super(key: key);
 
   @override
@@ -21,6 +22,7 @@ class Camara extends StatefulWidget {
 
 class _CamaraState extends State<Camara> {
   //late List<CameraDescription> camera;
+  late List<CameraDescription> cameras;
   late CameraController cameraController;
   String apiPedidosConductor =
       'https://aguasolfinal-dev-bbhx.1.us-1.fl0.io/api/pedido_conductor/';
@@ -55,21 +57,63 @@ class _CamaraState extends State<Camara> {
     }
   }
 
+  Future<List<CameraDescription>> funcion() async {
+    List<CameraDescription> cameras = await availableCameras();
+    return cameras;
+  }
+
   @override
   void initState() {
+    startCamera();
     super.initState();
     esProblemaOesPago();
-    cameraController = CameraController(camera[0], ResolutionPreset.medium,
-        enableAudio: false);
+  }
+
+  bool _cameraInitialized = false;
+
+  void startCamera() async {
+    print("somaaa");
+    cameras = await availableCameras();
+
+    cameraController = CameraController(cameras[0], ResolutionPreset.high);
+
+    print(" Camera controller : $cameraController");
 
     cameraController.initialize().then((value) {
       if (!mounted) {
         return;
       }
-      setState(() {});
+      setState(() {
+        _cameraInitialized =
+            true; // updating the flag after camera is initialized
+      }); //To refresh widget
     }).catchError((e) {
       print(e);
     });
+  }
+
+  void deletePhoto(String? fileName) async {
+    try {
+      // Obtener el directorio de caché
+      Directory cacheDir = await getTemporaryDirectory();
+
+      // Combinar el directorio con el nombre del archivo
+      String filePath = '${cacheDir.path}/$fileName';
+
+      // Crear un objeto File para el archivo que deseas eliminar
+      File file = File(filePath);
+
+      // Verificar si el archivo existe antes de intentar eliminarlo
+      if (await file.exists()) {
+        // Eliminar el archivo
+        await file.delete();
+        print('Foto eliminada con éxito: $filePath');
+      } else {
+        print('El archivo no existe: $filePath');
+      }
+    } catch (e) {
+      print('Error al eliminar la foto: $e');
+    }
   }
 
   @override
@@ -79,11 +123,12 @@ class _CamaraState extends State<Camara> {
     super.dispose();
   }
 
+  late XFile? _image;
   @override
   Widget build(BuildContext context) {
     double anchoPantalla = MediaQuery.of(context).size.width;
 
-    if (cameraController.value.isInitialized) {
+    if (_cameraInitialized && cameraController.value.isInitialized) {
       return Scaffold(
           body: SafeArea(
               child: Padding(
@@ -147,7 +192,13 @@ class _CamaraState extends State<Camara> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    try {
+                                      deletePhoto(_image?.name);
+                                    } catch (e) {
+                                      print('Error al eliminar la foto: $e');
+                                    }
+                                  },
                                   child: Icon(
                                     Icons.close,
                                     color: Colors.white,
@@ -158,23 +209,64 @@ class _CamaraState extends State<Camara> {
                                               const Color.fromARGB(
                                                   255, 2, 46, 83))),
                                 ),
-                                Container(
-                                  height: 60,
-                                  child: ElevatedButton(
-                                    onPressed: () {},
-                                    style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStateProperty.all(
-                                                const Color.fromARGB(
-                                                    255, 2, 46, 83))),
-                                    child: const Icon(
-                                      Icons.photo_camera,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                                FloatingActionButton(
+                                  onPressed: () async {
+                                    try {
+                                      final pass =
+                                          await getApplicationDocumentsDirectory();
+                                      final otro =
+                                          path.join(pass.path, 'pictures');
+                                      final picturesDirectory = Directory(otro);
+
+                                      if (!await picturesDirectory.exists()) {
+                                        await picturesDirectory.create(
+                                            recursive: true);
+                                        print('Directorio creado: $otro');
+                                      } else {
+                                        print('El directorio ya existe: $otro');
+                                      }
+                                      _image =
+                                          await cameraController.takePicture();
+                                      print("path: ${_image?.path}");
+                                    } catch (e) {
+                                      print('Error al tomar la foto: $e');
+                                    }
+                                  },
+                                  child: const Icon(Icons.camera_alt),
                                 ),
                                 ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    try {
+                                      print('nombre: ${_image?.name}');
+                                      final Directory appDirectory =
+                                          await getApplicationDocumentsDirectory();
+                                      final String pictureDirectory = path.join(
+                                          appDirectory.path, 'pictures');
+                                      final String timestamp =
+                                          DateTime.now().toString();
+                                      final String fileName = '$timestamp.jpg';
+                                      String filePath =
+                                          '$pictureDirectory/$fileName';
+                                      _image?.saveTo(filePath);
+                                      print('nuevo path y nombre: $filePath');
+                                      // Ruta del directorio que quieres iterar
+                                      String directorio =
+                                          '/data/user/0/com.example.appsol_final/app_flutter/pictures/';
+                                      // Crear un objeto Directory con la ruta del directorio
+                                      Directory dir = Directory(directorio);
+                                      // Verificar si el directorio existe
+                                      // Listar los elementos en el directorio
+                                      List<FileSystemEntity> elementos =
+                                          dir.listSync();
+                                      // Iterar sobre los elementos e imprimir los paths
+                                      for (var elemento in elementos) {
+                                        print(elemento.path);
+                                      }
+                                      deletePhoto(_image?.name);
+                                    } catch (e) {
+                                      print('Algun error: $e');
+                                    }
+                                  },
                                   child: Icon(
                                     Icons.check,
                                     color: Colors.white,
@@ -218,10 +310,11 @@ class _CamaraState extends State<Camara> {
                             width: anchoPantalla - 40,
                             //color:Colors.grey,
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Container(
                                   height: 40,
-                                  width: (anchoPantalla - 80) / 2,
+                                  width: (anchoPantalla - 80) / 2 + 13,
                                   child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.push(
@@ -238,6 +331,8 @@ class _CamaraState extends State<Camara> {
                                                   const Color.fromARGB(
                                                       255, 2, 46, 83))),
                                       child: const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons
@@ -255,9 +350,6 @@ class _CamaraState extends State<Camara> {
                                           )
                                         ],
                                       )),
-                                ),
-                                const SizedBox(
-                                  width: 20,
                                 ),
                                 Container(
                                   height: 40,
@@ -319,5 +411,3 @@ class _CamaraState extends State<Camara> {
     }
   }
 }
-
- */

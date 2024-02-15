@@ -1,4 +1,3 @@
-/*
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,9 +5,28 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/pdf.dart';
+import 'package:path/path.dart' as path;
 
 class Pdf extends StatefulWidget {
-  const Pdf({Key? key}) : super(key: key);
+  final int? rutaID;
+  final int? pedidos;
+  final int? pedidosEntregados;
+  final int? pedidosTruncados;
+  final double? totalMonto;
+  final double? totalYape;
+  final double? totalPlin;
+  final double? totalEfectivo;
+  const Pdf(
+      {Key? key,
+      this.rutaID,
+      this.pedidos,
+      this.pedidosEntregados,
+      this.pedidosTruncados,
+      this.totalMonto,
+      this.totalYape,
+      this.totalPlin,
+      this.totalEfectivo})
+      : super(key: key);
 
   @override
   State<Pdf> createState() => _PdfState();
@@ -38,6 +56,29 @@ class _PdfState extends State<Pdf> {
     return file;
   }
 
+  Future<String?> obtenerUltimaFoto() async {
+    final pass = await getApplicationDocumentsDirectory();
+    final otro = path.join(pass.path, 'pictures');
+    final picturesDirectory = Directory(otro);
+
+    if (await picturesDirectory.exists()) {
+      // Listar archivos en el directorio
+      List<FileSystemEntity> files = await picturesDirectory.list().toList();
+
+      // Ordenar archivos por fecha de modificación
+      files.sort(
+          (a, b) => b.statSync().modified.compareTo(a.statSync().modified));
+
+      // Obtener la ruta de la última foto
+      if (files.isNotEmpty) {
+        String ultimaFoto = files.first.path;
+        return ultimaFoto;
+      }
+    }
+
+    return null; // Si no hay fotos en el directorio
+  }
+
   Future<File> _createPDF(String text) async {
     // imagenes
     final ByteData logoEmpresa =
@@ -47,6 +88,15 @@ class _PdfState extends State<Pdf> {
     final ByteData imagenPedido =
         await rootBundle.load('lib/imagenes/express.png');
     Uint8List finalPedido = (imagenPedido).buffer.asUint8List();
+
+    String? screen = await obtenerUltimaFoto();
+    print("path: $screen");
+    // Obtener los bytes del archivo XFile
+    List<int> bytes = await File(screen ?? 'nada').readAsBytes();
+
+    // Crear un ByteData desde los bytes
+    ByteData byteData = ByteData.sublistView(Uint8List.fromList(bytes));
+    Uint8List finalByte = (byteData).buffer.asUint8List();
 
     print(".......dentro d create");
     final pdf = pw.Document();
@@ -107,7 +157,30 @@ class _PdfState extends State<Pdf> {
                         child: pw.Image(pw.MemoryImage(logoData)))
                   ]),
               pw.SizedBox(height: 5),
-
+              pw.Container(
+                  child: pw.Text("RESUMEN".toUpperCase(),
+                      style: pw.TextStyle(
+                          fontSize: 15, fontWeight: pw.FontWeight.bold))),
+              pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text("Ruta asignada: ${widget.rutaID}",
+                        style: const pw.TextStyle(fontSize: 20)),
+                    pw.Text("# pedidos por entregar: ${widget.pedidos}",
+                        style: const pw.TextStyle(fontSize: 20)),
+                    pw.Text("# pedidos entregados: ${widget.pedidosEntregados}",
+                        style: const pw.TextStyle(fontSize: 20)),
+                    pw.Text("# pedidos truncados: ${widget.pedidosTruncados}",
+                        style: const pw.TextStyle(fontSize: 20)),
+                    pw.Text("# cantidad recaudada: ${widget.totalMonto}",
+                        style: const pw.TextStyle(fontSize: 20)),
+                    pw.Text("por yape: ${widget.totalYape}",
+                        style: const pw.TextStyle(fontSize: 20)),
+                    pw.Text("por efectivo: ${widget.totalEfectivo}",
+                        style: const pw.TextStyle(fontSize: 20)),
+                    pw.Text("por plin: ${widget.totalPlin}",
+                        style: const pw.TextStyle(fontSize: 20))
+                  ]),
               // TITULO
               pw.Container(
                   child: pw.Text(
@@ -135,12 +208,19 @@ class _PdfState extends State<Pdf> {
                       pw.Text("Descuento",
                           style: pw.TextStyle(
                               fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                      pw.Text("Foto",
+                          style: pw.TextStyle(
+                              fontSize: 14, fontWeight: pw.FontWeight.bold)),
                     ]),
                     // DATA
                     pw.TableRow(children: [
                       pw.Text("data 1"),
                       pw.Text("data 2"),
                       pw.Text("data 3"),
+                      pw.Container(
+                          height: 100,
+                          width: 100,
+                          child: pw.Image(pw.MemoryImage(finalByte))),
                     ]),
                   ])),
             ],
@@ -438,4 +518,4 @@ class _PdfState extends State<Pdf> {
       ),
     );
   }
-}*/
+}

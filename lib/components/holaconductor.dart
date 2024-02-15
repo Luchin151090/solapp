@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
+import 'package:appsol_final/components/pdf.dart';
 
 extension StringExtension on String {
   String capitalize() {
@@ -23,6 +24,7 @@ class Pedido {
   final String tipo;
   final String fecha;
   String estado;
+  final String tipo_pago;
 
   ///REVISAR EN QUÈ FORMATO SE RECIVE LA FECHA
   final String nombre;
@@ -43,6 +45,7 @@ class Pedido {
     //required this.ubicacion,
     required this.direccion,
     this.estado = 'en proceso',
+    required this.tipo_pago,
   });
 }
 
@@ -75,9 +78,9 @@ class _HolaConductorState extends State<HolaConductor> {
   /*String apiPedidosConductor = 'http://10.0.2.2:8004/api/pedido_conductor/';
   String apiDetallePedido = 'http://10.0.2.2:8004/api/detallepedido/';*/
   String apiPedidosConductor =
-      'https://aguasolfinal-dev-bbhx.1.us-1.fl0.io/api/pedido_conductor/';
+      'https://apisol-dev-anph.2.us-1.fl0.io/api/pedido_conductor/';
   String apiDetallePedido =
-      'https://aguasolfinal-dev-bbhx.1.us-1.fl0.io/api/detallepedido/';
+      'https://apisol-dev-anph.2.us-1.fl0.io/api/detallepedido/';
   int conductorID = 1;
   bool puedoLlamar = false;
   List<Pedido> listPedidosbyRuta = [];
@@ -96,10 +99,17 @@ class _HolaConductorState extends State<HolaConductor> {
       apellidos: '',
       telefono: '',
       //ubicacion: '',
-      direccion: '');
+      direccion: '',
+      tipo_pago: '');
   int rutaID = 0;
   int? rutaIDpref = 0;
-
+  double totalMonto = 0;
+  int cantidad = 0;
+  double totalYape = 0;
+  double totalPlin = 0;
+  double totalEfectivo = 0;
+  int totalPendiente = 0;
+  int totalProceso = 0;
   @override
   void initState() {
     super.initState();
@@ -111,7 +121,11 @@ class _HolaConductorState extends State<HolaConductor> {
     print('3) CARGAR PREFERENCIAS-------');
     SharedPreferences rutaPreference = await SharedPreferences.getInstance();
     setState(() {
-      rutaIDpref = rutaPreference.getInt("Ruta");
+      if (rutaPreference.getInt("Ruta") != null) {
+        rutaIDpref = rutaPreference.getInt("Ruta");
+      } else {
+        rutaIDpref = 1;
+      }
       print('4) esta es mi ruta Preferencia ------- $rutaIDpref');
     });
   }
@@ -132,7 +146,10 @@ class _HolaConductorState extends State<HolaConductor> {
           "$apiPedidosConductor${rutaIDpref.toString()}/${conductorID.toString()}"),
       headers: {"Content-type": "application/json"},
     );
+    print(
+        "que fue chamooo: $apiPedidosConductor${rutaIDpref.toString()}/${conductorID.toString()}");
     try {
+      print("flag");
       if (res.statusCode == 200) {
         var data = json.decode(res.body);
         List<Pedido> listTemporal = data.map<Pedido>((mapa) {
@@ -147,6 +164,7 @@ class _HolaConductorState extends State<HolaConductor> {
             telefono: mapa['telefono'],
             //ubicacion: mapa['ubicacion'],
             direccion: mapa['direccion'],
+            tipo_pago: mapa['tipo_pago'],
           );
         }).toList();
         setState(() {
@@ -155,8 +173,36 @@ class _HolaConductorState extends State<HolaConductor> {
           listPedidosbyRuta = listTemporal;
           //SE CALCULA LA LONGITUD DE PEDIDOS BY RUTA PARA SABER CUANTOS SON
           //EXPRESS Y CUANTOS SON NORMALES
+          print('7.5) Monto total de lista temporal');
+          for (var i = 0; i < listPedidosbyRuta.length; i++) {
+            totalMonto += listPedidosbyRuta[i].montoTotal;
+            print('tipo: ${listPedidosbyRuta[i].tipo_pago}');
+            switch (listPedidosbyRuta[i].tipo_pago) {
+              case 'yape':
+                totalYape += listPedidosbyRuta[i].montoTotal;
+                break;
+              case 'plin':
+                totalPlin += listPedidosbyRuta[i].montoTotal;
+                break;
+              case 'efectivo':
+                totalEfectivo += listPedidosbyRuta[i].montoTotal;
+                break;
+              default:
+            }
+            switch (listPedidosbyRuta[i].estado) {
+              case 'pendiente':
+                totalPendiente++;
+                break;
+              case 'en proceso':
+                totalProceso++;
+                break;
+              default:
+            }
+          }
           print(
-              '8) Longitud de pedidos recibidos: ${listPedidosbyRuta.length}');
+              'precio total de los pedidos: $totalMonto \n yape: $totalYape \n plin:$totalPlin \n efectivo:$totalEfectivo \n #pendientes: $totalPendiente \n #procesos: $totalProceso');
+          cantidad = listPedidosbyRuta.length;
+          print('8) Longitud de pedidos recibidos: $cantidad');
           print('9) Calculando pedidos express');
           for (var i = 0; i < listPedidosbyRuta.length; i++) {
             if (listPedidosbyRuta[i].tipo == 'express') {
@@ -195,7 +241,7 @@ class _HolaConductorState extends State<HolaConductor> {
     print("3.1) Dentro de connectToServer");
     // Reemplaza la URL con la URL de tu servidor Socket.io
     socket = //io.io('http://10.0.2.2:8004', <String, dynamic>{
-        io.io('https://aguasolfinal-dev-bbhx.1.us-1.fl0.io', <String, dynamic>{
+        io.io('https://apisol-dev-anph.2.us-1.fl0.io', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': true,
       'reconnect': true,
@@ -258,6 +304,7 @@ class _HolaConductorState extends State<HolaConductor> {
   Future<dynamic> getDetalleXUnPedido(pedidoID) async {
     print('----------------------------------');
     print('14) Dentro de Detalles');
+    print('pedido: $pedidoID');
     if (pedidoID != 0) {
       var res = await http.get(
         Uri.parse(apiDetallePedido + pedidoID.toString()),
@@ -313,7 +360,7 @@ class _HolaConductorState extends State<HolaConductor> {
 
   @override
   Widget build(BuildContext context) {
-    //double anchoPantalla = MediaQuery.of(context).size.width;
+    double anchoPantalla = MediaQuery.of(context).size.width;
     int numeroTotalPedidos = listPedidosbyRuta.length;
     final userProvider = context.watch<UserProvider>();
     print('16) Esta es la longitud de Pedidos $numeroTotalPedidos');
@@ -597,17 +644,15 @@ class _HolaConductorState extends State<HolaConductor> {
                       height: 10,
                     ),
 
-                    Container(
-                      margin: const EdgeInsets.only(left: 20, right: 20),
-                      child: Row(
-                        // mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 160,
-                            height: 40,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  /* Navigator.push(
+                    Row(
+                      // mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: anchoPantalla * (164.5 / 360),
+                          height: 20,
+                          child: ElevatedButton(
+                              onPressed: () {
+                                /* Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => Camara(
@@ -615,122 +660,167 @@ class _HolaConductorState extends State<HolaConductor> {
                                               problemasOpago: 'problemas',
                                             )),
                                   );*/
-                                },
-                                style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
-                                        Color.fromARGB(255, 2, 86, 155))),
-                                child: const Row(
-                                  children: [
-                                    Icon(
-                                      Icons
-                                          .camera_alt, // Reemplaza con el icono que desees
-                                      size: 24,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      "Yape/Pin",
-                                      style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white),
-                                    )
-                                  ],
-                                )),
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Container(
-                            width: 160,
-                            height: 40,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text(
-                                        'TERMINE MI PEDIDO',
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color.fromARGB(
-                                                255, 4, 80, 143)),
-                                      ),
-                                      content: const Text(
-                                        '¿Entregaste el pedido?',
-                                        style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w400),
-                                      ),
-                                      actions: <Widget>[
-                                        ElevatedButton(
-                                            onPressed: () {
-                                              updateEstadoPedido('entregado',
-                                                  null, pedidoTrabajo.id);
-                                              Navigator.of(context).pop();
-                                              initState(); // Cierra el AlertDialog
-                                            },
-                                            child: const Text(
-                                              '¡SI!',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18,
-                                                  color: Color.fromARGB(
-                                                      255, 13, 58, 94)),
-                                            )),
-                                        ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.of(context)
-                                                  .pop(); // Cierra el AlertDialog
-                                            },
-                                            child: const Text(
-                                              'Cancelar',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 18,
-                                                  color: Color.fromARGB(
-                                                      255, 13, 58, 94)),
-                                            )),
-                                      ],
-                                    );
-                                  },
-                                );
                               },
                               style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
-                                    const Color.fromARGB(255, 2, 86, 155)),
-                              ),
+                                  backgroundColor: MaterialStateProperty.all(
+                                      Color.fromARGB(255, 2, 86, 155))),
                               child: const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(
                                     Icons
-                                        .money, // Reemplaza con el icono que desees
-                                    size: 24,
+                                        .camera_alt, // Reemplaza con el icono que desees
+                                    size: 10,
                                     color: Colors.white,
                                   ),
-                                  SizedBox(
-                                      width:
-                                          8), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                  SizedBox(width: 3),
                                   Text(
-                                    "Efectivo",
+                                    "Yape/Plin",
                                     style: TextStyle(
-                                        fontSize: 17,
+                                        fontSize: 10,
                                         fontWeight: FontWeight.w400,
                                         color: Colors.white),
-                                  ),
+                                  )
                                 ],
-                              ),
+                              )),
+                        ),
+                        SizedBox(
+                          width: anchoPantalla * (15 / 360),
+                        ),
+                        Container(
+                          width: anchoPantalla * (164.5 / 360),
+                          height: 20,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text(
+                                      'TERMINE MI PEDIDO',
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Color.fromARGB(255, 4, 80, 143)),
+                                    ),
+                                    content: const Text(
+                                      '¿Entregaste el pedido?',
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            updateEstadoPedido('entregado',
+                                                null, pedidoTrabajo.id);
+                                            Navigator.of(context).pop();
+                                            initState(); // Cierra el AlertDialog
+                                          },
+                                          child: const Text(
+                                            '¡SI!',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Color.fromARGB(
+                                                    255, 13, 58, 94)),
+                                          )),
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(); // Cierra el AlertDialog
+                                          },
+                                          child: const Text(
+                                            'Cancelar',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: Color.fromARGB(
+                                                    255, 13, 58, 94)),
+                                          )),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color.fromARGB(255, 2, 86, 155)),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons
+                                      .money, // Reemplaza con el icono que desees
+                                  size: 13,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(
+                                    width:
+                                        8), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                Text(
+                                  "Efectivo",
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-
                     const SizedBox(
-                      height: 10,
+                      height: 3,
+                    ),
+                    SizedBox(
+                      width: anchoPantalla,
+                      height: 19,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Pdf(
+                                      rutaID: rutaIDpref,
+                                      pedidos: totalPendiente,
+                                      totalMonto: totalMonto,
+                                      totalYape: totalYape,
+                                      totalPlin: totalPlin,
+                                      totalEfectivo: totalEfectivo,
+                                      pedidosEntregados: totalProceso,
+                                    )),
+                          );
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                              const Color.fromARGB(255, 2, 86, 155)),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons
+                                  .picture_as_pdf_outlined, // Reemplaza con el icono que desees
+                              size: 10,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                                width:
+                                    3), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                            Text(
+                              "Crear informe",
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ]))),
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
