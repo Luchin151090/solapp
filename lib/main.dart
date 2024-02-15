@@ -1,4 +1,5 @@
 import 'package:appsol_final/components/login.dart';
+import 'package:appsol_final/components/holaconductor2.dart';
 import 'package:appsol_final/provider/pedido_provider.dart';
 import 'package:appsol_final/provider/ubicacion_provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
           // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: Login(),
+        home: HolaConductor2(),
         /*home: BarraNavegacion(
           indice: 0,
           subIndice: 0,

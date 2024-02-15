@@ -1,11 +1,13 @@
+import 'package:flutter/material.dart';
+
 class ProductoPedidoCliente {
   final int productoID;
   final String productoNombre;
   final int cantidadProducto;
   final String foto;
-  final int promocionID;
-  final String promocionNombre;
-  final int cantidadPorPromo;
+  final int? promocionID;
+  final String? promocionNombre;
+  final int? cantidadPorPromo;
   int? cantidadPromos;
   ProductoPedidoCliente({
     required this.productoID,
@@ -29,7 +31,13 @@ class PedidoCliente {
   final String fecha;
   final String direccion;
   final String distrito;
-  List<ProductoPedidoCliente>? productos;
+  String iconoRecibido;
+  String iconoProceso;
+  String iconoEntregado;
+  Color colorRecibido;
+  Color colorProceso;
+  Color colorEntregado;
+  String mensaje;
   PedidoCliente({
     required this.id,
     required this.estado,
@@ -41,5 +49,12 @@ class PedidoCliente {
     required this.fecha,
     required this.direccion,
     required this.distrito,
+    this.iconoRecibido = '',
+    this.iconoProceso = '',
+    this.iconoEntregado = '',
+    this.colorEntregado = Colors.transparent,
+    this.colorProceso = Colors.transparent,
+    this.colorRecibido = Colors.transparent,
+    this.mensaje = '',
   });
 }

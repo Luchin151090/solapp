@@ -12,6 +12,7 @@ import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:appsol_final/provider/user_provider.dart';
 
 extension StringExtension on String {
   String capitalize() {
@@ -42,7 +43,6 @@ class _PedidoState extends State<Pedido> {
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
   //POR AHORA EL CLIENTE ES MANUAL!!""
-  int clienteId = 1;
   String direccion = 'Av. Las Flores 137 - Cayma';
   DateTime tiempoActual = DateTime.now();
   late DateTime tiempoPeru;
@@ -57,7 +57,7 @@ class _PedidoState extends State<Pedido> {
         body: jsonEncode({
           "cliente_id": clienteId,
           "subtotal": montoTotal.toDouble(),
-          "descuento": null,
+          "descuento": 0,
           "total": montoTotal.toDouble(),
           "fecha": fecha,
           "tipo": tipo,
@@ -78,9 +78,10 @@ class _PedidoState extends State<Pedido> {
         }));
   }
 
-  Future<void> crearPedidoyDetallePedido(tipo, monto, seleccionados) async {
+  Future<void> crearPedidoyDetallePedido(
+      clienteID, tipo, monto, seleccionados) async {
     DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 5));
-    await datosCreadoPedido(clienteId, tiempoActual.toString(), monto, tipo,
+    await datosCreadoPedido(clienteID, tiempoActual.toString(), monto, tipo,
         "pendiente", ubicacionSelectID);
     print(tiempoGMTPeru.toString());
     print(tiempoActual.timeZoneName);
@@ -90,7 +91,7 @@ class _PedidoState extends State<Pedido> {
       print(i);
       print("est es la promocion ID---------");
       print(seleccionados[i].promoID);
-      await detallePedido(clienteId, seleccionados[i].id,
+      await detallePedido(clienteID, seleccionados[i].id,
           seleccionados[i].cantidad, seleccionados[i].promoID);
     }
   }
@@ -100,6 +101,7 @@ class _PedidoState extends State<Pedido> {
       print('ES PEDIDOOO');
       setState(() {
         totalProvider = pedido.total;
+        print(totalProvider);
         totalVenta = totalProvider + envio;
         cantCarrito = pedido.cantidadProd;
         seleccionadosProvider = pedido.seleccionados;
@@ -156,6 +158,7 @@ class _PedidoState extends State<Pedido> {
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
     final pedidoProvider = context.watch<PedidoProvider>();
+    final userProvider = context.watch<UserProvider>();
     final ubicacionProvider = context.watch<UbicacionProvider>();
     esUbicacion(ubicacionProvider.ubicacion);
     setState(() {
@@ -208,10 +211,14 @@ class _PedidoState extends State<Pedido> {
                         child: SizedBox(
                           width: anchoActual * (400 / 360),
                           child: ElevatedButton(
-                            onPressed: totalVenta > 0.0
+                            onPressed: totalVenta > 0.0 &&
+                                    ubicacionSelectID != 0
                                 ? () async {
-                                    await crearPedidoyDetallePedido(tipoPedido,
-                                        totalVenta, seleccionadosProvider);
+                                    await crearPedidoyDetallePedido(
+                                        userProvider.user?.id,
+                                        tipoPedido,
+                                        totalVenta,
+                                        seleccionadosProvider);
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(

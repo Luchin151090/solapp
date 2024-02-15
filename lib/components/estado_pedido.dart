@@ -4,6 +4,7 @@ import 'package:appsol_final/models/pedido_cliente_model.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 
 class EstadoPedido extends StatefulWidget {
   final int? clienteId;
@@ -17,11 +18,27 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
   Color colorLetra = Colors.black;
   //Color colorTitulos = Color.fromARGB(255, 1, 42, 76);
   Color colorTitulos = Colors.black;
+  Color colorOF = Colors.grey;
+  Color colorON = Color.fromRGBO(120, 251, 99, 1.000);
   String apiUrl = dotenv.env['API_URL'] ?? '';
   String apiPedidosCliente = "/api/pedido_cliente/";
   String apiProductosPedido = "/api/productosPedido/";
+  String iconoRecibido = 'lib/imagenes/recibidoon4.json';
+  String iconoEnCaminoON = 'lib/imagenes/encaminoon1.json';
+  String iconoEnCaminoOF = 'lib/imagenes/encaminoof1.json';
+  String iconoEntregadoON = 'lib/imagenes/entregadoon1.json';
+  String iconoEntregadoOF = 'lib/imagenes/entregadoof1.json';
+
+  String mensajePendiente =
+      'Ya recibimos tu pedido!, estamos gestionando la entrega ;)';
+  String mensajeEncamino = 'Tus productos Sol ya estan em camino!';
+  String mensajeEntregado = 'Ya entregamos tu pedido';
+  String linea = 'lib/imagenes/lineacargando.json';
   List<PedidoCliente> listPedidosPendientes = [];
   List<PedidoCliente> listPedidosPasados = [];
+  List<ProductoPedidoCliente> listProductosPedidoPendiente = [];
+  List<ProductoPedidoCliente> listProductosPedidoPasados = [];
+
   @override
   void initState() {
     super.initState();
@@ -55,8 +72,25 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
         }).toList();
         setState(() {
           for (var i = 0; i < tempPedidos.length; i++) {
-            if (tempPedidos[i].estado == 'pendiente' ||
-                tempPedidos[i].estado == 'en proceso') {
+            if (tempPedidos[i].estado == 'pendiente') {
+              tempPedidos[i].mensaje = mensajePendiente;
+              tempPedidos[i].iconoRecibido = iconoRecibido;
+              tempPedidos[i].colorRecibido = colorON;
+              tempPedidos[i].iconoProceso = iconoEnCaminoOF;
+              tempPedidos[i].colorProceso = colorOF;
+              tempPedidos[i].iconoEntregado = iconoEntregadoOF;
+              tempPedidos[i].colorEntregado = colorOF;
+              listPedidosPendientes.add(tempPedidos[i]);
+
+              //ACA SE PUEDE AGREGAR UNA ATRIBUTO DE FECHA DE ENTREGA AL PEDIDO
+            } else if (tempPedidos[i].estado == 'en proceso') {
+              tempPedidos[i].mensaje = mensajeEncamino;
+              tempPedidos[i].iconoRecibido = iconoRecibido;
+              tempPedidos[i].colorRecibido = colorON;
+              tempPedidos[i].iconoProceso = iconoEnCaminoON;
+              tempPedidos[i].colorProceso = colorON;
+              tempPedidos[i].iconoEntregado = iconoEntregadoOF;
+              tempPedidos[i].colorEntregado = colorOF;
               listPedidosPendientes.add(tempPedidos[i]);
             } else if (tempPedidos[i].estado == 'entregado' ||
                 tempPedidos[i].estado == 'truncado') {
@@ -72,16 +106,16 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
   }
 
   Future<dynamic> getProductos(
-      pedidoID, List<ProductoPedidoCliente>? listaProductos) async {
+      pedidoID, List<ProductoPedidoCliente> listaProductos) async {
     print("1) get productos---------");
-    print(apiUrl + apiPedidosCliente + pedidoID.toString());
+    print(apiUrl + apiProductosPedido + pedidoID.toString());
     var res = await http.get(
-      Uri.parse(apiUrl + apiPedidosCliente + pedidoID.toString()),
+      Uri.parse(apiUrl + apiProductosPedido + pedidoID.toString()),
       headers: {"Content-type": "application/json"},
     );
     try {
       if (res.statusCode == 200) {
-        print("2) entro al try de get ubicaciones---------");
+        print("2) entro al try de get Productos---------");
         var data = json.decode(res.body);
         List<ProductoPedidoCliente> tempoProductos =
             data.map<ProductoPedidoCliente>((mapa) {
@@ -96,9 +130,9 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
           );
         }).toList();
         setState(() {
-          if (listaProductos is List<ProductoPedidoCliente>) {
-            listaProductos.addAll(tempoProductos);
-          }
+          print("es lista producto");
+          print(tempoProductos);
+          listaProductos.addAll(tempoProductos);
         });
       }
     } catch (e) {
@@ -110,12 +144,11 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
   Future<void> ordenandoGets(clienteID) async {
     await getPedidos(clienteID);
     for (var i = 0; i < listPedidosPasados.length; i++) {
-      await getProductos(
-          listPedidosPasados[i].id, listPedidosPasados[i].productos);
+      await getProductos(listPedidosPasados[i].id, listProductosPedidoPasados);
     }
     for (var i = 0; i < listPedidosPendientes.length; i++) {
       await getProductos(
-          listPedidosPendientes[i].id, listPedidosPendientes[i].productos);
+          listPedidosPendientes[i].id, listProductosPedidoPendiente);
     }
   }
 
@@ -124,6 +157,7 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
     final TabController tabController = TabController(length: 2, vsync: this);
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
+    print(listPedidosPendientes);
     return Scaffold(
       backgroundColor: Colors.white,
       /*appBar: AppBar(
@@ -131,10 +165,11 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
       ),*/
       body: SafeArea(
           child: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          //TAB BAR
           Container(
-            height: largoActual * 0.070,
+            height: largoActual * 0.060,
             width: anchoActual,
             decoration: BoxDecoration(
                 color: Color.fromARGB(129, 192, 192, 192),
@@ -144,25 +179,27 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
                 controller: tabController,
                 //indicatorWeight: 10,
                 indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Color.fromRGBO(0, 82, 164, 0.8),
-                ),
+                    borderRadius: BorderRadius.circular(20),
+                    color: Color.fromARGB(255, 0, 0, 0),
+                    border: Border.all(
+                        color: Colors.white,
+                        width: 2,
+                        style: BorderStyle.solid)),
                 labelStyle: TextStyle(
                     color: Colors.white,
-                    fontSize: largoActual * 0.020,
+                    fontSize: largoActual * 0.018,
                     fontWeight: FontWeight
-                        .w500), // Ajusta el tamaño del texto de la pestaña seleccionada
+                        .w400), // Ajusta el tamaño del texto de la pestaña seleccionada
                 unselectedLabelStyle: TextStyle(
-                    fontSize: largoActual * 0.019, fontWeight: FontWeight.w300),
+                    fontSize: largoActual * 0.018, fontWeight: FontWeight.w300),
                 //labelColor: colorLetra,
                 unselectedLabelColor: colorLetra,
-                indicatorColor: const Color.fromRGBO(83, 176, 68, 1.000),
                 tabs: const [
                   Tab(
                     text: "Pendientes",
                     icon: Icon(
                       Icons.assignment_rounded,
-                      size: 20,
+                      size: 18,
                     ),
                     iconMargin: EdgeInsets.only(bottom: 1),
                   ),
@@ -170,17 +207,19 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
                     text: "Entregados",
                     icon: Icon(
                       Icons.assignment_turned_in_rounded,
-                      size: 20,
+                      size: 18,
                     ),
                     iconMargin: EdgeInsets.only(bottom: 1),
                   ),
                 ]),
           ),
+          //CONTAINER
           Container(
+            alignment: Alignment.center,
             margin: EdgeInsets.only(
               top: largoActual * 0.013,
             ),
-            height: largoActual / 2.13,
+            height: largoActual / 1.301,
             width: double.maxFinite,
             child: TabBarView(
               controller: tabController,
@@ -201,18 +240,105 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
                                 ),
                           );*/
                         },
-                        child: Container(
-                          margin: EdgeInsets.only(right: anchoActual * 0.028),
-                          height: anchoActual * 0.83,
-                          width: anchoActual * 0.83,
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 75, 108, 134),
-                            borderRadius: BorderRadius.circular(50),
-                            /*image: DecorationImage(
-                                image:
-                                    NetworkImage(pedido.productos!.first.foto),
-                                fit: BoxFit.cover,
-                              )*/
+                        child: SizedBox(
+                          height: anchoActual * 0.51,
+                          child: Card(
+                            surfaceTintColor: Colors.white,
+                            color: Colors.white,
+                            elevation: 8,
+                            margin: EdgeInsets.only(
+                              top: largoActual * 0.0068,
+                              bottom: largoActual * 0.013,
+                              left: largoActual * 0.0068,
+                              right: largoActual * 0.0068,
+                            ),
+                            child: Container(
+                              margin: EdgeInsets.all(
+                                largoActual * 0.025,
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Container(
+                                        height: largoActual * 0.07,
+                                        width: anchoActual * 0.15,
+                                        decoration: BoxDecoration(
+                                            color: pedido.colorRecibido,
+                                            borderRadius:
+                                                BorderRadius.circular(80)),
+                                        child:
+                                            Lottie.asset(pedido.iconoRecibido),
+                                      ),
+                                      Container(
+                                        width: anchoActual * 0.15,
+                                        color: Colors.transparent,
+                                        child: Lottie.asset(linea),
+                                      ),
+                                      Container(
+                                        height: largoActual * 0.07,
+                                        width: anchoActual * 0.15,
+                                        decoration: BoxDecoration(
+                                            color: pedido.colorProceso,
+                                            borderRadius:
+                                                BorderRadius.circular(50)),
+                                        child:
+                                            Lottie.asset(pedido.iconoProceso),
+                                      ),
+                                      Container(
+                                        width: anchoActual * 0.15,
+                                        color: Colors.transparent,
+                                        child: Lottie.asset(linea),
+                                      ),
+                                      Container(
+                                        height: largoActual * 0.07,
+                                        width: anchoActual * 0.15,
+                                        decoration: BoxDecoration(
+                                            color: pedido.colorEntregado,
+                                            borderRadius:
+                                                BorderRadius.circular(50)),
+                                        child:
+                                            Lottie.asset(pedido.iconoEntregado),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: largoActual * 0.02,
+                                  ),
+                                  Text(
+                                    pedido.mensaje,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.013,
+                                        color: colorLetra),
+                                  ),
+                                  Text(
+                                    "Fecha: ${pedido.fecha}",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.013,
+                                        color: colorLetra),
+                                  ),
+                                  Text(
+                                    "Total: ${pedido.total}",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.013,
+                                        color: colorLetra),
+                                  ),
+                                  Text(
+                                    "Dirección: ${pedido.direccion}",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.013,
+                                        color: colorLetra),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       );
@@ -237,14 +363,6 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
                           margin: EdgeInsets.only(right: anchoActual * 0.028),
                           height: anchoActual * 0.83,
                           width: anchoActual * 0.83,
-                          decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 75, 108, 134),
-                              borderRadius: BorderRadius.circular(50),
-                              image: DecorationImage(
-                                image:
-                                    NetworkImage(pedido.productos!.first.foto),
-                                fit: BoxFit.cover,
-                              )),
                         ),
                       );
                     }),

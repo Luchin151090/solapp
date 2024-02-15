@@ -34,12 +34,12 @@ class _PromosState extends State<Promos> {
   late PedidoModel pedidoMio;
   String apiUrl = dotenv.env['API_URL'] ?? '';
   DateTime fechaLim = DateTime.now();
-
   List<Producto> productosContabilizados = [];
   List<Producto> productosProvider = [];
   List<Promo> promocionesContabilizadas = [];
   List<Promo> promosProvider = [];
   List<Promo> listPromociones = [];
+  double totalProvider = 0.0;
   List<ProductoPromocion> prodPromContabilizadas = [];
   List<ProductoPromocion> listProdProm = [];
   int cantidadP = 0;
@@ -177,7 +177,6 @@ class _PromosState extends State<Promos> {
 
   double obtenerTotal() {
     double stotal = 0;
-
     promocionesContabilizadas =
         listPromociones.where((promo) => promo.cantidad > 0).toList();
     for (var promo in promocionesContabilizadas) {
@@ -216,6 +215,7 @@ class _PromosState extends State<Promos> {
       cantCarrito = pedido.cantidadProd;
       productosProvider = pedido.seleccionados;
       promosProvider = pedido.seleccionadosPromo;
+      totalProvider = pedido.total;
       if (pedido.cantidadProd > 0) {
         setState(() {
           colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
@@ -232,6 +232,7 @@ class _PromosState extends State<Promos> {
         productosProvider = [];
         promosProvider = [];
         colorCantidadCarrito = Colors.grey;
+        totalProvider = 0.0;
       });
     }
   }
@@ -538,7 +539,6 @@ class _PromosState extends State<Promos> {
                                                       productosProvider;
                                                 }
                                               }
-
                                               promocionesContabilizadas
                                                   .addAll(promosProvider);
                                             });
@@ -550,7 +550,7 @@ class _PromosState extends State<Promos> {
                                                 cantidadProd:
                                                     productosContabilizados
                                                         .length,
-                                                total: obtenerTotal());
+                                                total: totalProvider + total);
                                             Provider.of<PedidoProvider>(context,
                                                     listen: false)
                                                 .updatePedido(pedidoMio);

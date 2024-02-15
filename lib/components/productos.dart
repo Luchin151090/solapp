@@ -27,6 +27,7 @@ class _ProductosState extends State<Productos> {
   List<Producto> productosContabilizados = [];
   List<Producto> productosProvider = [];
   List<Promo> promosProvider = [];
+  double totalProvider = 0.0;
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
 
@@ -112,6 +113,7 @@ class _ProductosState extends State<Productos> {
       cantCarrito = pedido.cantidadProd;
       productosProvider = pedido.seleccionados;
       promosProvider = pedido.seleccionadosPromo;
+      totalProvider = pedido.total;
       if (pedido.cantidadProd > 0) {
         setState(() {
           colorCantidadCarrito = const Color.fromRGBO(255, 0, 93, 1.000);
@@ -128,6 +130,7 @@ class _ProductosState extends State<Productos> {
         productosProvider = [];
         promosProvider = [];
         colorCantidadCarrito = Colors.grey;
+        totalProvider = 0.0;
       });
     }
   }
@@ -421,7 +424,7 @@ class _ProductosState extends State<Productos> {
                                               cantidadProd:
                                                   productosContabilizados
                                                       .length,
-                                              total: obtenerTotal());
+                                              total: totalProvider + total);
                                           Provider.of<PedidoProvider>(context,
                                                   listen: false)
                                               .updatePedido(pedidoMio);
