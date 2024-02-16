@@ -1,16 +1,20 @@
 import 'package:appsol_final/components/login.dart';
-import 'package:appsol_final/components/holaconductor2.dart';
 import 'package:appsol_final/provider/pedido_provider.dart';
 import 'package:appsol_final/provider/ubicacion_provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:camera/camera.dart';
 // Importa el paquete permission_handler
+
+late List<CameraDescription> camera;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
+  camera = await availableCameras();
+
   runApp(const MyApp());
 }
 
@@ -39,7 +43,7 @@ class MyApp extends StatelessWidget {
           // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        home: HolaConductor2(),
+        home: Login(),
         /*home: BarraNavegacion(
           indice: 0,
           subIndice: 0,

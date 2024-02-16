@@ -1,4 +1,4 @@
-import 'package:appsol_final/components/holaconductor.dart';
+import 'package:appsol_final/components/holaconductor2.dart';
 import 'package:appsol_final/components/navegador.dart';
 import 'package:appsol_final/components/prueba.dart';
 import 'package:appsol_final/components/ubicacion.dart';
@@ -6,6 +6,7 @@ import 'package:appsol_final/models/user_model.dart';
 import 'package:appsol_final/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 //import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -29,6 +30,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _contrasena = TextEditingController();
   late int status = 0;
   late int rol = 0;
+  late int id = 0;
   late UserModel userData;
   bool yaTieneUbicaciones = false;
 
@@ -70,6 +72,7 @@ class _LoginState extends State<Login> {
           setState(() {
             status = 200;
             rol = 4;
+            id = userData.id;
           });
         }
         //CONDUCTOR
@@ -84,6 +87,7 @@ class _LoginState extends State<Login> {
           setState(() {
             status = 200;
             rol = 5;
+            id = userData.id;
           });
         }
         // GERENTE
@@ -97,11 +101,16 @@ class _LoginState extends State<Login> {
           setState(() {
             status = 200;
             rol = 3;
+            id = userData.id;
           });
         }
 
         // ACTUALIZAMOS EL ESTADO DEL PROVIDER, PARA QUE SE PUEDA USAR DE MANERA GLOBAL
         Provider.of<UserProvider>(context, listen: false).updateUser(userData);
+        SharedPreferences userPreference =
+            await SharedPreferences.getInstance();
+        userPreference.setInt("userID", id);
+        print(id);
       } else if (res.statusCode == 401) {
         var data400 = json.decode(res.body);
         print("data400");
@@ -336,7 +345,7 @@ class _LoginState extends State<Login> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          const HolaConductor()),
+                                          const HolaConductor2()),
                                 );
 
                                 //SI ES GERENTE
