@@ -38,6 +38,8 @@ class _PedidoState extends State<Pedido> {
   List<Producto> seleccionadosProvider = [];
   List<Promo> selecciondosPromosProvider = [];
   String tipoPedido = "normal";
+  TextEditingController notas = TextEditingController();
+  String notasParaConductor = '';
   int lastPedido = 0;
   Color color = Colors.white;
   int cantCarrito = 0;
@@ -50,7 +52,7 @@ class _PedidoState extends State<Pedido> {
   String apiUrl = dotenv.env['API_URL'] ?? '';
 
   Future<dynamic> datosCreadoPedido(
-      clienteId, fecha, montoTotal, tipo, estado, ubicacionID) async {
+      clienteId, fecha, montoTotal, tipo, estado, notas, ubicacionID) async {
     print("-----------------------creandoPEDIDOO");
     await http.post(Uri.parse(apiUrl + '/api/pedido'),
         headers: {"Content-type": "application/json"},
@@ -63,6 +65,7 @@ class _PedidoState extends State<Pedido> {
           "tipo": tipo,
           "estado": estado,
           "ubicacion_id": ubicacionID,
+          "observacion": notas
         }));
   }
 
@@ -79,10 +82,10 @@ class _PedidoState extends State<Pedido> {
   }
 
   Future<void> crearPedidoyDetallePedido(
-      clienteID, tipo, monto, seleccionados) async {
+      clienteID, tipo, monto, seleccionados, notas) async {
     DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 5));
     await datosCreadoPedido(clienteID, tiempoActual.toString(), monto, tipo,
-        "pendiente", ubicacionSelectID);
+        "pendiente", notas, ubicacionSelectID);
     print(tiempoGMTPeru.toString());
     print(tiempoActual.timeZoneName);
     print("creando detalles de pedidos----------");
@@ -218,7 +221,8 @@ class _PedidoState extends State<Pedido> {
                                         userProvider.user?.id,
                                         tipoPedido,
                                         totalVenta,
-                                        seleccionadosProvider);
+                                        seleccionadosProvider,
+                                        notas.text);
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -765,6 +769,7 @@ class _PedidoState extends State<Pedido> {
                             right: anchoActual * 0.055,
                             bottom: largoActual * 0.0068),
                         child: TextFormField(
+                          controller: notas,
                           cursorColor: const Color.fromRGBO(0, 106, 252, 1.000),
                           enableInteractiveSelection: false,
                           style: TextStyle(

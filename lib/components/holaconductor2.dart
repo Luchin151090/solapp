@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
 import 'package:appsol_final/components/camara.dart';
 import 'package:appsol_final/components/pdf.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 extension StringExtension on String {
   String capitalize() {
@@ -25,14 +26,17 @@ class Pedido {
   final String tipo;
   final String fecha;
   String estado;
-  String? tipo_pago;
+  String? tipoPago;
 
   ///REVISAR EN QUÈ FORMATO SE RECIVE LA FECHA
   final String nombre;
   final String apellidos;
   final String telefono;
   //final String ubicacion;
+  final double latitud;
+  final double longitud;
   final String direccion;
+  String comentario;
 
   Pedido({
     Key? key,
@@ -45,8 +49,11 @@ class Pedido {
     required this.telefono,
     //required this.ubicacion,
     required this.direccion,
+    required this.latitud,
+    required this.longitud,
     this.estado = 'en proceso',
-    this.tipo_pago,
+    this.comentario = '',
+    this.tipoPago,
   });
 }
 
@@ -79,6 +86,7 @@ class HolaConductor2 extends StatefulWidget {
 class _HolaConductor2State extends State<HolaConductor2> {
   late io.Socket socket;
   String apiUrl = dotenv.env['API_URL'] ?? '';
+  String googleApiKey = 'AIzaSyBibduCuOg5ba-aAqvMWHf9XkZUgLZoks4';
   String apiPedidosConductor = '/api/pedido_conductor/';
   String apiDetallePedido = '/api/detallepedido/';
   bool puedoLlamar = false;
@@ -89,6 +97,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
   int pedidoIDActual = 0;
   String nombreCliente = '';
   String apellidoCliente = '';
+  String observacionCliente = '';
   Color colorProgreso = Colors.transparent;
   Pedido pedidoTrabajo = Pedido(
       id: 0,
@@ -98,9 +107,11 @@ class _HolaConductor2State extends State<HolaConductor2> {
       nombre: '',
       apellidos: '',
       telefono: '',
-      //ubicacion: '',
+      latitud: 0.0,
+      longitud: 0.0,
       direccion: '',
-      tipo_pago: '');
+      tipoPago: '',
+      comentario: '');
   int rutaID = 0;
   int? rutaIDpref = 0;
   int? conductorIDpref = 0;
@@ -173,18 +184,19 @@ class _HolaConductor2State extends State<HolaConductor2> {
         var data = json.decode(res.body);
         List<Pedido> listTemporal = data.map<Pedido>((mapa) {
           return Pedido(
-            id: mapa['id'],
-            montoTotal: mapa['total'].toDouble(),
-            fecha: mapa['fecha'],
-            estado: mapa['estado'],
-            tipo: mapa['tipo'],
-            nombre: mapa['nombre'],
-            apellidos: mapa['apellidos'],
-            telefono: mapa['telefono'],
-            //ubicacion: mapa['ubicacion'],
-            direccion: mapa['direccion'],
-            tipo_pago: mapa['tipo_pago'],
-          );
+              id: mapa['id'],
+              montoTotal: mapa['total'].toDouble(),
+              latitud: mapa['latitud'].toDouble(),
+              longitud: mapa['longitud'].toDouble(),
+              fecha: mapa['fecha'],
+              estado: mapa['estado'],
+              tipo: mapa['tipo'],
+              nombre: mapa['nombre'],
+              apellidos: mapa['apellidos'],
+              telefono: mapa['telefono'],
+              direccion: mapa['direccion'],
+              tipoPago: mapa['tipo_pago'],
+              comentario: mapa['observacion'] ?? 'sin comentarios');
         }).toList();
         print('7) Esta es la lista temporal ${listTemporal.length}');
         //SE SETEA EL VALOR DE PEDIDOS BY RUTA
@@ -197,10 +209,10 @@ class _HolaConductor2State extends State<HolaConductor2> {
         for (var i = 0; i < listPedidosbyRuta.length; i++) {
           setState(() {
             totalMonto += listPedidosbyRuta[i].montoTotal;
-            print('tipo: ${listPedidosbyRuta[i].tipo_pago}');
+            print('tipo: ${listPedidosbyRuta[i].tipoPago}');
           });
 
-          switch (listPedidosbyRuta[i].tipo_pago) {
+          switch (listPedidosbyRuta[i].tipoPago) {
             case 'yape':
               setState(() {
                 totalYape += listPedidosbyRuta[i].montoTotal;
@@ -250,7 +262,8 @@ class _HolaConductor2State extends State<HolaConductor2> {
               numerodePedidosExpress++;
             });
           }
-          if (listPedidosbyRuta[i].estado == 'entregado') {
+          if (listPedidosbyRuta[i].estado == 'entregado' ||
+              listPedidosbyRuta[i].estado == 'truncado') {
             setState(() {
               numPedidoActual++;
             });
@@ -287,6 +300,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
               pedidoTrabajo = listPedidosbyRuta[i];
               nombreCliente = listPedidosbyRuta[i].nombre.capitalize();
               apellidoCliente = listPedidosbyRuta[i].apellidos.capitalize();
+              observacionCliente = listPedidosbyRuta[i].comentario.capitalize();
               print('12) Este es el pedidoIDactual $pedidoIDActual');
             });
             break;
@@ -669,6 +683,9 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                 fontSize: 17,
                                                 fontWeight: FontWeight.w500),
                                           ),
+                                          SizedBox(
+                                            height: largoActual * 0.02,
+                                          ),
                                           Row(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -676,7 +693,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                 MainAxisAlignment.start,
                                             children: [
                                               Container(
-                                                width: 70,
+                                                width: 85,
                                                 child: const Text(
                                                   "Productos",
                                                   style:
@@ -704,7 +721,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                 MainAxisAlignment.start,
                                             children: [
                                               Container(
-                                                width: 70,
+                                                width: 85,
                                                 child: const Text(
                                                   "Cliente",
                                                   style:
@@ -719,7 +736,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                 style: TextStyle(fontSize: 14),
                                               ),
                                               Text(
-                                                "${nombreCliente} ${apellidoCliente}",
+                                                "$nombreCliente $apellidoCliente",
                                                 style: const TextStyle(
                                                     fontSize: 14),
                                               ),
@@ -732,7 +749,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                 MainAxisAlignment.start,
                                             children: [
                                               Container(
-                                                width: 70,
+                                                width: 85,
                                                 child: const Text(
                                                   "Monto",
                                                   style:
@@ -752,6 +769,38 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                               ),
                                             ],
                                           ),
+
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                width: 85,
+                                                child: const Text(
+                                                  "Comentarios",
+                                                  style:
+                                                      TextStyle(fontSize: 14),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              const Text(
+                                                ":   ",
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                              Text(
+                                                observacionCliente,
+                                                style: const TextStyle(
+                                                    fontSize: 14),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: largoActual * 0.02,
+                                          ),
                                           Container(
                                               margin: const EdgeInsets.only(
                                                   left: 15),
@@ -762,8 +811,8 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                     fontWeight:
                                                         FontWeight.w500),
                                               )),
-                                          const SizedBox(
-                                            height: 5,
+                                          SizedBox(
+                                            height: largoActual * 0.02,
                                           ),
                                           //BOTONES YAPE Y EFECTIVO
                                           Row(

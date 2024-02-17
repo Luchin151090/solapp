@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:appsol_final/components/holaconductor2.dart';
 import 'package:http/http.dart' as http;
-import 'package:appsol_final/components/holaconductor.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:convert';
@@ -26,18 +25,24 @@ class _CamaraState extends State<Camara> {
   //late List<CameraDescription> camera;
   late List<CameraDescription> cameras;
   late CameraController cameraController;
+  TextEditingController comentarioConductor = TextEditingController();
   String apiUrl = dotenv.env['API_URL'] ?? '';
   String apiPedidosConductor = '/api/pedido_conductor/';
   String comentario = '';
+  String observacionPedido = '';
   String estadoNuevo = '';
+  String tipoPago = '';
 
-  Future<dynamic> updateEstadoPedido(estadoNuevo, foto, pedidoID) async {
+  Future<dynamic> updateEstadoPedido(
+      estadoNuevo, foto, observacion, tipoPago, pedidoID) async {
     if (pedidoID != 0) {
-      await http.put(Uri.parse("$apiPedidosConductor$pedidoID"),
+      await http.put(Uri.parse("$apiUrl$apiPedidosConductor$pedidoID"),
           headers: {"Content-type": "application/json"},
           body: jsonEncode({
             "estado": estadoNuevo,
             "foto": foto,
+            "observacion": observacion,
+            "tipo_pago": tipoPago
           }));
     } else {
       print('papas fritas');
@@ -49,11 +54,13 @@ class _CamaraState extends State<Camara> {
       setState(() {
         comentario = 'Comentarios';
         estadoNuevo = 'entregado';
+        tipoPago = 'yape';
       });
     } else {
       setState(() {
         comentario = 'Detalla los inconvenientes';
         estadoNuevo = 'truncado';
+        tipoPago = '';
       });
     }
   }
@@ -282,40 +289,49 @@ class _CamaraState extends State<Camara> {
 
                                           // ignore: use_build_context_synchronously
                                           showModalBottomSheet(
+                                              backgroundColor: Color.fromRGBO(
+                                                  0, 106, 252, 1.000),
                                               context: context,
+                                              isScrollControlled: true,
                                               builder: (contex) {
-                                                return Container(
-                                                  height: largoActual * 0.2,
-                                                  margin: EdgeInsets.only(
-                                                      left: anchoActual * 0.08,
-                                                      right: anchoActual * 0.08,
-                                                      top: largoActual * 0.05,
+                                                return Padding(
+                                                  padding: EdgeInsets.only(
                                                       bottom:
-                                                          largoActual * 0.05),
-                                                  child: Column(
-                                                    children: [
-                                                      Container(
-                                                          child:
-                                                              SingleChildScrollView(
-                                                        child: Column(
+                                                          MediaQuery.of(contex)
+                                                              .viewInsets
+                                                              .bottom),
+                                                  child: Container(
+                                                    height: largoActual * 0.15,
+                                                    margin: EdgeInsets.only(
+                                                        left:
+                                                            anchoActual * 0.08,
+                                                        right:
+                                                            anchoActual * 0.08,
+                                                        top: largoActual * 0.05,
+                                                        bottom:
+                                                            largoActual * 0.05),
+                                                    child: Column(
+                                                      children: [
+                                                        Column(
                                                             mainAxisAlignment:
                                                                 MainAxisAlignment
                                                                     .center,
                                                             children: [
                                                               Container(
-                                                                padding: const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        16.0),
                                                                 decoration:
                                                                     BoxDecoration(
-                                                                  border: Border.all(
-                                                                      color: Colors
-                                                                          .grey),
+                                                                  color: Colors
+                                                                      .white,
                                                                   borderRadius:
                                                                       BorderRadius
                                                                           .circular(
                                                                               8.0),
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .grey,
+                                                                    width: 0.5,
+                                                                  ),
                                                                 ),
                                                                 child:
                                                                     TextField(
@@ -323,31 +339,24 @@ class _CamaraState extends State<Camara> {
                                                                       InputDecoration(
                                                                           hintText:
                                                                               comentario),
+                                                                  controller:
+                                                                      comentarioConductor,
                                                                 ),
                                                               )
                                                             ]),
-                                                      )),
-                                                      const SizedBox(
-                                                        height: 20,
-                                                      ),
-                                                      Container(
-                                                        margin: const EdgeInsets
-                                                            .only(
-                                                            left: 20,
-                                                            right: 20),
-                                                        width: anchoActual - 40,
-                                                        //color:Colors.grey,
-                                                        child: Row(
+                                                        const SizedBox(
+                                                          height: 20,
+                                                        ),
+                                                        Row(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
                                                                   .spaceBetween,
                                                           children: [
-                                                            Container(
+                                                            SizedBox(
                                                               height: 40,
                                                               width:
-                                                                  (anchoActual -
-                                                                          80) /
-                                                                      2,
+                                                                  anchoActual *
+                                                                      0.83,
                                                               child:
                                                                   ElevatedButton(
                                                                       onPressed:
@@ -355,33 +364,35 @@ class _CamaraState extends State<Camara> {
                                                                         updateEstadoPedido(
                                                                             estadoNuevo,
                                                                             null,
+                                                                            comentarioConductor.text,
+                                                                            tipoPago,
                                                                             widget.pedidoID);
                                                                         Navigator
                                                                             .push(
                                                                           context,
                                                                           //REGRESA A LA VISTA DE HOME PERO ACTUALIZA EL PEDIDO
                                                                           MaterialPageRoute(
-                                                                              builder: (context) => HolaConductor()),
+                                                                              builder: (context) => const HolaConductor2()),
                                                                         );
                                                                       },
                                                                       style: ButtonStyle(
-                                                                          backgroundColor: MaterialStateProperty.all(const Color
-                                                                              .fromARGB(
-                                                                              255,
-                                                                              2,
-                                                                              46,
-                                                                              83))),
+                                                                          elevation: MaterialStateProperty.all(
+                                                                              8),
+                                                                          surfaceTintColor: MaterialStateProperty.all(Colors
+                                                                              .white),
+                                                                          backgroundColor: MaterialStateProperty.all(Colors
+                                                                              .white)),
                                                                       child:
                                                                           const Row(
                                                                         mainAxisAlignment:
-                                                                            MainAxisAlignment.end,
+                                                                            MainAxisAlignment.center,
                                                                         children: [
                                                                           Text(
                                                                             "Listo",
                                                                             style: TextStyle(
                                                                                 fontSize: 18,
                                                                                 fontWeight: FontWeight.w400,
-                                                                                color: Colors.white),
+                                                                                color: Color.fromRGBO(0, 106, 252, 1.000)),
                                                                           ),
                                                                           SizedBox(
                                                                               width: 8),
@@ -389,16 +400,19 @@ class _CamaraState extends State<Camara> {
                                                                             Icons.arrow_forward, // Reemplaza con el icono que desees
                                                                             size:
                                                                                 24,
-                                                                            color:
-                                                                                Colors.white,
+                                                                            color: Color.fromRGBO(
+                                                                                0,
+                                                                                106,
+                                                                                252,
+                                                                                1.000),
                                                                           ),
                                                                         ],
                                                                       )),
                                                             ),
                                                           ],
                                                         ),
-                                                      ),
-                                                    ],
+                                                      ],
+                                                    ),
                                                   ),
                                                 );
                                               });
