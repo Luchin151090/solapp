@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.appsol_final"
-    compileSdkVersion flutter.compileSdkVersion//33//flutter.compileSdkVersion
+    compileSdkVersion 33//flutter.compileSdkVersion//33//flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {

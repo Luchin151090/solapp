@@ -216,8 +216,7 @@ class _CamaraState extends State<Camara> {
                                       style: ButtonStyle(
                                           backgroundColor:
                                               MaterialStateProperty.all(
-                                                  const Color.fromRGBO(
-                                                      0, 106, 252, 1.000))),
+                                                  Colors.black)),
                                     ),
                                     //BOTON DE TOMAR FOTO
                                     FloatingActionButton(
@@ -246,8 +245,7 @@ class _CamaraState extends State<Camara> {
                                           print('Error al tomar la foto: $e');
                                         }
                                       },
-                                      backgroundColor:
-                                          Color.fromRGBO(0, 106, 252, 1.000),
+                                      backgroundColor: Colors.black,
                                       child: const Icon(
                                         Icons.camera_alt,
                                         color: Colors.white,
@@ -293,11 +291,11 @@ class _CamaraState extends State<Camara> {
                                                   0, 106, 252, 1.000),
                                               context: context,
                                               isScrollControlled: true,
-                                              builder: (contex) {
+                                              builder: (context) {
                                                 return Padding(
                                                   padding: EdgeInsets.only(
                                                       bottom:
-                                                          MediaQuery.of(contex)
+                                                          MediaQuery.of(context)
                                                               .viewInsets
                                                               .bottom),
                                                   child: Container(
@@ -427,8 +425,7 @@ class _CamaraState extends State<Camara> {
                                       style: ButtonStyle(
                                           backgroundColor:
                                               MaterialStateProperty.all(
-                                                  const Color.fromRGBO(
-                                                      0, 106, 252, 1.000))),
+                                                  Colors.black)),
                                     ),
                                   ],
                                 ),

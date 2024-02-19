@@ -179,80 +179,77 @@ class _PedidoState extends State<Pedido> {
           enableDrag: false,
           onClosing: () {},
           builder: (context) {
-            return Expanded(
-              child: SizedBox(
-                height: largoActual * 0.16,
-                child: Container(
-                  margin: EdgeInsets.only(
-                      top: largoActual * 0.02,
-                      bottom: largoActual * 0.013,
-                      left: anchoActual * 0.069,
-                      right: anchoActual * 0.069),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Total',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: largoActual * (17 / 736)),
+            return SizedBox(
+              height: largoActual * 0.16,
+              child: Container(
+                margin: EdgeInsets.only(
+                    top: largoActual * 0.02,
+                    bottom: largoActual * 0.013,
+                    left: anchoActual * 0.069,
+                    right: anchoActual * 0.069),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: largoActual * (17 / 736)),
+                        ),
+                        Text(
+                          'S/.$totalVenta',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: largoActual * (17 / 736)),
+                        )
+                      ],
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: largoActual * (8 / 736)),
+                      child: SizedBox(
+                        width: anchoActual * (400 / 360),
+                        child: ElevatedButton(
+                          onPressed:
+                              totalProvider > 0.0 && ubicacionSelectID != 0
+                                  ? () async {
+                                      await crearPedidoyDetallePedido(
+                                          userProvider.user?.id,
+                                          tipoPedido,
+                                          totalVenta,
+                                          seleccionadosProvider,
+                                          notas.text);
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => const Fin()),
+                                      );
+                                    }
+                                  : null,
+                          style: ButtonStyle(
+                            elevation: MaterialStateProperty.all(8),
+                            surfaceTintColor: MaterialStateProperty.all(
+                                const Color.fromARGB(255, 255, 255, 255)),
+                            minimumSize: MaterialStatePropertyAll(Size(
+                                anchoActual * (350 / 360),
+                                largoActual * (38 / 736))),
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color.fromARGB(255, 255, 255, 255)),
                           ),
-                          Text(
-                            'S/.$totalVenta',
+                          child: Text(
+                            'Confirmar Pedido',
                             style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: largoActual * (17 / 736)),
-                          )
-                        ],
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(top: largoActual * (8 / 736)),
-                        child: SizedBox(
-                          width: anchoActual * (400 / 360),
-                          child: ElevatedButton(
-                            onPressed: totalVenta > 0.0 &&
-                                    ubicacionSelectID != 0
-                                ? () async {
-                                    await crearPedidoyDetallePedido(
-                                        userProvider.user?.id,
-                                        tipoPedido,
-                                        totalVenta,
-                                        seleccionadosProvider,
-                                        notas.text);
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => const Fin()),
-                                    );
-                                  }
-                                : null,
-                            style: ButtonStyle(
-                              elevation: MaterialStateProperty.all(8),
-                              surfaceTintColor: MaterialStateProperty.all(
-                                  const Color.fromARGB(255, 255, 255, 255)),
-                              minimumSize: MaterialStatePropertyAll(Size(
-                                  anchoActual * (350 / 360),
-                                  largoActual * (38 / 736))),
-                              backgroundColor: MaterialStateProperty.all(
-                                  const Color.fromARGB(255, 255, 255, 255)),
-                            ),
-                            child: Text(
-                              'Confirmar Pedido',
-                              style: TextStyle(
-                                  color:
-                                      const Color.fromRGBO(0, 106, 252, 1.000),
-                                  fontSize: largoActual * (14 / 736),
-                                  fontWeight: FontWeight.w500),
-                            ),
+                                color: const Color.fromRGBO(0, 106, 252, 1.000),
+                                fontSize: largoActual * (14 / 736),
+                                fontWeight: FontWeight.w500),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -602,8 +599,7 @@ class _PedidoState extends State<Pedido> {
                             onChanged: (bool value) {
                               setState(() {
                                 light0 = value;
-                                tiempoPeru = tiempoActual
-                                    .subtract(const Duration(hours: 5));
+                                tiempoPeru = tiempoActual;
                                 print(value);
                                 print('hora acrtual ${tiempoPeru.hour}');
                               });
@@ -619,14 +615,6 @@ class _PedidoState extends State<Pedido> {
                               } else {
                                 //ES EXPRESS
                                 if (tiempoActual.hour <= 16) {
-                                  print('son mas de las 16');
-                                  setState(() {
-                                    tipoPedido = 'normal';
-                                    light0 = false;
-                                    color = Colors.white;
-                                    envio = 0;
-                                  });
-                                } else {
                                   print('son menos de las 16');
                                   setState(() {
                                     tipoPedido = 'express';
@@ -635,6 +623,14 @@ class _PedidoState extends State<Pedido> {
                                     envio = 4;
                                     print(tipoPedido);
                                     print(envio);
+                                  });
+                                } else {
+                                  print('son mas de las 16');
+                                  setState(() {
+                                    tipoPedido = 'normal';
+                                    light0 = false;
+                                    color = Colors.white;
+                                    envio = 0;
                                   });
                                 }
                               }

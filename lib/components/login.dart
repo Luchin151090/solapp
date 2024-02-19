@@ -186,6 +186,8 @@ class _LoginState extends State<Login> {
           Color.fromRGBO(0, 106, 252, 1.000),
         ], begin: Alignment.topLeft, end: Alignment.bottomCenter)),
         child: SafeArea(
+          top: false,
+          bottom: false,
           child: Padding(
             padding: const EdgeInsets.all(4.0),
             child: Column(
