@@ -65,12 +65,14 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   bool _disposed = false;
   bool _autoScrollInProgress = false;
 
-  ScrollController _scrollController1 = ScrollController();
-  ScrollController _scrollController2 = ScrollController();
+  ScrollController scrollController1 = ScrollController();
+  ScrollController scrollController2 = ScrollController();
   @override
   void initState() {
     super.initState();
     ordenarFuncionesInit();
+//    _autoscroll1();
+
     /* if (widget.latitud != null && widget.longitud != null) {
     obtenerDireccion(widget.latitud!, widget.longitud!).then((res2) {
       setState(() {
@@ -92,6 +94,28 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
       _startAutoScroll();
     });*/
   }
+
+  /*void _autoscroll1() {
+    // Espera un pequeño retraso antes de iniciar el autoscroll
+    Future.delayed(Duration(milliseconds: 3000), () {
+      scrollController1
+          .animateTo(
+        scrollController1.position.maxScrollExtent,
+        duration: Duration(seconds: 5),
+        curve: Curves.easeInOut,
+      )
+          .then((_) {
+        // Cuando la animación de desplazamiento ha terminado, restablece la posición del ListView
+        Future.delayed(Duration(milliseconds: 3000), () {
+          scrollController1.animateTo(
+            0,
+            duration: Duration(seconds: 5),
+            curve: Curves.easeInOut,
+          );
+        });
+      });
+    });
+  }*/
 
   Future<void> ordenarFuncionesInit() async {
     await getUbicaciones(widget.clienteId);
@@ -120,10 +144,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
             distrito: mapa['distrito'],
           );
         }).toList();
-        setState(() {
-          listUbicacionesObjetos = tempUbicacion;
-          print(listUbicacionesObjetos);
-        });
+        if (mounted) {
+          setState(() {
+            listUbicacionesObjetos = tempUbicacion;
+            print(listUbicacionesObjetos);
+          });
+        }
       }
     } catch (e) {
       print('Error en la solicitud: $e');
@@ -362,8 +388,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   void dispose() {
     _disposed = true; // Mark as disposed
     _timer?.cancel();
-    _scrollController1.dispose();
-    _scrollController2.dispose();
+
     super.dispose();
   }
 
@@ -727,7 +752,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           controller: _tabController,
                           children: [
                             ListView.builder(
-                                controller: _scrollController1,
+                                controller: scrollController1,
                                 scrollDirection: Axis.horizontal,
                                 itemCount: 5,
                                 itemBuilder: (context, index) {
@@ -765,7 +790,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                 }),
                             ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                controller: _scrollController2,
+                                controller: scrollController2,
                                 itemCount: listProducto.length,
                                 itemBuilder: (context, index) {
                                   Producto producto = listProducto[index];
