@@ -13,7 +13,7 @@ late List<CameraDescription> camera;
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  camera = await availableCameras();
+  //camera = await availableCameras();
 
   runApp(const MyApp());
 }

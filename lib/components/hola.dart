@@ -88,9 +88,9 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
       });
     });
   }*/
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    /* WidgetsBinding.instance.addPostFrameCallback((_) {
       _startAutoScroll();
-    });
+    });*/
   }
 
   Future<void> ordenarFuncionesInit() async {
@@ -164,19 +164,23 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
           );
         }).toList();
 
-        setState(() {
-          listProducto = tempProducto;
-          //conductores = tempConductor;
-        });
+        // VERIFICAR SI EL WIDGET EXISTE Y LUEGO SETEAMOS EL VALOR
+        if (mounted) {
+          setState(() {
+            listProducto = tempProducto;
+            //conductores = tempConductor;
+          });
+        }
+
         print("4) ....lista productos");
-        print(listProducto[0].foto);
+        //print(listProducto[0].foto);
       }
     } catch (e) {
       print('Error en la solicitud: $e');
       throw Exception('Error en la solicitud: $e');
     }
   }
-
+/*
   void _startAutoScroll() {
     _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
       if (!_disposed) {
@@ -264,6 +268,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     }
   }
 
+*/
+
   Future<void> obtenerDireccion(x, y) async {
     //double latitud = widget.latitud ?? 0.0; // Accede a widget.latitud
     //double longitud = widget.longitud ?? 0.0;
@@ -348,6 +354,10 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     }
   }
 
+  // TEST UBICACIONES PARA DROPDOWN
+  List<String> ubicacionesString = ['1era', '2da', '3ra'];
+  String? _ubicacionSelected;
+
   @override
   void dispose() {
     _disposed = true; // Mark as disposed
@@ -391,6 +401,59 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           children: [
                             //LOCATION
                             Container(
+                              width: MediaQuery.of(context).size.width / 1.4,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.amber,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: IconButton(
+                                        onPressed: () {
+                                          print("soy el pin");
+                                        },
+                                        icon: Icon(
+                                          Icons.add_location_alt_rounded,
+                                          size: 30,
+                                          color: const Color.fromARGB(
+                                              255, 13, 125, 218),
+                                        )),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    margin: const EdgeInsets.only(left: 20),
+                                    decoration: BoxDecoration(
+                                        color:
+                                            Color.fromARGB(255, 183, 255, 172),
+                                        borderRadius: BorderRadius.circular(8)),
+                                    width: 180,
+                                    //height: 80,
+                                    child: DropdownButton<String>(
+                                      isExpanded: true,
+                                      value: _ubicacionSelected,
+                                      items:
+                                          ubicacionesString.map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        print(newValue);
+                                        setState(() {
+                                          _ubicacionSelected = newValue!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            /*Container(
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                   color:
@@ -554,7 +617,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                           : value);
                                 }).toList(),
                               ),
-                            ),
+                            ),*/
 
                             //CARRITO
                             Container(
@@ -688,8 +751,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       height: anchoActual * 0.83,
                                       width: anchoActual * 0.83,
                                       decoration: BoxDecoration(
-                                          color:
-                                              Color.fromARGB(255, 71, 106, 133),
+                                          color: const Color.fromARGB(
+                                              255, 130, 219, 133),
                                           borderRadius:
                                               BorderRadius.circular(30),
                                           image: const DecorationImage(
@@ -726,13 +789,13 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                       height: anchoActual * 0.83,
                                       width: anchoActual * 0.83,
                                       decoration: BoxDecoration(
-                                          color:
-                                              Color.fromARGB(255, 75, 108, 134),
+                                          color: Color.fromARGB(
+                                              255, 130, 219, 133),
                                           borderRadius:
                                               BorderRadius.circular(50),
                                           image: DecorationImage(
                                             image: NetworkImage(producto.foto),
-                                            fit: BoxFit.cover,
+                                            fit: BoxFit.fitHeight,
                                           )),
                                     ),
                                   );

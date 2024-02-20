@@ -70,34 +70,37 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
             distrito: mapa['distrito'],
           );
         }).toList();
-        setState(() {
-          for (var i = 0; i < tempPedidos.length; i++) {
-            if (tempPedidos[i].estado == 'pendiente') {
-              tempPedidos[i].mensaje = mensajePendiente;
-              tempPedidos[i].iconoRecibido = iconoRecibido;
-              tempPedidos[i].colorRecibido = colorON;
-              tempPedidos[i].iconoProceso = iconoEnCaminoOF;
-              tempPedidos[i].colorProceso = colorOF;
-              tempPedidos[i].iconoEntregado = iconoEntregadoOF;
-              tempPedidos[i].colorEntregado = colorOF;
-              listPedidosPendientes.add(tempPedidos[i]);
+        // Verificar si el widget está montado antes de llamar a setState
+        if (mounted) {
+          setState(() {
+            for (var i = 0; i < tempPedidos.length; i++) {
+              if (tempPedidos[i].estado == 'pendiente') {
+                tempPedidos[i].mensaje = mensajePendiente;
+                tempPedidos[i].iconoRecibido = iconoRecibido;
+                tempPedidos[i].colorRecibido = colorON;
+                tempPedidos[i].iconoProceso = iconoEnCaminoOF;
+                tempPedidos[i].colorProceso = colorOF;
+                tempPedidos[i].iconoEntregado = iconoEntregadoOF;
+                tempPedidos[i].colorEntregado = colorOF;
+                listPedidosPendientes.add(tempPedidos[i]);
 
-              //ACA SE PUEDE AGREGAR UNA ATRIBUTO DE FECHA DE ENTREGA AL PEDIDO
-            } else if (tempPedidos[i].estado == 'en proceso') {
-              tempPedidos[i].mensaje = mensajeEncamino;
-              tempPedidos[i].iconoRecibido = iconoRecibido;
-              tempPedidos[i].colorRecibido = colorON;
-              tempPedidos[i].iconoProceso = iconoEnCaminoON;
-              tempPedidos[i].colorProceso = colorON;
-              tempPedidos[i].iconoEntregado = iconoEntregadoOF;
-              tempPedidos[i].colorEntregado = colorOF;
-              listPedidosPendientes.add(tempPedidos[i]);
-            } else if (tempPedidos[i].estado == 'entregado' ||
-                tempPedidos[i].estado == 'truncado') {
-              listPedidosPasados.add(tempPedidos[i]);
+                // ACA SE PUEDE AGREGAR UN ATRIBUTO DE FECHA DE ENTREGA AL PEDIDO
+              } else if (tempPedidos[i].estado == 'en proceso') {
+                tempPedidos[i].mensaje = mensajeEncamino;
+                tempPedidos[i].iconoRecibido = iconoRecibido;
+                tempPedidos[i].colorRecibido = colorON;
+                tempPedidos[i].iconoProceso = iconoEnCaminoON;
+                tempPedidos[i].colorProceso = colorON;
+                tempPedidos[i].iconoEntregado = iconoEntregadoOF;
+                tempPedidos[i].colorEntregado = colorOF;
+                listPedidosPendientes.add(tempPedidos[i]);
+              } else if (tempPedidos[i].estado == 'entregado' ||
+                  tempPedidos[i].estado == 'truncado') {
+                listPedidosPasados.add(tempPedidos[i]);
+              }
             }
-          }
-        });
+          });
+        }
       }
     } catch (e) {
       print('Error en la solicitud: $e');
@@ -129,11 +132,14 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
             cantidadPorPromo: mapa['cantidad_por_promo'],
           );
         }).toList();
-        setState(() {
-          print("es lista producto");
-          print(tempoProductos);
-          listaProductos.addAll(tempoProductos);
-        });
+        // Verificar si el widget está montado antes de llamar a setState
+        if (mounted) {
+          setState(() {
+            print("es lista producto");
+            print(tempoProductos);
+            listaProductos.addAll(tempoProductos);
+          });
+        }
       }
     } catch (e) {
       print('Error en la solicitud: $e');
