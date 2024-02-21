@@ -56,12 +56,13 @@ class _ProductosState extends State<Productos> {
           );
         }).toList();
 
-        setState(() {
+        if(mounted){
+          setState(() {
           listProducto = tempProducto;
           //conductores = tempConductor;
         });
-        print("....lista productos");
-        print(listProducto);
+        }
+        
       }
     } catch (e) {
       print('Error en la solicitud: $e');

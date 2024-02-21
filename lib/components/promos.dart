@@ -75,10 +75,13 @@ class _PromosState extends State<Promos> {
               fechaLimite: mapa['fecha_limite'],
               foto: '$apiUrl/images/${mapa['foto'].replaceAll(r'\\', '/')}');
         }).toList();
-
-        setState(() {
+        
+        if(mounted){
+          setState(() {
           listPromociones = tempPromocion;
         });
+        }
+        
       }
     } catch (e) {
       print('Error en la solicitud: $e');
