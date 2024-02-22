@@ -39,6 +39,7 @@ class _PedidoState extends State<Pedido> {
   List<Promo> selecciondosPromosProvider = [];
   String tipoPedido = "normal";
   TextEditingController notas = TextEditingController();
+  TextEditingController _cupon = TextEditingController();
   String notasParaConductor = '';
   int lastPedido = 0;
   Color color = Colors.white;
@@ -50,6 +51,7 @@ class _PedidoState extends State<Pedido> {
   late DateTime tiempoPeru;
   int ubicacionSelectID = 0;
   String apiUrl = dotenv.env['API_URL'] ?? '';
+  String codigoverify = '/api/code_cliente';
 
   Future<dynamic> datosCreadoPedido(
       clienteId, fecha, montoTotal, tipo, estado, notas, ubicacionID) async {
@@ -154,6 +156,23 @@ class _PedidoState extends State<Pedido> {
         direccion = "";
       });
     }
+  }
+  Future <dynamic> cuponExist(cupon)async{
+    var res = await http.post(Uri.parse(apiUrl+codigoverify),
+    headers: {"Content-type":"application/json"},
+    body: jsonEncode({
+      "codigo":cupon
+    }));
+    try{
+      if(res.statusCode==200){
+        bool data = json.decode(res.body);
+        return data;
+      }
+      
+    }catch(e){
+      throw Exception("$e");
+    }
+    
   }
 
   @override
@@ -483,6 +502,7 @@ class _PedidoState extends State<Pedido> {
                           SizedBox(
                             width: anchoActual * 0.36,
                             child: TextFormField(
+                              controller: _cupon,
                               cursorColor:
                                   const Color.fromRGBO(0, 106, 252, 1.000),
                               enableInteractiveSelection: false,
@@ -507,7 +527,18 @@ class _PedidoState extends State<Pedido> {
                             width: anchoActual * 0.03,
                           ),
                           ElevatedButton(
-                            onPressed: () {},
+                            onPressed: ()async {
+                              // LOGICA PARA VALIDAR  62 ELEVADO A LA 5TA
+                              bool existe = await cuponExist(_cupon);
+                              if(existe) //true
+                              {
+                                print("codigo válido");
+                              }
+                              else{
+                                print("no existe el codigo");
+                              }
+                              
+                            },
                             style: ButtonStyle(
                               elevation: MaterialStateProperty.all(5),
                               minimumSize: MaterialStatePropertyAll(Size(

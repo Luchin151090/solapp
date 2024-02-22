@@ -1,3 +1,4 @@
+import 'package:appsol_final/components/formulario.dart';
 import 'package:appsol_final/components/holaconductor2.dart';
 import 'package:appsol_final/components/navegador.dart';
 import 'package:appsol_final/components/prueba.dart';
@@ -425,11 +426,11 @@ class _LoginState extends State<Login> {
                         print(largoActual);
                         print(anchoActual);
 
-                        /*  Navigator.push(
+                         Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => const Formu()),
-                            );*/
+                            );
                       },
                       style: ButtonStyle(
                           elevation: MaterialStateProperty.all(8),

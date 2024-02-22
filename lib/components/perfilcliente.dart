@@ -213,6 +213,7 @@ class _PerfilCliente extends State<PerfilCliente> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          /** SARITA =) YA ESTA EL END POINT DE SALDO SERA QU LO PRUEBS  */
                           Text(
                             'S/. 30.00',
                             style: TextStyle(

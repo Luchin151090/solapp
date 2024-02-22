@@ -1,4 +1,4 @@
-/*
+
 import 'dart:convert';
 import 'package:intl/intl.dart';
 
@@ -75,7 +75,7 @@ class _FormuState extends State<Formu> {
                     children: [
                       // TITULOS
                       Container(
-                        margin: const EdgeInsets.only(top: largoActual * 0.013, left: anchoActual * 0.055),
+                        margin: const EdgeInsets.only(top: 10 * 0.013, left: 10 * 0.055),
                         //color:Colors.grey,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -446,7 +446,7 @@ class _FormuState extends State<Formu> {
                                             'OK',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: largoActual * 0.034,
+                                                fontSize: 12,
                                                 color: Color.fromARGB(
                                                     255, 13, 58, 94)),
                                           ),
@@ -473,4 +473,3 @@ class _FormuState extends State<Formu> {
   }
 }
 
-*/

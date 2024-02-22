@@ -1,3 +1,4 @@
+import 'package:appsol_final/components/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
@@ -16,11 +17,11 @@ class _PresentaState extends State<Presenta> {
   void initState() {
     //navegar al login despues de 3 segundos
     super.initState();
-    Future.delayed(Duration(seconds: 6), () {
-      /*Navigator.pushReplacement(
+    Future.delayed(Duration(seconds: 5), () {
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Login2()), // Reemplaza OtraVista con el nombre de tu vista destino
-      );*/
+        MaterialPageRoute(builder: (context) => Login()), // Reemplaza OtraVista con el nombre de tu vista destino
+      );
     });
   }
 

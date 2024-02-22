@@ -589,6 +589,29 @@ class _HolaConductor2State extends State<HolaConductor2> {
                         ),
                       ),
 
+                      /**MI CODIGO DE MI VA AQUI OK? XD */
+                      Positioned(
+                          top: 90,
+                          left: 10,
+                          child: Card(
+                            
+                            elevation: 8,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                //color: Colors.blue,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Hola, ${userProvider.user?.nombre}',
+                                    style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0),fontSize: 16),),
+                                    Text("Tu ruta es la N°: 1",
+                                    style: TextStyle(color: const Color.fromARGB(255, 37, 37, 37),fontSize: 19),)
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )),
                       //BARRA DE PROGRESO
                       Positioned(
                         top: anchoActual *
