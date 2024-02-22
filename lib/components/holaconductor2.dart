@@ -314,11 +314,13 @@ class _HolaConductor2State extends State<HolaConductor2> {
         }
 
         print("---- numerp de Pedido Actual $numPedidoActual");
-        setState(() {
-          decimalProgreso = ((numPedidoActual) / cantidad);
-          print("-------$numPedidoActual/$cantidad = $decimalProgreso");
-          porcentajeProgreso = (decimalProgreso * 100).round();
-        });
+        if (numPedidoActual > 0 && cantidad > 0) {
+          setState(() {
+            decimalProgreso = ((numPedidoActual) / cantidad);
+            print("-------$numPedidoActual/$cantidad = $decimalProgreso");
+            porcentajeProgreso = (decimalProgreso * 100).round();
+          });
+        }
         if (porcentajeProgreso < 33.4) {
           setState(() {
             colorProgreso = Color.fromRGBO(255, 0, 93, 1.000);
