@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Camara extends StatefulWidget {
   final int? pedidoID;
@@ -32,6 +33,27 @@ class _CamaraState extends State<Camara> {
   String observacionPedido = '';
   String estadoNuevo = '';
   String tipoPago = '';
+  File? _imageFile;
+
+  Future<void> _takePicture() async {
+    final pass = await getApplicationDocumentsDirectory();
+    final otro = path.join(pass.path, 'pictures');
+    final picturesDirectory = Directory(otro);
+    if (!await picturesDirectory.exists()) {
+      await picturesDirectory.create(recursive: true);
+      print('Directorio creado: $otro');
+    } else {
+      print('El directorio ya existe: $otro');
+    }
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
 
   Future<dynamic> updateEstadoPedido(
       estadoNuevo, foto, observacion, tipoPago, pedidoID) async {
@@ -102,22 +124,16 @@ class _CamaraState extends State<Camara> {
 
   void deletePhoto(String? fileName) async {
     try {
-      // Obtener el directorio de caché
-      Directory cacheDir = await getTemporaryDirectory();
-
-      // Combinar el directorio con el nombre del archivo
-      String filePath = '${cacheDir.path}/$fileName';
-
       // Crear un objeto File para el archivo que deseas eliminar
-      File file = File(filePath);
+      File file = File(fileName!);
 
       // Verificar si el archivo existe antes de intentar eliminarlo
       if (await file.exists()) {
         // Eliminar el archivo
         await file.delete();
-        print('Foto eliminada con éxito: $filePath');
+        print('Foto eliminada con éxito: $fileName');
       } else {
-        print('El archivo no existe: $filePath');
+        print('El archivo no existe: $fileName');
       }
     } catch (e) {
       print('Error al eliminar la foto: $e');
@@ -130,7 +146,6 @@ class _CamaraState extends State<Camara> {
     super.dispose();
   }
 
-  late XFile? _image;
   @override
   Widget build(BuildContext context) {
     final anchoActual = MediaQuery.of(context).size.width;
@@ -199,52 +214,9 @@ class _CamaraState extends State<Camara> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    //BOTON DE ELIMINAR FOTO
-                                    ElevatedButton(
-                                      onPressed: () async {
-                                        try {
-                                          deletePhoto(_image?.name);
-                                        } catch (e) {
-                                          print(
-                                              'Error al eliminar la foto: $e');
-                                        }
-                                      },
-                                      child: Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                      ),
-                                      style: ButtonStyle(
-                                          backgroundColor:
-                                              MaterialStateProperty.all(
-                                                  Colors.black)),
-                                    ),
                                     //BOTON DE TOMAR FOTO
                                     FloatingActionButton(
-                                      onPressed: () async {
-                                        try {
-                                          final pass =
-                                              await getApplicationDocumentsDirectory();
-                                          final otro =
-                                              path.join(pass.path, 'pictures');
-                                          final picturesDirectory =
-                                              Directory(otro);
-
-                                          if (!await picturesDirectory
-                                              .exists()) {
-                                            await picturesDirectory.create(
-                                                recursive: true);
-                                            print('Directorio creado: $otro');
-                                          } else {
-                                            print(
-                                                'El directorio ya existe: $otro');
-                                          }
-                                          _image = await cameraController
-                                              .takePicture();
-                                          print("path: ${_image?.path}");
-                                        } catch (e) {
-                                          print('Error al tomar la foto: $e');
-                                        }
-                                      },
+                                      onPressed: _takePicture,
                                       backgroundColor: Colors.black,
                                       child: const Icon(
                                         Icons.camera_alt,
@@ -255,165 +227,145 @@ class _CamaraState extends State<Camara> {
                                     ElevatedButton(
                                       onPressed: () async {
                                         try {
-                                          print('nombre: ${_image?.name}');
-                                          final Directory appDirectory =
-                                              await getApplicationDocumentsDirectory();
-                                          final String pictureDirectory =
-                                              path.join(appDirectory.path,
-                                                  'pictures');
-                                          final String timestamp =
-                                              DateTime.now().toString();
-                                          final String fileName =
-                                              '$timestamp.jpg';
-                                          String filePath =
-                                              '$pictureDirectory/$fileName';
-                                          _image?.saveTo(filePath);
-                                          print(
-                                              'nuevo path y nombre: $filePath');
-                                          // Ruta del directorio que quieres iterar
-                                          String directorio =
-                                              '/data/user/0/com.example.appsol_final/app_flutter/pictures/';
-                                          // Crear un objeto Directory con la ruta del directorio
-                                          Directory dir = Directory(directorio);
-                                          // Verificar si el directorio existe
-                                          // Listar los elementos en el directorio
-                                          List<FileSystemEntity> elementos =
-                                              dir.listSync();
-                                          // Iterar sobre los elementos e imprimir los paths
-                                          for (var elemento in elementos) {
-                                            print(elemento.path);
-                                          }
-                                          deletePhoto(_image?.name);
-
-                                          // ignore: use_build_context_synchronously
-                                          showModalBottomSheet(
-                                              backgroundColor: Color.fromRGBO(
-                                                  0, 106, 252, 1.000),
-                                              context: context,
-                                              isScrollControlled: true,
-                                              builder: (context) {
-                                                return Padding(
-                                                  padding: EdgeInsets.only(
-                                                      bottom:
-                                                          MediaQuery.of(context)
-                                                              .viewInsets
-                                                              .bottom),
-                                                  child: Container(
-                                                    height: largoActual * 0.15,
-                                                    margin: EdgeInsets.only(
-                                                        left:
-                                                            anchoActual * 0.08,
-                                                        right:
-                                                            anchoActual * 0.08,
-                                                        top: largoActual * 0.05,
-                                                        bottom:
-                                                            largoActual * 0.05),
-                                                    child: Column(
-                                                      children: [
-                                                        Column(
+                                          if (_imageFile != null) {
+                                            final pass =
+                                                await getApplicationDocumentsDirectory();
+                                            final otro = path.join(
+                                                pass.path, 'pictures');
+                                            final String fileName =
+                                                '${widget.pedidoID}.jpg';
+                                            String filePath = '$otro/$fileName';
+                                            final nuevaFoto =
+                                                XFile(_imageFile!.path);
+                                            nuevaFoto.saveTo(filePath);
+                                            deletePhoto(_imageFile!.path);
+                                            setState(() {
+                                              _imageFile = null;
+                                            });
+                                            showModalBottomSheet(
+                                                backgroundColor: Color.fromRGBO(
+                                                    0, 106, 252, 1.000),
+                                                context: context,
+                                                isScrollControlled: true,
+                                                builder: (context) {
+                                                  return Padding(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: MediaQuery.of(
+                                                                context)
+                                                            .viewInsets
+                                                            .bottom),
+                                                    child: Container(
+                                                      height:
+                                                          largoActual * 0.15,
+                                                      margin: EdgeInsets.only(
+                                                          left: anchoActual *
+                                                              0.08,
+                                                          right: anchoActual *
+                                                              0.08,
+                                                          top: largoActual *
+                                                              0.05,
+                                                          bottom: largoActual *
+                                                              0.05),
+                                                      child: Column(
+                                                        children: [
+                                                          Column(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Container(
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            8.0),
+                                                                    border:
+                                                                        Border
+                                                                            .all(
+                                                                      color: Colors
+                                                                          .grey,
+                                                                      width:
+                                                                          0.5,
+                                                                    ),
+                                                                  ),
+                                                                  child:
+                                                                      TextField(
+                                                                    decoration: InputDecoration(
+                                                                        hintText:
+                                                                            comentario),
+                                                                    controller:
+                                                                        comentarioConductor,
+                                                                  ),
+                                                                )
+                                                              ]),
+                                                          const SizedBox(
+                                                            height: 20,
+                                                          ),
+                                                          Row(
                                                             mainAxisAlignment:
                                                                 MainAxisAlignment
-                                                                    .center,
+                                                                    .spaceBetween,
                                                             children: [
-                                                              Container(
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              8.0),
-                                                                  border: Border
-                                                                      .all(
-                                                                    color: Colors
-                                                                        .grey,
-                                                                    width: 0.5,
-                                                                  ),
-                                                                ),
+                                                              SizedBox(
+                                                                height: 40,
+                                                                width:
+                                                                    anchoActual *
+                                                                        0.83,
                                                                 child:
-                                                                    TextField(
-                                                                  decoration:
-                                                                      InputDecoration(
-                                                                          hintText:
-                                                                              comentario),
-                                                                  controller:
-                                                                      comentarioConductor,
-                                                                ),
-                                                              )
-                                                            ]),
-                                                        const SizedBox(
-                                                          height: 20,
-                                                        ),
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            SizedBox(
-                                                              height: 40,
-                                                              width:
-                                                                  anchoActual *
-                                                                      0.83,
-                                                              child:
-                                                                  ElevatedButton(
-                                                                      onPressed:
-                                                                          () {
-                                                                        updateEstadoPedido(
-                                                                            estadoNuevo,
-                                                                            null,
-                                                                            comentarioConductor.text,
-                                                                            tipoPago,
-                                                                            widget.pedidoID);
-                                                                        Navigator
-                                                                            .push(
-                                                                          context,
-                                                                          //REGRESA A LA VISTA DE HOME PERO ACTUALIZA EL PEDIDO
-                                                                          MaterialPageRoute(
-                                                                              builder: (context) => const HolaConductor2()),
-                                                                        );
-                                                                      },
-                                                                      style: ButtonStyle(
-                                                                          elevation: MaterialStateProperty.all(
-                                                                              8),
-                                                                          surfaceTintColor: MaterialStateProperty.all(Colors
-                                                                              .white),
-                                                                          backgroundColor: MaterialStateProperty.all(Colors
-                                                                              .white)),
-                                                                      child:
-                                                                          const Row(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.center,
-                                                                        children: [
-                                                                          Text(
-                                                                            "Listo",
-                                                                            style: TextStyle(
-                                                                                fontSize: 18,
-                                                                                fontWeight: FontWeight.w400,
-                                                                                color: Color.fromRGBO(0, 106, 252, 1.000)),
-                                                                          ),
-                                                                          SizedBox(
-                                                                              width: 8),
-                                                                          Icon(
-                                                                            Icons.arrow_forward, // Reemplaza con el icono que desees
-                                                                            size:
-                                                                                24,
-                                                                            color: Color.fromRGBO(
-                                                                                0,
-                                                                                106,
-                                                                                252,
-                                                                                1.000),
-                                                                          ),
-                                                                        ],
-                                                                      )),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ],
+                                                                    ElevatedButton(
+                                                                        onPressed:
+                                                                            () {
+                                                                          updateEstadoPedido(
+                                                                              estadoNuevo,
+                                                                              null,
+                                                                              comentarioConductor.text,
+                                                                              tipoPago,
+                                                                              widget.pedidoID);
+                                                                          Navigator
+                                                                              .push(
+                                                                            context,
+                                                                            //REGRESA A LA VISTA DE HOME PERO ACTUALIZA EL PEDIDO
+                                                                            MaterialPageRoute(builder: (context) => const HolaConductor2()),
+                                                                          );
+                                                                        },
+                                                                        style: ButtonStyle(
+                                                                            elevation: MaterialStateProperty.all(
+                                                                                8),
+                                                                            surfaceTintColor: MaterialStateProperty.all(Colors
+                                                                                .white),
+                                                                            backgroundColor: MaterialStateProperty.all(Colors
+                                                                                .white)),
+                                                                        child:
+                                                                            const Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.center,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Listo",
+                                                                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: Color.fromRGBO(0, 106, 252, 1.000)),
+                                                                            ),
+                                                                            SizedBox(width: 8),
+                                                                            Icon(
+                                                                              Icons.arrow_forward, // Reemplaza con el icono que desees
+                                                                              size: 24,
+                                                                              color: Color.fromRGBO(0, 106, 252, 1.000),
+                                                                            ),
+                                                                          ],
+                                                                        )),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                              });
+                                                  );
+                                                });
+                                          } else {
+                                            print(
+                                                "Todavia no se ha tomado una foto");
+                                          }
                                         } catch (e) {
                                           print('Algun error: $e');
                                         }

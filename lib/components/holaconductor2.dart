@@ -132,9 +132,11 @@ class _HolaConductor2State extends State<HolaConductor2> {
   double totalEfectivo = 0;
   int totalPendiente = 0;
   int totalProceso = 0;
+  int totalEntregado = 0;
+  int totalTruncado = 0;
   double decimalProgreso = 0;
   int porcentajeProgreso = 0;
-
+  List<int> idpedidos = [];
   @override
   void initState() {
     super.initState();
@@ -162,7 +164,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
       });
     } else {
       setState(() {
-        conductorIDpref = 0;
+        conductorIDpref = 4;
       });
     }
 
@@ -253,6 +255,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
           setState(() {
             totalMonto += listPedidosbyRuta[i].montoTotal;
             print('tipo: ${listPedidosbyRuta[i].tipoPago}');
+            idpedidos.add(listPedidosbyRuta[i].id);
           });
 
           switch (listPedidosbyRuta[i].tipoPago) {
@@ -283,6 +286,18 @@ class _HolaConductor2State extends State<HolaConductor2> {
             case 'en proceso':
               setState(() {
                 totalProceso++;
+              });
+
+              break;
+            case 'truncado':
+              setState(() {
+                totalTruncado++;
+              });
+
+              break;
+            case 'entregado':
+              setState(() {
+                totalEntregado++;
               });
 
               break;
@@ -594,7 +609,6 @@ class _HolaConductor2State extends State<HolaConductor2> {
                           top: 90,
                           left: 10,
                           child: Card(
-                            
                             elevation: 8,
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -603,10 +617,20 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Hola, ${userProvider.user?.nombre}',
-                                    style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0),fontSize: 16),),
-                                    Text("Tu ruta es la N°: 1",
-                                    style: TextStyle(color: const Color.fromARGB(255, 37, 37, 37),fontSize: 19),)
+                                    Text(
+                                      'Hola, ${userProvider.user?.nombre}',
+                                      style: TextStyle(
+                                          color: const Color.fromARGB(
+                                              255, 0, 0, 0),
+                                          fontSize: 16),
+                                    ),
+                                    Text(
+                                      "Tu ruta es la N°: 1",
+                                      style: TextStyle(
+                                          color: const Color.fromARGB(
+                                              255, 37, 37, 37),
+                                          fontSize: 19),
+                                    )
                                   ],
                                 ),
                               ),
@@ -764,7 +788,11 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                             totalEfectivo:
                                                                 totalEfectivo,
                                                             pedidosEntregados:
-                                                                totalProceso,
+                                                                totalEntregado,
+                                                            idpedidos:
+                                                                idpedidos,
+                                                            pedidosTruncados:
+                                                                totalTruncado,
                                                           )),
                                                 );
                                               },
