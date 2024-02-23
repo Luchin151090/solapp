@@ -10,8 +10,11 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
-import 'package:appsol_final/components/camara.dart';
 import 'package:appsol_final/components/pdf.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
+import 'dart:io';
 
 //import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:appsol_final/models/producto_model.dart';
@@ -155,7 +158,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
       });
     } else {
       setState(() {
-        rutaIDpref = 5;
+        rutaIDpref = 8;
       });
     }
     if (userPreference.getInt("userID") != null) {
@@ -164,7 +167,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
       });
     } else {
       setState(() {
-        conductorIDpref = 4;
+        conductorIDpref = 3;
       });
     }
 
@@ -524,6 +527,180 @@ class _HolaConductor2State extends State<HolaConductor2> {
         num2 = 0.0;
         ubicacionPref = LatLng(num1, num2);
       });
+    }
+  }
+
+  TextEditingController comentarioConductor = TextEditingController();
+  String comentario = '';
+  String observacionPedido = '';
+  String estadoNuevo = '';
+  String tipoPago = '';
+  File? _imageFile;
+
+  Future<void> _takePicture() async {
+    final pass = await getApplicationDocumentsDirectory();
+    final otro = path.join(pass.path, 'pictures');
+    final picturesDirectory = Directory(otro);
+    if (!await picturesDirectory.exists()) {
+      await picturesDirectory.create(recursive: true);
+      print('Directorio creado: $otro');
+    } else {
+      print('El directorio ya existe: $otro');
+    }
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
+  void esProblemaOesPago(String problemasOpago) {
+    if (problemasOpago == 'pago') {
+      setState(() {
+        comentario = 'Comentarios';
+        estadoNuevo = 'entregado';
+        tipoPago = 'yape';
+      });
+    } else {
+      setState(() {
+        comentario = 'Detalla los inconvenientes';
+        estadoNuevo = 'truncado';
+        tipoPago = '';
+      });
+    }
+  }
+
+  void deletePhoto(String? fileName) async {
+    try {
+      // Crear un objeto File para el archivo que deseas eliminar
+      File file = File(fileName!);
+
+      // Verificar si el archivo existe antes de intentar eliminarlo
+      if (await file.exists()) {
+        // Eliminar el archivo
+        await file.delete();
+        print('Foto eliminada con éxito: $fileName');
+      } else {
+        print('El archivo no existe: $fileName');
+      }
+    } catch (e) {
+      print('Error al eliminar la foto: $e');
+    }
+  }
+
+  void TomarFoto(double anchoActual, double largoActual, String dato) async {
+    _takePicture();
+    if (_imageFile != null) {
+      final pass = await getApplicationDocumentsDirectory();
+      final otro = path.join(pass.path, 'pictures');
+      final String fileName = '${pedidoTrabajo.id}.jpg';
+      String filePath = '$otro/$fileName';
+      final nuevaFoto = XFile(_imageFile!.path);
+      nuevaFoto.saveTo(filePath);
+      deletePhoto(_imageFile!.path);
+      setState(() {
+        _imageFile = null;
+      });
+      esProblemaOesPago(dato);
+      showModalBottomSheet(
+          backgroundColor: Color.fromRGBO(0, 106, 252, 1.000),
+          context: context,
+          isScrollControlled: true,
+          builder: (context) {
+            return Padding(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Container(
+                height: largoActual * 0.15,
+                margin: EdgeInsets.only(
+                    left: anchoActual * 0.08,
+                    right: anchoActual * 0.08,
+                    top: largoActual * 0.05,
+                    bottom: largoActual * 0.05),
+                child: Column(
+                  children: [
+                    Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(
+                                color: Colors.grey,
+                                width: 0.5,
+                              ),
+                            ),
+                            child: TextField(
+                              decoration: InputDecoration(hintText: comentario),
+                              controller: comentarioConductor,
+                            ),
+                          )
+                        ]),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          height: 40,
+                          width: anchoActual * 0.83,
+                          child: ElevatedButton(
+                              onPressed: () {
+                                updateEstadoPedido(
+                                    estadoNuevo,
+                                    null,
+                                    comentarioConductor.text,
+                                    tipoPago,
+                                    pedidoTrabajo.id);
+                                Navigator.push(
+                                  context,
+                                  //REGRESA A LA VISTA DE HOME PERO ACTUALIZA EL PEDIDO
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const HolaConductor2()),
+                                );
+                              },
+                              style: ButtonStyle(
+                                  elevation: MaterialStateProperty.all(8),
+                                  surfaceTintColor:
+                                      MaterialStateProperty.all(Colors.white),
+                                  backgroundColor:
+                                      MaterialStateProperty.all(Colors.white)),
+                              child: const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Listo",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w400,
+                                        color:
+                                            Color.fromRGBO(0, 106, 252, 1.000)),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(
+                                    Icons
+                                        .arrow_forward, // Reemplaza con el icono que desees
+                                    size: 24,
+                                    color: Color.fromRGBO(0, 106, 252, 1.000),
+                                  ),
+                                ],
+                              )),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+    } else {
+      print("Todavia no se ha tomado una foto");
     }
   }
 
@@ -1028,7 +1205,11 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                   height: largoActual * 0.05,
                                                   child: ElevatedButton(
                                                       onPressed: () {
-                                                        Navigator.push(
+                                                        TomarFoto(
+                                                            anchoActual,
+                                                            largoActual,
+                                                            'pago');
+                                                        /*Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
                                                               builder:
@@ -1039,7 +1220,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                                         problemasOpago:
                                                                             'pago',
                                                                       )),
-                                                        );
+                                                        );*/
                                                       },
                                                       style: ButtonStyle(
                                                           backgroundColor:
@@ -1236,6 +1417,11 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                               height: largoActual * 0.05,
                                               child: ElevatedButton(
                                                   onPressed: () {
+                                                    TomarFoto(
+                                                        anchoActual,
+                                                        largoActual,
+                                                        'problemas');
+                                                    /*
                                                     Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
@@ -1247,7 +1433,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                                 problemasOpago:
                                                                     'problemas',
                                                               )),
-                                                    );
+                                                    );*/
                                                   },
                                                   style: ButtonStyle(
                                                       backgroundColor:
