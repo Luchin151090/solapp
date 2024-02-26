@@ -54,16 +54,17 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   String apiUrl = dotenv.env['API_URL'] ?? '';
   List<Producto> listProducto = [];
   List<UbicacionModel> listUbicacionesObjetos = [];
-  //late List<String> listUbicaciones = [];
+  List<String> ubicacionesString = [];
+  String? _ubicacionSelected;
   late String? dropdownValue;
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
-  Color colorTextos = Color.fromARGB(255, 3, 34, 60);
+  Color colorTextos = const Color.fromARGB(255, 3, 34, 60);
   late String direccion;
   late UbicacionModel miUbicacion;
   Timer? _timer;
-  bool _disposed = false;
-  bool _autoScrollInProgress = false;
+  //bool _disposed = false;
+  //bool _autoScrollInProgress = false;
 
   ScrollController scrollController1 = ScrollController();
   ScrollController scrollController2 = ScrollController();
@@ -149,6 +150,11 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
             listUbicacionesObjetos = tempUbicacion;
             print(listUbicacionesObjetos);
           });
+          for (var i = 0; i < listUbicacionesObjetos.length; i++) {
+            setState(() {
+              ubicacionesString.add(listUbicacionesObjetos[i].direccion);
+            });
+          }
         }
       }
     } catch (e) {
@@ -380,13 +386,29 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     }
   }
 
+  UbicacionModel direccionSeleccionada(String direccion) {
+    UbicacionModel ubicacionObjeto = UbicacionModel(
+        id: 0,
+        latitud: 0,
+        longitud: 0,
+        direccion: 'direccion',
+        clienteID: 0,
+        clienteNrID: 0,
+        distrito: 'distrito');
+    for (var i = 0; i < listUbicacionesObjetos.length; i++) {
+      if (listUbicacionesObjetos[i].direccion == direccion) {
+        setState(() {
+          ubicacionObjeto = listUbicacionesObjetos[i];
+        });
+      }
+    }
+    return ubicacionObjeto;
+  }
   // TEST UBICACIONES PARA DROPDOWN
-  List<String> ubicacionesString = ['1era', '2da', '3ra'];
-  String? _ubicacionSelected;
 
   @override
   void dispose() {
-    _disposed = true; // Mark as disposed
+    //_disposed = true; // Mark as disposed
     _timer?.cancel();
 
     super.dispose();
@@ -428,221 +450,174 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                             Container(
                               width: MediaQuery.of(context).size.width / 1.4,
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20)),
+                                  borderRadius: BorderRadius.circular(15)),
                               child: Row(
                                 children: [
                                   Container(
+                                    width: anchoActual * 0.7,
                                     decoration: BoxDecoration(
-                                        color: Colors.amber,
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: IconButton(
-                                        onPressed: () {
-                                          print("soy el pin");
+                                      color: const Color.fromRGBO(
+                                          83, 176, 68, 1.000),
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Container(
+                                      //color: Colors.amberAccent,
+                                      margin: const EdgeInsets.only(
+                                          left: 12, right: 5),
+                                      child: DropdownButton<String>(
+                                        hint: Text(
+                                          '¿A dónde llevamos tu pedido?',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: largoActual * 0.018,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        icon: IconButton(
+                                          onPressed: () {
+                                            showModalBottomSheet(
+                                              backgroundColor:
+                                                  const Color.fromRGBO(
+                                                      0, 106, 252, 1.000),
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return Container(
+                                                  margin: EdgeInsets.only(
+                                                      top: largoActual * 0.041,
+                                                      left: anchoActual * 0.055,
+                                                      right:
+                                                          anchoActual * 0.055),
+                                                  height: largoActual * 0.17,
+                                                  width: anchoActual,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Container(
+                                                        margin: const EdgeInsets
+                                                            .only(left: 10),
+                                                        child: Text(
+                                                          'Agregar Ubicación',
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize:
+                                                                largoActual *
+                                                                    0.023,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                          height: largoActual *
+                                                              0.013),
+                                                      ElevatedButton(
+                                                        onPressed: () async {
+                                                          print("ubi añadidda");
+                                                          await currentLocation();
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        style: ButtonStyle(
+                                                          elevation:
+                                                              MaterialStateProperty
+                                                                  .all(8),
+                                                          minimumSize:
+                                                              MaterialStatePropertyAll(Size(
+                                                                  anchoActual *
+                                                                      0.28,
+                                                                  largoActual *
+                                                                      0.054)),
+                                                          backgroundColor:
+                                                              MaterialStateProperty
+                                                                  .all(Colors
+                                                                      .white),
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .add_location_alt_rounded,
+                                                              color: const Color
+                                                                  .fromRGBO(
+                                                                  0,
+                                                                  106,
+                                                                  252,
+                                                                  1.000),
+                                                              size:
+                                                                  largoActual *
+                                                                      0.034,
+                                                            ),
+                                                            Text(
+                                                              ' Agregar ubicación actual',
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      largoActual *
+                                                                          0.021,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                  color: const Color
+                                                                      .fromRGBO(
+                                                                      0,
+                                                                      106,
+                                                                      252,
+                                                                      1.000)),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                          icon: Icon(
+                                              Icons.add_location_alt_rounded,
+                                              size: largoActual * 0.031,
+                                              color: Colors.white),
+                                        ),
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: largoActual * 0.018,
+                                            fontWeight: FontWeight.w500),
+                                        borderRadius: BorderRadius.circular(20),
+                                        elevation: 20,
+                                        dropdownColor: const Color.fromRGBO(
+                                            83, 176, 68, 1.000),
+                                        isExpanded: true,
+                                        value: _ubicacionSelected,
+                                        items: ubicacionesString
+                                            .map((String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Text(value),
+                                          );
+                                        }).toList(),
+                                        onChanged: (String? newValue) {
+                                          print(newValue);
+                                          setState(() {
+                                            _ubicacionSelected = newValue!;
+                                            miUbicacion =
+                                                direccionSeleccionada(newValue);
+                                            Provider.of<UbicacionProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .updateUbicacion(miUbicacion);
+                                          });
                                         },
-                                        icon: Icon(
-                                          Icons.add_location_alt_rounded,
-                                          size: 30,
-                                          color: const Color.fromARGB(
-                                              255, 13, 125, 218),
-                                        )),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(3),
-                                    margin: const EdgeInsets.only(left: 20),
-                                    decoration: BoxDecoration(
-                                        color:
-                                            Color.fromARGB(255, 183, 255, 172),
-                                        borderRadius: BorderRadius.circular(8)),
-                                    width: 180,
-                                    //height: 80,
-                                    child: DropdownButton<String>(
-                                      isExpanded: true,
-                                      value: _ubicacionSelected,
-                                      items:
-                                          ubicacionesString.map((String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(value),
-                                        );
-                                      }).toList(),
-                                      onChanged: (String? newValue) {
-                                        print(newValue);
-                                        setState(() {
-                                          _ubicacionSelected = newValue!;
-                                        });
-                                      },
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-
-                            /*Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color:
-                                      const Color.fromRGBO(83, 176, 68, 1.000),
-                                  borderRadius: BorderRadius.circular(40)),
-                              height: largoActual * 0.059,
-                              width: anchoActual * 0.7,
-                              child: DropdownMenu<String>(
-                                textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: largoActual * 0.018,
-                                    fontWeight: FontWeight.w500),
-                                hintText: '¿Dónde lo entregamos?',
-                                trailingIcon: Icon(
-                                  Icons.arrow_drop_down,
-                                  size: largoActual * 0.031,
-                                  color: Colors.white,
-                                ),
-                                leadingIcon: IconButton(
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                      backgroundColor:
-                                          Color.fromRGBO(0, 106, 252, 1.000),
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return Container(
-                                          margin: EdgeInsets.only(
-                                              top: largoActual * 0.041,
-                                              left: anchoActual * 0.055,
-                                              right: anchoActual * 0.055),
-                                          height: largoActual * 0.17,
-                                          width: anchoActual,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                margin: const EdgeInsets.only(
-                                                    left: 10),
-                                                child: Text(
-                                                  'Agregar Ubicación',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize:
-                                                        largoActual * 0.023,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                  height: largoActual * 0.013),
-                                              ElevatedButton(
-                                                onPressed: () async {
-                                                  print("ubi añadidda");
-                                                  await currentLocation();
-                                                  Navigator.of(context).pop();
-                                                },
-                                                style: ButtonStyle(
-                                                  elevation:
-                                                      MaterialStateProperty.all(
-                                                          8),
-                                                  minimumSize:
-                                                      MaterialStatePropertyAll(
-                                                          Size(
-                                                              anchoActual *
-                                                                  0.28,
-                                                              largoActual *
-                                                                  0.054)),
-                                                  backgroundColor:
-                                                      MaterialStateProperty.all(
-                                                          Colors.white),
-                                                ),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: [
-                                                    Icon(
-                                                      Icons
-                                                          .add_location_alt_rounded,
-                                                      color:
-                                                          const Color.fromRGBO(
-                                                              0,
-                                                              106,
-                                                              252,
-                                                              1.000),
-                                                      size: largoActual * 0.034,
-                                                    ),
-                                                    Text(
-                                                      ' Agregar ubicación actual',
-                                                      style: TextStyle(
-                                                          fontSize:
-                                                              largoActual *
-                                                                  0.021,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color: const Color
-                                                              .fromRGBO(0, 106,
-                                                              252, 1.000)),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                  icon: Icon(Icons.add_location_alt_rounded,
-                                      size: largoActual * 0.031,
-                                      color: Colors.white),
-                                ),
-                                inputDecorationTheme: InputDecorationTheme(
-                                    hintStyle: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: largoActual * 0.018,
-                                        fontWeight: FontWeight.w500),
-                                    enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                        borderSide: const BorderSide(
-                                            width: 0, color: Colors.white))),
-                                expandedInsets: EdgeInsets.zero,
-                                menuStyle: MenuStyle(
-                                  surfaceTintColor: MaterialStateProperty.all(
-                                      const Color.fromARGB(255, 252, 255, 255)),
-                                  backgroundColor: MaterialStateProperty.all(
-                                      const Color.fromARGB(255, 252, 255, 255)),
-                                ),
-                                initialSelection: dropdownValue,
-                                onSelected: (String? value) {
-                                  // This is called when the user selects an item.
-                                  setState(() {
-                                    for (var i = 0;
-                                        i < listUbicacionesObjetos.length;
-                                        i++) {
-                                      if (listUbicacionesObjetos[i].direccion ==
-                                          value) {
-                                        miUbicacion = listUbicacionesObjetos[i];
-                                        Provider.of<UbicacionProvider>(context,
-                                                listen: false)
-                                            .updateUbicacion(miUbicacion);
-
-                                        listUbicacionesObjetos.insert(
-                                            0, listUbicacionesObjetos[i]);
-                                        listUbicacionesObjetos.remove(
-                                            listUbicacionesObjetos[i + 1]);
-                                        dropdownValue = value;
-                                      }
-                                    }
-                                  });
-                                },
-                                dropdownMenuEntries: List.generate(
-                                    listUbicacionesObjetos.length, (index) {
-                                  final value =
-                                      listUbicacionesObjetos[index].direccion;
-                                  return DropdownMenuEntry<String>(
-                                      value: value,
-                                      label: value.length > 20
-                                          ? '${value.substring(0, 15)}'
-                                          : value);
-                                }).toList(),
-                              ),
-                            ),*/
 
                             //CARRITO
                             Container(
@@ -686,7 +661,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                         margin: EdgeInsets.only(
                             left: anchoActual * 0.055, top: largoActual * 0.03),
                         child: Text(
-                          "Bienvenid@, ${userProvider.user?.nombre}",
+                          "Bienvenid@, ${userProvider.user?.nombre.capitalize()}",
                           style: TextStyle(
                               fontWeight: FontWeight.w200,
                               fontSize: largoActual * 0.020,
@@ -724,7 +699,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                             labelStyle: TextStyle(
                                 fontSize: largoActual * 0.020,
                                 fontWeight: FontWeight
-                                    .w400), // Ajusta el tamaño del texto de la pestaña seleccionada
+                                    .w500), // Ajusta el tamaño del texto de la pestaña seleccionada
                             unselectedLabelStyle: TextStyle(
                                 fontSize: largoActual * 0.020,
                                 fontWeight: FontWeight.w300),
@@ -841,7 +816,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                 child: Text(
                               "Mejora tu vida!",
                               style: TextStyle(
-                                  fontSize: largoActual * 0.0198,
+                                  fontSize: largoActual * 0.019,
                                   fontWeight: FontWeight.w300,
                                   color: colorTextos),
                             )),
@@ -850,7 +825,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                 "Necesitas",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w300,
-                                    fontSize: largoActual * 0.021,
+                                    fontSize: largoActual * 0.019,
                                     color: colorTextos),
                               ),
                             )
@@ -858,127 +833,125 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                         ),
                       ),
                       //BOTONES MEJORA TU VIDA Y ASISTENCIA
-                      Container(
-                        margin: EdgeInsets.only(
-                            left: anchoActual * 0.02,
-                            right: anchoActual * 0.02),
-                        child: Row(children: [
-                          Container(
-                            height: largoActual * 0.054,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text(
-                                        'PRONTO',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Color.fromARGB(
-                                                255, 4, 80, 143)),
-                                      ),
-                                      content: Text(
-                                        'Muy pronto te sorprenderemos!',
-                                        style: TextStyle(
-                                            fontSize: largoActual * 0.027,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(); // Cierra el AlertDialog
-                                          },
-                                          child: Text(
-                                            'OK',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: largoActual * 0.034,
-                                                color: const Color.fromARGB(
-                                                    255, 13, 58, 94)),
-                                          ),
+                      Row(children: [
+                        //boton aqui
+                        SizedBox(
+                          width: anchoActual * 0.40,
+                          height: largoActual * 0.054,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text(
+                                      'PRONTO',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Color.fromARGB(255, 4, 80, 143)),
+                                    ),
+                                    content: Text(
+                                      'Muy pronto te sorprenderemos!',
+                                      style: TextStyle(
+                                          fontSize: largoActual * 0.027,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // Cierra el AlertDialog
+                                        },
+                                        child: Text(
+                                          'OK',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: largoActual * 0.034,
+                                              color: const Color.fromARGB(
+                                                  255, 13, 58, 94)),
                                         ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                              style: ButtonStyle(
-                                elevation: MaterialStateProperty.all(8),
-                                minimumSize: MaterialStatePropertyAll(Size(
-                                    anchoActual * 0.28, largoActual * 0.054)),
-                                backgroundColor: MaterialStateProperty.all(
-                                    const Color.fromRGBO(0, 106, 252, 1.000)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons
-                                        .attach_money_outlined, // Reemplaza con el icono que desees
-                                    size: largoActual * 0.028,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                      width: anchoActual *
-                                          0.022), // Ajusta el espacio entre el icono y el texto según tus preferencias
-                                  Text(
-                                    "Aquí",
-                                    style: TextStyle(
-                                        fontSize: largoActual * 0.021,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.white),
-                                  ),
-                                ],
-                              ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all(8),
+                              minimumSize: MaterialStatePropertyAll(Size(
+                                  anchoActual * 0.28, largoActual * 0.054)),
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color.fromRGBO(0, 106, 252, 1.000)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons
+                                      .attach_money_outlined, // Reemplaza con el icono que desees
+                                  size: largoActual * 0.025,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(
+                                    width: anchoActual *
+                                        0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                Text(
+                                  "Aquí",
+                                  style: TextStyle(
+                                      fontSize: largoActual * 0.021,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white),
+                                ),
+                              ],
                             ),
                           ),
-                          Expanded(child: Container()),
-                          Container(
-                            width: anchoActual * 0.55,
-                            height: largoActual * 0.054,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Asistencia()),
-                                );
-                              },
-                              style: ButtonStyle(
-                                elevation: MaterialStateProperty.all(8),
-                                minimumSize: MaterialStatePropertyAll(Size(
-                                    anchoActual * 0.28, largoActual * 0.054)),
-                                backgroundColor: MaterialStateProperty.all(
-                                    const Color.fromRGBO(0, 106, 252, 1.000)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons
-                                        .support_agent_rounded, // Reemplaza con el icono que desees
-                                    size: largoActual * 0.028,
-                                    color: Colors.white,
-                                  ),
+                        ),
+                        Expanded(child: Container()),
+                        //boton ayuda
+                        SizedBox(
+                          width: anchoActual * 0.4,
+                          height: largoActual * 0.054,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Asistencia()),
+                              );
+                            },
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all(8),
+                              minimumSize: MaterialStatePropertyAll(Size(
+                                  anchoActual * 0.28, largoActual * 0.054)),
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color.fromRGBO(0, 106, 252, 1.000)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons
+                                      .support_agent_rounded, // Reemplaza con el icono que desees
+                                  size: largoActual * 0.025,
+                                  color: Colors.white,
+                                ),
 
-                                  SizedBox(
-                                      width: anchoActual *
-                                          0.022), // Ajusta el espacio entre el icono y el texto según tus preferencias
-                                  Text(
-                                    "Asistencia",
-                                    style: TextStyle(
-                                        fontSize: largoActual * 0.021,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.white),
-                                  ),
-                                ],
-                              ),
+                                SizedBox(
+                                    width: anchoActual *
+                                        0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                Text(
+                                  "Ayuda",
+                                  style: TextStyle(
+                                      fontSize: largoActual * 0.021,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white),
+                                ),
+                              ],
                             ),
                           ),
-                        ]),
-                      ),
+                        ),
+                      ]),
                     ]))));
   }
 }

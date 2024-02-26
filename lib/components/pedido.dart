@@ -34,6 +34,7 @@ class _PedidoState extends State<Pedido> {
   double ahorro = 0.0;
   double totalVenta = 0.0;
   double totalProvider = 0.0;
+  double tamanoTitulos = 0.0;
   List<dynamic> seleccionadosTodos = [];
   List<Producto> seleccionadosProvider = [];
   List<Promo> selecciondosPromosProvider = [];
@@ -43,6 +44,7 @@ class _PedidoState extends State<Pedido> {
   String notasParaConductor = '';
   int lastPedido = 0;
   Color color = Colors.white;
+  Color colorDireccion = Colors.redAccent;
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
   //POR AHORA EL CLIENTE ES MANUAL!!""
@@ -86,6 +88,16 @@ class _PedidoState extends State<Pedido> {
   Future<void> crearPedidoyDetallePedido(
       clienteID, tipo, monto, seleccionados, notas) async {
     DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 5));
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          );
+        });
+
     await datosCreadoPedido(clienteID, tiempoActual.toString(), monto, tipo,
         "pendiente", notas, ubicacionSelectID);
     print(tiempoGMTPeru.toString());
@@ -148,31 +160,29 @@ class _PedidoState extends State<Pedido> {
       setState(() {
         ubicacionSelectID = ubicacion.id;
         direccion = ubicacion.direccion;
+        colorDireccion = const Color.fromARGB(255, 1, 75, 135);
       });
     } else {
       print('no es ubi');
       setState(() {
         ubicacionSelectID = 0;
-        direccion = "";
+        direccion = "Seleccione una dirección, por favor";
       });
     }
   }
-  Future <dynamic> cuponExist(cupon)async{
-    var res = await http.post(Uri.parse(apiUrl+codigoverify),
-    headers: {"Content-type":"application/json"},
-    body: jsonEncode({
-      "codigo":cupon
-    }));
-    try{
-      if(res.statusCode==200){
+
+  Future<dynamic> cuponExist(cupon) async {
+    var res = await http.post(Uri.parse(apiUrl + codigoverify),
+        headers: {"Content-type": "application/json"},
+        body: jsonEncode({"codigo": cupon}));
+    try {
+      if (res.statusCode == 200) {
         bool data = json.decode(res.body);
         return data;
       }
-      
-    }catch(e){
+    } catch (e) {
       throw Exception("$e");
     }
-    
   }
 
   @override
@@ -183,545 +193,321 @@ class _PedidoState extends State<Pedido> {
     final userProvider = context.watch<UserProvider>();
     final ubicacionProvider = context.watch<UbicacionProvider>();
     esUbicacion(ubicacionProvider.ubicacion);
+    tamanoTitulos = largoActual * 0.021;
     setState(() {
       seleccionadosTodos = [];
     });
     esVacio(pedidoProvider.pedido);
     print("SELECCIONADOS TODOS");
     print(seleccionadosTodos);
-    return Scaffold(
-      backgroundColor: Colors.white,
-      bottomSheet: BottomSheet(
-          backgroundColor: const Color.fromRGBO(0, 106, 252, 1.000),
-          shadowColor: Colors.black,
-          elevation: 10,
-          enableDrag: false,
-          onClosing: () {},
-          builder: (context) {
-            return SizedBox(
-              height: largoActual * 0.16,
-              child: Container(
-                margin: EdgeInsets.only(
-                    top: largoActual * 0.02,
-                    bottom: largoActual * 0.013,
-                    left: anchoActual * 0.069,
-                    right: anchoActual * 0.069),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Total',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: largoActual * (17 / 736)),
-                        ),
-                        Text(
-                          'S/.$totalVenta',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: largoActual * (17 / 736)),
-                        )
-                      ],
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: largoActual * (8 / 736)),
-                      child: SizedBox(
-                        width: anchoActual * (400 / 360),
-                        child: ElevatedButton(
-                          onPressed:
-                              totalProvider > 0.0 && ubicacionSelectID != 0
-                                  ? () async {
-                                      await crearPedidoyDetallePedido(
-                                          userProvider.user?.id,
-                                          tipoPedido,
-                                          totalVenta,
-                                          seleccionadosProvider,
-                                          notas.text);
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => const Fin()),
-                                      );
-                                    }
-                                  : null,
-                          style: ButtonStyle(
-                            elevation: MaterialStateProperty.all(8),
-                            surfaceTintColor: MaterialStateProperty.all(
-                                const Color.fromARGB(255, 255, 255, 255)),
-                            minimumSize: MaterialStatePropertyAll(Size(
-                                anchoActual * (350 / 360),
-                                largoActual * (38 / 736))),
-                            backgroundColor: MaterialStateProperty.all(
-                                const Color.fromARGB(255, 255, 255, 255)),
-                          ),
-                          child: Text(
-                            'Confirmar Pedido',
-                            style: TextStyle(
-                                color: const Color.fromRGBO(0, 106, 252, 1.000),
-                                fontSize: largoActual * (14 / 736),
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
-      appBar: AppBar(
-        surfaceTintColor: Colors.white,
+    if (totalProvider != 0) {
+      return Scaffold(
         backgroundColor: Colors.white,
-        toolbarHeight: largoActual * 0.08,
-        actions: [
-          Container(
-            margin: EdgeInsets.only(
-                top: largoActual * 0.018, right: anchoActual * 0.045),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(50)),
-            height: largoActual * 0.059,
-            width: largoActual * 0.059,
-            child: Badge(
-              largeSize: 18,
-              backgroundColor: colorCantidadCarrito,
-              label: Text(cantCarrito.toString(),
-                  style: const TextStyle(fontSize: 12)),
-              child: IconButton(
-                onPressed: () {
-                  setState(() {
-                    totalProvider = 0;
-                    seleccionadosTodos = [];
-                    seleccionadosProvider = [];
-                    selecciondosPromosProvider = [];
-                    cantCarrito = 0;
-                  });
-                  pedidoMio = PedidoModel(
-                      seleccionados: seleccionadosProvider,
-                      seleccionadosPromo: selecciondosPromosProvider,
-                      cantidadProd: cantCarrito,
-                      total: totalProvider);
-                  Provider.of<PedidoProvider>(context, listen: false)
-                      .updatePedido(pedidoMio);
-                },
-                icon: const Icon(Icons.delete_rounded),
-                color: const Color.fromRGBO(0, 106, 252, 1.000),
-                iconSize: largoActual * 0.035,
-              ).animate().shakeY(
-                    duration: Duration(milliseconds: 300),
-                  ),
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-          child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //TU PEDIDO
-                    Container(
-                      margin: EdgeInsets.only(
-                          bottom: largoActual * 0.013,
-                          left: anchoActual * 0.055),
-                      child: Text(
-                        "Tu pedido",
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 1, 42, 76),
-                            fontWeight: FontWeight.w600,
-                            fontSize: largoActual * 0.023),
+        bottomSheet: BottomSheet(
+            backgroundColor: const Color.fromRGBO(0, 106, 252, 1.000),
+            shadowColor: Colors.black,
+            elevation: 10,
+            enableDrag: false,
+            onClosing: () {},
+            builder: (context) {
+              return SizedBox(
+                height: largoActual * 0.16,
+                child: Container(
+                  margin: EdgeInsets.only(
+                      top: largoActual * 0.02,
+                      bottom: largoActual * 0.013,
+                      left: anchoActual * 0.069,
+                      right: anchoActual * 0.069),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: largoActual * (17 / 736)),
+                          ),
+                          Text(
+                            'S/.$totalVenta',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: largoActual * (17 / 736)),
+                          )
+                        ],
                       ),
+                      Container(
+                        margin: EdgeInsets.only(top: largoActual * (8 / 736)),
+                        child: SizedBox(
+                          width: anchoActual * (400 / 360),
+                          child: ElevatedButton(
+                            onPressed: totalProvider > 0.0 &&
+                                    ubicacionSelectID != 0
+                                ? () async {
+                                    await crearPedidoyDetallePedido(
+                                        userProvider.user?.id,
+                                        tipoPedido,
+                                        totalVenta,
+                                        seleccionadosProvider,
+                                        notas.text);
+                                    setState(() {
+                                      totalProvider = 0;
+                                      seleccionadosTodos = [];
+                                      seleccionadosProvider = [];
+                                      selecciondosPromosProvider = [];
+                                      cantCarrito = 0;
+                                    });
+                                    pedidoMio = PedidoModel(
+                                        seleccionados: seleccionadosProvider,
+                                        seleccionadosPromo:
+                                            selecciondosPromosProvider,
+                                        cantidadProd: cantCarrito,
+                                        total: totalProvider);
+                                    // ignore: use_build_context_synchronously
+                                    Provider.of<PedidoProvider>(context,
+                                            listen: false)
+                                        .updatePedido(pedidoMio);
+                                    // ignore: use_build_context_synchronously
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const Fin()),
+                                    );
+                                  }
+                                : null,
+                            style: ButtonStyle(
+                              elevation: MaterialStateProperty.all(8),
+                              surfaceTintColor: MaterialStateProperty.all(
+                                  const Color.fromARGB(255, 255, 255, 255)),
+                              minimumSize: MaterialStatePropertyAll(Size(
+                                  anchoActual * (350 / 360),
+                                  largoActual * (38 / 736))),
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color.fromARGB(255, 255, 255, 255)),
+                            ),
+                            child: Text(
+                              'Confirmar Pedido',
+                              style: TextStyle(
+                                  color:
+                                      const Color.fromRGBO(0, 106, 252, 1.000),
+                                  fontSize: largoActual * (14 / 736),
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+        appBar: AppBar(
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          toolbarHeight: largoActual * 0.08,
+          actions: [
+            Container(
+              margin: EdgeInsets.only(
+                  top: largoActual * 0.018, right: anchoActual * 0.045),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: Colors.white, borderRadius: BorderRadius.circular(50)),
+              height: largoActual * 0.059,
+              width: largoActual * 0.059,
+              child: Badge(
+                largeSize: 18,
+                backgroundColor: colorCantidadCarrito,
+                label: Text(cantCarrito.toString(),
+                    style: const TextStyle(fontSize: 12)),
+                child: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      totalProvider = 0;
+                      seleccionadosTodos = [];
+                      seleccionadosProvider = [];
+                      selecciondosPromosProvider = [];
+                      cantCarrito = 0;
+                    });
+                    pedidoMio = PedidoModel(
+                        seleccionados: seleccionadosProvider,
+                        seleccionadosPromo: selecciondosPromosProvider,
+                        cantidadProd: cantCarrito,
+                        total: totalProvider);
+                    Provider.of<PedidoProvider>(context, listen: false)
+                        .updatePedido(pedidoMio);
+                  },
+                  icon: const Icon(Icons.delete_rounded),
+                  color: const Color.fromRGBO(0, 106, 252, 1.000),
+                  iconSize: largoActual * 0.035,
+                ).animate().shakeY(
+                      duration: Duration(milliseconds: 300),
                     ),
-                    SizedBox(
-                      height: largoActual * 0.24,
-                      child: Card(
-                        surfaceTintColor: Colors.white,
-                        color: Colors.white,
-                        elevation: 8,
+              ),
+            ),
+          ],
+        ),
+        body: SafeArea(
+            child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      //TU PEDIDO
+                      Container(
                         margin: EdgeInsets.only(
-                            top: largoActual * 0.0068,
                             bottom: largoActual * 0.013,
-                            left: anchoActual * 0.028,
-                            right: anchoActual * 0.028),
-                        child: ListView.builder(
-                            itemCount: seleccionadosTodos.length,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                alignment: Alignment.center,
-                                margin: EdgeInsets.only(
-                                    bottom: largoActual * 0.0068,
-                                    left: anchoActual * 0.028,
-                                    right: anchoActual * 0.028),
-                                decoration: const BoxDecoration(
-                                    border: Border(
-                                  bottom: BorderSide(
-                                      style: BorderStyle.solid,
-                                      color: Colors.black26),
-                                )),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.only(
-                                              left: anchoActual * 0.028),
-                                          height: largoActual * 0.064,
-                                          width: anchoActual * 0.13,
-                                          decoration: BoxDecoration(
-                                              color: Colors.transparent,
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                              image: DecorationImage(
-                                                image: NetworkImage(
-                                                    seleccionadosTodos[index]
-                                                        .foto),
-                                                //fit: BoxFit.cover,
-                                              )),
-                                        ),
-                                        SizedBox(
-                                          width: anchoActual * 0.028,
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              seleccionadosTodos[index]
-                                                  .nombre
-                                                  .toString()
-                                                  .capitalize(),
-                                              style: TextStyle(
-                                                  fontSize: largoActual * 0.019,
-                                                  color: const Color.fromARGB(
-                                                      255, 1, 75, 135)),
-                                            ),
-                                            SizedBox(
-                                              width: anchoActual * 0.45,
-                                              child: Text(
+                            left: anchoActual * 0.055),
+                        child: Text(
+                          "Tu pedido",
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 1, 42, 76),
+                              fontWeight: FontWeight.w600,
+                              fontSize: tamanoTitulos),
+                        ),
+                      ),
+                      SizedBox(
+                        height: largoActual * 0.24,
+                        child: Card(
+                          surfaceTintColor: Colors.white,
+                          color: Colors.white,
+                          elevation: 8,
+                          margin: EdgeInsets.only(
+                              top: largoActual * 0.0068,
+                              bottom: largoActual * 0.013,
+                              left: anchoActual * 0.028,
+                              right: anchoActual * 0.028),
+                          child: ListView.builder(
+                              itemCount: seleccionadosTodos.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  alignment: Alignment.center,
+                                  margin: EdgeInsets.only(
+                                      bottom: largoActual * 0.0068,
+                                      left: anchoActual * 0.028,
+                                      right: anchoActual * 0.028),
+                                  decoration: const BoxDecoration(
+                                      border: Border(
+                                    bottom: BorderSide(
+                                        style: BorderStyle.solid,
+                                        color: Colors.black26),
+                                  )),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            margin: EdgeInsets.only(
+                                                left: anchoActual * 0.028),
+                                            height: largoActual * 0.064,
+                                            width: anchoActual * 0.13,
+                                            decoration: BoxDecoration(
+                                                color: Colors.transparent,
+                                                borderRadius:
+                                                    BorderRadius.circular(0),
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      seleccionadosTodos[index]
+                                                          .foto),
+                                                  //fit: BoxFit.cover,
+                                                )),
+                                          ),
+                                          SizedBox(
+                                            width: anchoActual * 0.028,
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
                                                 seleccionadosTodos[index]
-                                                    .descripcion
+                                                    .nombre
                                                     .toString()
                                                     .capitalize(),
                                                 style: TextStyle(
                                                     fontSize:
-                                                        largoActual * 0.015,
+                                                        largoActual * 0.019,
                                                     color: const Color.fromARGB(
                                                         255, 1, 75, 135)),
                                               ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(
-                                          right: anchoActual * 0.028),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          SizedBox(
-                                            height: largoActual * 0.0054,
-                                          ),
-                                          Text(
-                                            "S/. ${seleccionadosTodos[index].precio}",
-                                            style: TextStyle(
-                                                fontSize: largoActual * 0.018,
-                                                color: const Color.fromARGB(
-                                                    255, 1, 75, 135)),
-                                          ),
-                                          Text(
-                                            "Cant. ${seleccionadosTodos[index].cantidad}",
-                                            style: TextStyle(
-                                                fontSize: largoActual * 0.018,
-                                                color: const Color.fromARGB(
-                                                    255, 1, 75, 135)),
-                                          ),
-                                          SizedBox(
-                                            height: largoActual * 0.0081,
-                                          ),
+                                              SizedBox(
+                                                width: anchoActual * 0.45,
+                                                child: Text(
+                                                  seleccionadosTodos[index]
+                                                      .descripcion
+                                                      .toString()
+                                                      .capitalize(),
+                                                  style: TextStyle(
+                                                      fontSize:
+                                                          largoActual * 0.015,
+                                                      color:
+                                                          const Color.fromARGB(
+                                                              255, 1, 75, 135)),
+                                                ),
+                                              ),
+                                            ],
+                                          )
                                         ],
                                       ),
-                                    )
-                                  ],
-                                ),
-                              );
-                            }),
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                            right: anchoActual * 0.028),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            SizedBox(
+                                              height: largoActual * 0.0054,
+                                            ),
+                                            Text(
+                                              "S/. ${seleccionadosTodos[index].precio}",
+                                              style: TextStyle(
+                                                  fontSize: largoActual * 0.018,
+                                                  color: const Color.fromARGB(
+                                                      255, 1, 75, 135)),
+                                            ),
+                                            Text(
+                                              "Cant. ${seleccionadosTodos[index].cantidad}",
+                                              style: TextStyle(
+                                                  fontSize: largoActual * 0.018,
+                                                  color: const Color.fromARGB(
+                                                      255, 1, 75, 135)),
+                                            ),
+                                            SizedBox(
+                                              height: largoActual * 0.0081,
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                );
+                              }),
+                        ),
                       ),
-                    ),
-                    //CUPONES
-                    Container(
-                      margin: EdgeInsets.only(
-                          bottom: largoActual * 0.013,
-                          left: anchoActual * 0.055),
-                      child: Text(
-                        "Cupones",
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 1, 42, 76),
-                            fontWeight: FontWeight.w600,
-                            fontSize: largoActual * 0.023),
+                      //CUPONES
+                      Container(
+                        margin: EdgeInsets.only(
+                            bottom: largoActual * 0.013,
+                            left: anchoActual * 0.055),
+                        child: Text(
+                          "Cupones",
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 1, 42, 76),
+                              fontWeight: FontWeight.w600,
+                              fontSize: tamanoTitulos),
+                        ),
                       ),
-                    ),
-                    Card(
-                      surfaceTintColor: Colors.white,
-                      color: Colors.white,
-                      elevation: 8,
-                      margin: EdgeInsets.only(
-                          left: anchoActual * 0.028,
-                          right: anchoActual * 0.028,
-                          bottom: largoActual * 0.013),
-                      child: Row(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(
-                                top: largoActual * 0.0068,
-                                bottom: largoActual * 0.0068,
-                                left: anchoActual * 0.069),
-                            height: largoActual * 0.065,
-                            width: anchoActual * 0.13,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(0),
-                            ),
-                            child: Lottie.asset('lib/imagenes/cupon4.json'),
-                          ),
-                          SizedBox(
-                            width: anchoActual * 0.03,
-                          ),
-                          SizedBox(
-                            width: anchoActual * 0.36,
-                            child: TextFormField(
-                              controller: _cupon,
-                              cursorColor:
-                                  const Color.fromRGBO(0, 106, 252, 1.000),
-                              enableInteractiveSelection: false,
-                              style: TextStyle(
-                                  fontSize: largoActual * 0.018,
-                                  color: const Color.fromARGB(255, 1, 75, 135)),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'Ingresar cupón',
-                                hintStyle: TextStyle(
-                                    color: const Color.fromARGB(
-                                        255, 195, 195, 195),
-                                    fontSize: largoActual * 0.018,
-                                    fontWeight: FontWeight.w400),
-                              ),
-                              /*validator: (value) {
-
-                              },*/
-                            ),
-                          ),
-                          SizedBox(
-                            width: anchoActual * 0.03,
-                          ),
-                          ElevatedButton(
-                            onPressed: ()async {
-                              // LOGICA PARA VALIDAR  62 ELEVADO A LA 5TA
-                              bool existe = await cuponExist(_cupon);
-                              if(existe) //true
-                              {
-                                print("codigo válido");
-                              }
-                              else{
-                                print("no existe el codigo");
-                              }
-                              
-                            },
-                            style: ButtonStyle(
-                              elevation: MaterialStateProperty.all(5),
-                              minimumSize: MaterialStatePropertyAll(Size(
-                                  anchoActual * 0.247, largoActual * 0.052)),
-                              backgroundColor: MaterialStateProperty.all(
-                                  const Color.fromRGBO(255, 0, 93, 1.000)),
-                            ),
-                            child: Text(
-                              'Validar',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: largoActual * 0.018,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    //TIPO DE ENVIO
-                    Container(
-                      margin: EdgeInsets.only(
-                          bottom: largoActual * 0.013,
-                          left: anchoActual * 0.055),
-                      child: Text(
-                        "Tipo de envio",
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 1, 42, 76),
-                            fontWeight: FontWeight.w600,
-                            fontSize: largoActual * 0.023),
-                      ),
-                    ),
-                    Card(
-                      surfaceTintColor: color,
-                      color: Colors.white,
-                      elevation: 8,
-                      margin: EdgeInsets.only(
-                          left: anchoActual * 0.028,
-                          right: anchoActual * 0.028,
-                          bottom: largoActual * 0.013),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: anchoActual * 0.28,
-                            margin: EdgeInsets.only(
-                                left: anchoActual * 0.042,
-                                right: anchoActual * 0.042,
-                                top: largoActual * 0.013,
-                                bottom: largoActual * 0.013),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Normal',
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.019,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color.fromARGB(255, 1, 75, 135)),
-                                ),
-                                Text(
-                                  'GRATIS',
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.013,
-                                      color: const Color.fromARGB(
-                                          255, 1, 75, 135)),
-                                ),
-                                Text(
-                                  "Si lo pides después de la 1:00 P.M se agenda para mañana.",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.013,
-                                      color: const Color.fromARGB(
-                                          255, 1, 75, 135)),
-                                ).animate().shake(),
-                              ],
-                            ),
-                          ),
-                          Switch(
-                            activeColor:
-                                const Color.fromRGBO(120, 251, 99, 1.000),
-                            inactiveTrackColor:
-                                const Color.fromARGB(255, 226, 226, 226),
-                            inactiveThumbColor:
-                                const Color.fromARGB(255, 174, 174, 174),
-                            trackOutlineWidth:
-                                const MaterialStatePropertyAll(0),
-                            trackOutlineColor: const MaterialStatePropertyAll(
-                                Colors.transparent),
-                            value: light0,
-                            onChanged: (bool value) {
-                              setState(() {
-                                light0 = value;
-                                tiempoPeru = tiempoActual;
-                                print(value);
-                                print('hora acrtual ${tiempoPeru.hour}');
-                              });
-                              if (light0 == false) {
-                                //ES NORMAL
-                                setState(() {
-                                  color = Colors.white;
-                                  tipoPedido = 'normal';
-                                  envio = 0;
-                                  print(tipoPedido);
-                                  print(envio);
-                                });
-                              } else {
-                                //ES EXPRESS
-                                if (tiempoActual.hour <= 16) {
-                                  print('son menos de las 16');
-                                  setState(() {
-                                    tipoPedido = 'express';
-                                    color = const Color.fromRGBO(
-                                        120, 251, 99, 1.000);
-                                    envio = 4;
-                                    print(tipoPedido);
-                                    print(envio);
-                                  });
-                                } else {
-                                  print('son mas de las 16');
-                                  setState(() {
-                                    tipoPedido = 'normal';
-                                    light0 = false;
-                                    color = Colors.white;
-                                    envio = 0;
-                                  });
-                                }
-                              }
-
-                              setState(() {
-                                totalVenta = totalProvider + envio;
-                                print(totalVenta);
-                              });
-                            },
-                          ),
-                          Container(
-                            width: anchoActual * 0.28,
-                            margin: EdgeInsets.only(
-                                left: anchoActual * 0.028,
-                                right: anchoActual * 0.028,
-                                top: largoActual * 0.013,
-                                bottom: largoActual * 0.013),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Express',
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.019,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color.fromARGB(
-                                          255, 1, 75, 135)),
-                                ),
-                                Text('+ S/. 4.00',
-                                    style: TextStyle(
-                                        fontSize: largoActual * 0.013,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135))),
-                                Text(
-                                  "Recive tu producto más rapido y disfrútalo lo antes posible",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.013,
-                                      color: const Color.fromARGB(
-                                          255, 1, 75, 135)),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    //DIRECCION DE ENVIO
-                    Container(
-                      margin: EdgeInsets.only(
-                          bottom: largoActual * 0.013,
-                          left: anchoActual * 0.055),
-                      child: Text(
-                        "Direccion",
-                        style: TextStyle(
-                            color: Color.fromARGB(255, 1, 42, 76),
-                            fontWeight: FontWeight.w600,
-                            fontSize: largoActual * 0.023),
-                      ),
-                    ),
-                    Card(
+                      Card(
                         surfaceTintColor: Colors.white,
                         color: Colors.white,
                         elevation: 8,
@@ -729,199 +515,487 @@ class _PedidoState extends State<Pedido> {
                             left: anchoActual * 0.028,
                             right: anchoActual * 0.028,
                             bottom: largoActual * 0.013),
-                        child: Container(
-                            //height: largoActual * 0.2,
-                            margin: EdgeInsets.only(
-                                left: anchoActual * 0.055,
-                                right: anchoActual * 0.055,
-                                top: largoActual * 0.0068,
-                                bottom: largoActual * 0.0068),
-                            //AQUI SE PONDRA LA DIRECCION QUE ELIGIO EL CLIENTE
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(
-                                  width: anchoActual * 0.62,
-                                  child: Text(
-                                    direccion,
-                                    textAlign: TextAlign.start,
-                                    style: TextStyle(
-                                        fontSize: largoActual * 0.017,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
-                                  ),
+                        child: Row(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(
+                                  top: largoActual * 0.0068,
+                                  bottom: largoActual * 0.0068,
+                                  left: anchoActual * 0.069),
+                              height: largoActual * 0.065,
+                              width: anchoActual * 0.13,
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(0),
+                              ),
+                              child: Lottie.asset('lib/imagenes/cupon4.json'),
+                            ),
+                            SizedBox(
+                              width: anchoActual * 0.03,
+                            ),
+                            SizedBox(
+                              width: anchoActual * 0.36,
+                              child: TextFormField(
+                                controller: _cupon,
+                                cursorColor:
+                                    const Color.fromRGBO(0, 106, 252, 1.000),
+                                enableInteractiveSelection: false,
+                                style: TextStyle(
+                                    fontSize: largoActual * 0.018,
+                                    color:
+                                        const Color.fromARGB(255, 1, 75, 135)),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Ingresar cupón',
+                                  hintStyle: TextStyle(
+                                      color: const Color.fromARGB(
+                                          255, 195, 195, 195),
+                                      fontSize: largoActual * 0.018,
+                                      fontWeight: FontWeight.w400),
                                 ),
-                                SizedBox(
-                                  width: anchoActual * 0.013,
-                                ),
-                                Container(
-                                  margin: EdgeInsets.only(
-                                    top: largoActual * 0.0013,
-                                    bottom: largoActual * 0.0013,
-                                  ),
-                                  height: largoActual * 0.061,
-                                  width: largoActual * 0.061,
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    borderRadius: BorderRadius.circular(0),
-                                  ),
-                                  child: Lottie.asset('lib/imagenes/ubi4.json'),
-                                ),
-                              ],
-                            ))),
-                    //NOTAS PARA EL REPARTIDOR
-                    Container(
-                      margin: EdgeInsets.only(
-                          bottom: largoActual * 0.013,
-                          left: anchoActual * 0.055),
-                      child: Text(
-                        "Notas para el repartidor",
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 1, 42, 76),
-                            fontWeight: FontWeight.w600,
-                            fontSize: largoActual * 0.023),
-                      ),
-                    ),
-                    Card(
-                      surfaceTintColor: Colors.white,
-                      color: Colors.white,
-                      elevation: 8,
-                      margin: EdgeInsets.only(
-                          left: anchoActual * 0.028,
-                          right: anchoActual * 0.028,
-                          bottom: anchoActual * 0.013),
-                      child: Container(
-                        margin: EdgeInsets.only(
-                            left: anchoActual * 0.055,
-                            right: anchoActual * 0.055,
-                            bottom: largoActual * 0.0068),
-                        child: TextFormField(
-                          controller: notas,
-                          cursorColor: const Color.fromRGBO(0, 106, 252, 1.000),
-                          enableInteractiveSelection: false,
-                          style: TextStyle(
-                              fontSize: largoActual * 0.018,
-                              color: const Color.fromARGB(255, 1, 75, 135)),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText:
-                                'Ej. Casa con porton azúl, tocar tercer piso',
-                            hintStyle: TextStyle(
-                                color: const Color.fromARGB(255, 195, 195, 195),
-                                fontSize: largoActual * 0.018,
-                                fontWeight: FontWeight.w400),
-                          ),
-                          /*validator: (value) {
+                                /*validator: (value) {
 
-                          },*/
+                              },*/
+                              ),
+                            ),
+                            SizedBox(
+                              width: anchoActual * 0.03,
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                // LOGICA PARA VALIDAR  62 ELEVADO A LA 5TA
+                                bool existe = await cuponExist(_cupon);
+                                if (existe) //true
+                                {
+                                  print("codigo válido");
+                                } else {
+                                  print("no existe el codigo");
+                                }
+                              },
+                              style: ButtonStyle(
+                                elevation: MaterialStateProperty.all(5),
+                                minimumSize: MaterialStatePropertyAll(Size(
+                                    anchoActual * 0.247, largoActual * 0.052)),
+                                backgroundColor: MaterialStateProperty.all(
+                                    const Color.fromRGBO(255, 0, 93, 1.000)),
+                              ),
+                              child: Text(
+                                'Validar',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: largoActual * 0.018,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    //RESUMEN
-                    Container(
-                      margin: EdgeInsets.only(
-                          bottom: largoActual * 0.013,
-                          left: anchoActual * 0.055),
-                      child: Text(
-                        "Resumen de Pedido",
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 1, 42, 76),
-                            fontWeight: FontWeight.w600,
-                            fontSize: largoActual * 0.023),
+                      //TIPO DE ENVIO
+                      Container(
+                        margin: EdgeInsets.only(
+                            bottom: largoActual * 0.013,
+                            left: anchoActual * 0.055),
+                        child: Text(
+                          "Tipo de envio",
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 1, 42, 76),
+                              fontWeight: FontWeight.w600,
+                              fontSize: tamanoTitulos),
+                        ),
                       ),
-                    ),
-                    Card(
-                      surfaceTintColor: Colors.white,
-                      color: Colors.white,
-                      elevation: 8,
-                      margin: EdgeInsets.only(
-                        left: anchoActual * (10 / 360),
-                        right: anchoActual * (10 / 360),
-                        bottom: largoActual * (10 / 736),
+                      Card(
+                        surfaceTintColor: color,
+                        color: Colors.white,
+                        elevation: 8,
+                        margin: EdgeInsets.only(
+                            left: anchoActual * 0.028,
+                            right: anchoActual * 0.028,
+                            bottom: largoActual * 0.013),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: anchoActual * 0.28,
+                              margin: EdgeInsets.only(
+                                  left: anchoActual * 0.042,
+                                  right: anchoActual * 0.042,
+                                  top: largoActual * 0.013,
+                                  bottom: largoActual * 0.013),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Normal',
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.019,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color.fromARGB(255, 1, 75, 135)),
+                                  ),
+                                  Text(
+                                    'GRATIS',
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.013,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
+                                  ),
+                                  Text(
+                                    "Si lo pides después de la 1:00 P.M se agenda para mañana.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.013,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
+                                  ).animate().shake(),
+                                ],
+                              ),
+                            ),
+                            Switch(
+                              activeColor:
+                                  const Color.fromRGBO(120, 251, 99, 1.000),
+                              inactiveTrackColor:
+                                  const Color.fromARGB(255, 226, 226, 226),
+                              inactiveThumbColor:
+                                  const Color.fromARGB(255, 174, 174, 174),
+                              trackOutlineWidth:
+                                  const MaterialStatePropertyAll(0),
+                              trackOutlineColor: const MaterialStatePropertyAll(
+                                  Colors.transparent),
+                              value: light0,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  light0 = value;
+                                  tiempoPeru = tiempoActual;
+                                  print(value);
+                                  print('hora acrtual ${tiempoPeru.hour}');
+                                });
+                                if (light0 == false) {
+                                  //ES NORMAL
+                                  setState(() {
+                                    color = Colors.white;
+                                    tipoPedido = 'normal';
+                                    envio = 0;
+                                    print(tipoPedido);
+                                    print(envio);
+                                  });
+                                } else {
+                                  //ES EXPRESS
+                                  if (tiempoActual.hour <= 16) {
+                                    print('son menos de las 16');
+                                    setState(() {
+                                      tipoPedido = 'express';
+                                      color = const Color.fromRGBO(
+                                          120, 251, 99, 1.000);
+                                      envio = 4;
+                                      print(tipoPedido);
+                                      print(envio);
+                                    });
+                                  } else {
+                                    print('son mas de las 16');
+                                    setState(() {
+                                      tipoPedido = 'normal';
+                                      light0 = false;
+                                      color = Colors.white;
+                                      envio = 0;
+                                    });
+                                  }
+                                }
+
+                                setState(() {
+                                  totalVenta = totalProvider + envio;
+                                  print(totalVenta);
+                                });
+                              },
+                            ),
+                            Container(
+                              width: anchoActual * 0.28,
+                              margin: EdgeInsets.only(
+                                  left: anchoActual * 0.028,
+                                  right: anchoActual * 0.028,
+                                  top: largoActual * 0.013,
+                                  bottom: largoActual * 0.013),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Express',
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.019,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
+                                  ),
+                                  Text('+ S/. 4.00',
+                                      style: TextStyle(
+                                          fontSize: largoActual * 0.013,
+                                          color: const Color.fromARGB(
+                                              255, 1, 75, 135))),
+                                  Text(
+                                    "Recive tu producto más rapido y disfrútalo lo antes posible",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.013,
+                                        color: const Color.fromARGB(
+                                            255, 1, 75, 135)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Container(
+                      //DIRECCION DE ENVIO
+                      Container(
+                        margin: EdgeInsets.only(
+                            bottom: largoActual * 0.013,
+                            left: anchoActual * 0.055),
+                        child: Text(
+                          "A esta dirección enviaremos el pedido",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 1, 42, 76),
+                              fontWeight: FontWeight.w600,
+                              fontSize: tamanoTitulos),
+                        ),
+                      ),
+                      Card(
+                          surfaceTintColor: Colors.white,
+                          color: Colors.white,
+                          elevation: 8,
                           margin: EdgeInsets.only(
-                              left: anchoActual * (20 / 360),
-                              right: anchoActual * (20 / 360),
-                              bottom: largoActual * (8 / 736),
-                              top: largoActual * (8 / 736)),
-                          child: Column(
-                            children: [
-                              Row(
+                              left: anchoActual * 0.028,
+                              right: anchoActual * 0.028,
+                              bottom: largoActual * 0.013),
+                          child: Container(
+                              //height: largoActual * 0.2,
+                              margin: EdgeInsets.only(
+                                  left: anchoActual * 0.055,
+                                  right: anchoActual * 0.055,
+                                  top: largoActual * 0.0068,
+                                  bottom: largoActual * 0.0068),
+                              //AQUI SE PONDRA LA DIRECCION QUE ELIGIO EL CLIENTE
+                              child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    'Productos',
-                                    style: TextStyle(
-                                        fontSize: largoActual * (13 / 736),
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
+                                  SizedBox(
+                                    width: anchoActual * 0.62,
+                                    child: Text(
+                                      direccion,
+                                      textAlign: TextAlign.start,
+                                      style: TextStyle(
+                                          fontSize: largoActual * 0.017,
+                                          color: colorDireccion),
+                                    ),
                                   ),
-                                  Text(
-                                    'S/.$totalProvider',
-                                    style: TextStyle(
-                                        fontSize: largoActual * (13 / 736),
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
-                                  )
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Envio',
-                                    style: TextStyle(
-                                        fontSize: largoActual * (13 / 736),
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
+                                  SizedBox(
+                                    width: anchoActual * 0.013,
                                   ),
-                                  Text(
-                                    'S/.$envio',
-                                    style: TextStyle(
-                                        fontSize: largoActual * (13 / 736),
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
-                                  )
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Ahorro',
-                                    style: TextStyle(
-                                        fontSize: largoActual * (13 / 736),
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color.fromRGBO(
-                                            234, 51, 98, 1.000)),
+                                  Container(
+                                    margin: EdgeInsets.only(
+                                      top: largoActual * 0.0013,
+                                      bottom: largoActual * 0.0013,
+                                    ),
+                                    height: largoActual * 0.061,
+                                    width: largoActual * 0.061,
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      borderRadius: BorderRadius.circular(0),
+                                    ),
+                                    child:
+                                        Lottie.asset('lib/imagenes/ubi4.json'),
                                   ),
-                                  Text(
-                                    'S/.$ahorro',
-                                    style: TextStyle(
-                                        fontSize: largoActual * (13 / 736),
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color.fromRGBO(
-                                            234, 51, 98, 1.000)),
-                                  )
                                 ],
-                              )
-                            ],
-                          )),
-                    ),
-                    SizedBox(
-                      height: largoActual * (95 / 630),
-                    ),
-                  ],
+                              ))),
+                      //NOTAS PARA EL REPARTIDOR
+                      Container(
+                        margin: EdgeInsets.only(
+                            bottom: largoActual * 0.013,
+                            left: anchoActual * 0.055),
+                        child: Text(
+                          "Notas para el repartidor",
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 1, 42, 76),
+                              fontWeight: FontWeight.w600,
+                              fontSize: tamanoTitulos),
+                        ),
+                      ),
+                      Card(
+                        surfaceTintColor: Colors.white,
+                        color: Colors.white,
+                        elevation: 8,
+                        margin: EdgeInsets.only(
+                            left: anchoActual * 0.028,
+                            right: anchoActual * 0.028,
+                            bottom: anchoActual * 0.013),
+                        child: Container(
+                          margin: EdgeInsets.only(
+                              left: anchoActual * 0.055,
+                              right: anchoActual * 0.055,
+                              bottom: largoActual * 0.0068),
+                          child: TextFormField(
+                            controller: notas,
+                            cursorColor:
+                                const Color.fromRGBO(0, 106, 252, 1.000),
+                            enableInteractiveSelection: false,
+                            style: TextStyle(
+                                fontSize: largoActual * 0.018,
+                                color: const Color.fromARGB(255, 1, 75, 135)),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText:
+                                  'Ej. Casa con porton azúl, tocar tercer piso',
+                              hintStyle: TextStyle(
+                                  color:
+                                      const Color.fromARGB(255, 195, 195, 195),
+                                  fontSize: largoActual * 0.018,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                            /*validator: (value) {
+
+                          },*/
+                          ),
+                        ),
+                      ),
+                      //RESUMEN
+                      Container(
+                        margin: EdgeInsets.only(
+                            bottom: largoActual * 0.013,
+                            left: anchoActual * 0.055),
+                        child: Text(
+                          "Resumen de Pedido",
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 1, 42, 76),
+                              fontWeight: FontWeight.w600,
+                              fontSize: tamanoTitulos),
+                        ),
+                      ),
+                      Card(
+                        surfaceTintColor: Colors.white,
+                        color: Colors.white,
+                        elevation: 8,
+                        margin: EdgeInsets.only(
+                          left: anchoActual * (10 / 360),
+                          right: anchoActual * (10 / 360),
+                          bottom: largoActual * (10 / 736),
+                        ),
+                        child: Container(
+                            margin: EdgeInsets.only(
+                                left: anchoActual * (20 / 360),
+                                right: anchoActual * (20 / 360),
+                                bottom: largoActual * (8 / 736),
+                                top: largoActual * (8 / 736)),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Productos',
+                                      style: TextStyle(
+                                          fontSize: largoActual * (13 / 736),
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color.fromARGB(
+                                              255, 1, 75, 135)),
+                                    ),
+                                    Text(
+                                      'S/.$totalProvider',
+                                      style: TextStyle(
+                                          fontSize: largoActual * (13 / 736),
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color.fromARGB(
+                                              255, 1, 75, 135)),
+                                    )
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Envio',
+                                      style: TextStyle(
+                                          fontSize: largoActual * (13 / 736),
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color.fromARGB(
+                                              255, 1, 75, 135)),
+                                    ),
+                                    Text(
+                                      'S/.$envio',
+                                      style: TextStyle(
+                                          fontSize: largoActual * (13 / 736),
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color.fromARGB(
+                                              255, 1, 75, 135)),
+                                    )
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Ahorro',
+                                      style: TextStyle(
+                                          fontSize: largoActual * (13 / 736),
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color.fromRGBO(
+                                              234, 51, 98, 1.000)),
+                                    ),
+                                    Text(
+                                      'S/.$ahorro',
+                                      style: TextStyle(
+                                          fontSize: largoActual * (13 / 736),
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color.fromRGBO(
+                                              234, 51, 98, 1.000)),
+                                    )
+                                  ],
+                                )
+                              ],
+                            )),
+                      ),
+                      SizedBox(
+                        height: largoActual * (95 / 630),
+                      ),
+                    ],
+                  ),
+                ))),
+      );
+    } else {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          surfaceTintColor: Colors.white,
+          backgroundColor: Colors.white,
+          toolbarHeight: largoActual * 0.08,
+        ),
+        body: SafeArea(
+            child: Center(
+          child: Stack(
+            children: [
+              Container(
+                margin: EdgeInsets.only(top: 0),
+                height: largoActual * 0.9,
+                width: anchoActual * 0.9,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(0),
                 ),
-              ))),
-    );
+                child: Lottie.asset('lib/imagenes/carritovacio.json'),
+              ),
+              Positioned(
+                  top: anchoActual *
+                      0.6, // Ajusta la posición vertical según tus necesidades
+                  left: anchoActual * 0.25,
+                  child: Text(
+                    'Tu carrito esta vacío',
+                    style: TextStyle(
+                        color: const Color.fromARGB(255, 1, 42, 76),
+                        fontWeight: FontWeight.w600,
+                        fontSize: largoActual * 0.023),
+                  )),
+            ],
+          ),
+        )),
+      );
+    }
   }
 }

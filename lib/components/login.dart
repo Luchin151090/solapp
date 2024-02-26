@@ -265,6 +265,7 @@ class _LoginState extends State<Login> {
                                 const EdgeInsets.symmetric(horizontal: 16.0),
                             child: TextFormField(
                               controller: _contrasena,
+                              obscureText: true,
                               decoration: const InputDecoration(
                                 hintText: 'Contraseña',
                                 border: InputBorder.none,
@@ -426,11 +427,11 @@ class _LoginState extends State<Login> {
                         print(largoActual);
                         print(anchoActual);
 
-                         Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Formu()),
-                            );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Formu()),
+                        );
                       },
                       style: ButtonStyle(
                           elevation: MaterialStateProperty.all(8),
