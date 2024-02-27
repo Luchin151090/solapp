@@ -72,51 +72,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     ordenarFuncionesInit();
-//    _autoscroll1();
-
-    /* if (widget.latitud != null && widget.longitud != null) {
-    obtenerDireccion(widget.latitud!, widget.longitud!).then((res2) {
-      setState(() {
-        print("coor");
-        print(res2);
-        listUbicaciones.add(res2);
-        dropdownValue = listUbicaciones.first;
-      });
-    });
-  } else {
-    print("Las coordenadas son nulas");
-    obtenerDireccion(-16.4054755, -71.5706074).then((res) {
-      setState(() {
-        listUbicaciones.add(res);
-      });
-    });
-  }*/
-    /* WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startAutoScroll();
-    });*/
   }
-
-  /*void _autoscroll1() {
-    // Espera un pequeño retraso antes de iniciar el autoscroll
-    Future.delayed(Duration(milliseconds: 3000), () {
-      scrollController1
-          .animateTo(
-        scrollController1.position.maxScrollExtent,
-        duration: Duration(seconds: 5),
-        curve: Curves.easeInOut,
-      )
-          .then((_) {
-        // Cuando la animación de desplazamiento ha terminado, restablece la posición del ListView
-        Future.delayed(Duration(milliseconds: 3000), () {
-          scrollController1.animateTo(
-            0,
-            duration: Duration(seconds: 5),
-            curve: Curves.easeInOut,
-          );
-        });
-      });
-    });
-  }*/
 
   Future<void> ordenarFuncionesInit() async {
     await getUbicaciones(widget.clienteId);
@@ -212,95 +168,6 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
       throw Exception('Error en la solicitud: $e');
     }
   }
-/*
-  void _startAutoScroll() {
-    _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
-      if (!_disposed) {
-        _autoScroll();
-      } else {
-        timer.cancel(); // Stop the timer if disposed
-      }
-    });
-  }
-
-  void _autoScroll() async {
-    if (_disposed) return;
-    try {
-      // Marcar que el desplazamiento automático está en progreso
-      _autoScrollInProgress = true;
-
-      print("Auto-scroll initiated");
-
-      // Espera 5 segundos antes de iniciar el desplazamiento automático
-      await Future.delayed(const Duration(seconds: 2));
-
-      // CONTROLLER 1
-      if (_scrollController1.hasClients) {
-        print("ScrollController1 has clients");
-
-        // Verificar que el controlador tenga posiciones antes de realizar operaciones
-        if (_scrollController1.position.maxScrollExtent > 0.0) {
-          // Desplázate hacia abajo
-          await _scrollController1.animateTo(
-            _scrollController1.position.maxScrollExtent,
-            duration: const Duration(seconds: 5),
-            curve: Curves.easeInOut,
-          );
-
-          // Espera 4 segundos antes de volver a la posición inicial
-          await Future.delayed(const Duration(seconds: 4));
-
-          // Desplázate de nuevo hacia arriba
-          await _scrollController1.animateTo(
-            0.0,
-            duration: const Duration(seconds: 5),
-            curve: Curves.easeInOut,
-          );
-        } else {
-          print("ScrollController1 has no positions");
-        }
-      } else {
-        print("ScrollController1 has no clients");
-      }
-
-      // CONTROLLER 2
-      if (_scrollController2.hasClients) {
-        print("ScrollController1 has clients");
-
-        // Verificar que el controlador tenga posiciones antes de realizar operaciones
-        if (_scrollController2.position.maxScrollExtent > 0.0) {
-          // Desplázate hacia abajo
-          await _scrollController2.animateTo(
-            _scrollController2.position.maxScrollExtent,
-            duration: const Duration(seconds: 5),
-            curve: Curves.easeInOut,
-          );
-
-          // Espera 4 segundos antes de volver a la posición inicial
-          await Future.delayed(const Duration(seconds: 4));
-
-          // Desplázate de nuevo hacia arriba
-          await _scrollController2.animateTo(
-            0.0,
-            duration: const Duration(seconds: 5),
-            curve: Curves.easeInOut,
-          );
-        } else {
-          print("ScrollController1 has no positions");
-        }
-      } else {
-        print("ScrollController1 has no clients");
-      }
-
-      // Marcar que el desplazamiento automático ha terminado
-      _autoScrollInProgress = false;
-    } catch (e) {
-      print("---Error");
-      print(e);
-    }
-  }
-
-*/
 
   Future<void> obtenerDireccion(x, y) async {
     //double latitud = widget.latitud ?? 0.0; // Accede a widget.latitud
@@ -636,7 +503,9 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                     ),
                                   ],
                                 ),
-                              ),
+                              ).animate().shakeX(
+                                    duration: Duration(milliseconds: 300),
+                                  ),
 
                               //CARRITO
                               Container(

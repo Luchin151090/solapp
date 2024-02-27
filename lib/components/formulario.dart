@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:appsol_final/components/login.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ class _FormuState extends State<Formu> {
 
       // Formatear la fecha como una cadena en el formato deseado (por ejemplo, 'yyyy-MM-dd')
       String fechaFormateada = DateFormat('yyyy-MM-dd').format(fechaNacimiento);
+      String fechaActual = DateFormat('yyyy-MM-dd').format(fechaAct);
 
       await http.post(Uri.parse(apiUrl + apiCreateUser),
           headers: {"Content-type": "application/json"},
@@ -51,7 +53,7 @@ class _FormuState extends State<Formu> {
             "ruc": ruc ?? "",
             "dni": dni,
             "fecha_nacimiento": fechaFormateada,
-            "fecha_creacion_cuenta": fechaAct,
+            "fecha_creacion_cuenta": fechaActual,
             "sexo": sexo
           }));
     } catch (e) {
@@ -64,93 +66,126 @@ class _FormuState extends State<Formu> {
     //final TabController _tabController = TabController(length: 2, vsync: this);
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
+    double largoCasilla = largoActual * 0.068;
+    double tamanoLabel = largoActual * 0.018;
+    double tamanoHint = largoActual * 0.018;
     DateTime tiempoActual = DateTime.now();
+    Color textoIngreso = Color.fromARGB(255, 84, 84, 84);
     return Scaffold(
-        backgroundColor: Color.fromARGB(255, 255, 255, 255),
-        appBar: AppBar(),
-        body: SafeArea(
-            child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    //mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // TITULOS
-                      Container(
-                        margin: const EdgeInsets.only(
-                            top: 10 * 0.013, left: 10 * 0.055),
-                        //color:Colors.grey,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                    child: Text(
-                                  "Me encantaría",
-                                  style: TextStyle(
-                                      color:
-                                          const Color.fromARGB(255, 0, 57, 103),
-                                      fontSize: largoActual * 0.047,
-                                      fontWeight: FontWeight.w300),
-                                )),
-                                Container(
-                                    child: Text(
-                                  "saber de ti",
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.047,
-                                      color: Color.fromARGB(255, 0, 41, 72)),
-                                )),
-                              ],
-                            ),
-                            Container(
-                              margin:
-                                  EdgeInsets.only(right: anchoActual * 0.025),
-                              height: (largoActual * 0.094) + 20,
-                              width: (largoActual * 0.094) + 20,
-                              child: Lottie.asset(
-                                  'lib/imagenes/Animation - 1701877289450.json'),
-                            ),
-                          ],
-                        ),
+        body: DecoratedBox(
+      decoration: const BoxDecoration(
+          gradient: LinearGradient(colors: [
+        Color.fromRGBO(0, 106, 252, 1.000),
+        Color.fromRGBO(0, 106, 252, 1.000),
+        Colors.white,
+      ], begin: Alignment.topLeft, end: Alignment.bottomCenter)),
+      child: SafeArea(
+          top: false,
+          child: Padding(
+              padding: EdgeInsets.only(
+                top: largoActual * 0.05,
+                left: anchoActual * 0.02,
+                right: anchoActual * 0.02,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // TITULOS
+                    Container(
+                      margin: const EdgeInsets.only(
+                          top: 10 * 0.013, left: 10 * 0.055),
+                      //color:Colors.grey,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Login()),
+                                );
+                              },
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                              )),
+                          SizedBox(
+                            width: anchoActual * 0.02,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Container(
+                                  child: Text(
+                                "Nos encantaría",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: largoActual * 0.025,
+                                    fontWeight: FontWeight.w600),
+                              )),
+                              Container(
+                                  child: Text(
+                                "saber de ti",
+                                style: TextStyle(
+                                    fontSize: largoActual * 0.025,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white),
+                              )),
+                            ],
+                          ),
+                          Expanded(child: Container()),
+                          Container(
+                            margin: EdgeInsets.only(right: anchoActual * 0.025),
+                            height: (largoActual * 0.094),
+                            width: (largoActual * 0.094),
+                            child: Lottie.asset('lib/imagenes/pelotita.json'),
+                          ),
+                        ],
                       ),
-                      SizedBox(
-                        height: largoActual * 0.027,
-                      ),
+                    ),
+                    SizedBox(
+                      height: largoActual * 0.01,
+                    ),
 
-                      // FORMULARIO
-                      Container(
-                        margin: EdgeInsets.only(left: anchoActual * 0.055),
-                        padding: const EdgeInsets.all(8),
-                        // height: 700,
-                        width: anchoActual * 0.83,
-                        decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 237, 210, 242),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              width: 2,
-                              color: const Color.fromARGB(255, 2, 72, 129),
-                            )),
-                        //color:Colors.cyan,
-                        child: Form(
-                            key: _formKey,
-                            child: Column(
-                              children: [
-                                TextFormField(
+                    // FORMULARIO
+                    Container(
+                      //margin: EdgeInsets.only(left: anchoActual * 0.055),
+                      padding: const EdgeInsets.only(
+                          left: 15, right: 15, bottom: 10),
+                      // height: 700,
+                      width: anchoActual * 0.9,
+                      decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            width: 1.5,
+                            color: Color.fromARGB(255, 163, 163, 163),
+                          )),
+                      //color:Colors.cyan,
+                      child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height: largoCasilla,
+                                child: TextFormField(
                                   controller: _nombres,
                                   decoration: InputDecoration(
                                     labelText: 'Nombres',
                                     hintText: 'Ingrese sus apellidos',
-                                    isDense: true,
+                                    isDense: false,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
+                                      fontSize: tamanoHint,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -161,19 +196,22 @@ class _FormuState extends State<Formu> {
                                     return null;
                                   },
                                 ),
-                                TextFormField(
+                              ),
+                              SizedBox(
+                                height: largoCasilla,
+                                child: TextFormField(
                                   controller: _apellidos,
                                   decoration: InputDecoration(
                                     labelText: 'Apellidos',
                                     hintText: 'Ingrese sus apellidos',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
+                                      fontSize: tamanoHint,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -184,19 +222,22 @@ class _FormuState extends State<Formu> {
                                     return null;
                                   },
                                 ),
-                                TextFormField(
+                              ),
+                              SizedBox(
+                                height: largoCasilla,
+                                child: TextFormField(
                                   controller: _dni,
                                   decoration: InputDecoration(
                                     labelText: 'DNI',
                                     hintText: 'Ingrese sus apellidos',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
+                                      fontSize: tamanoHint,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -207,7 +248,10 @@ class _FormuState extends State<Formu> {
                                     return null;
                                   },
                                 ),
-                                DropdownButtonFormField<String>(
+                              ),
+                              SizedBox(
+                                height: largoCasilla,
+                                child: DropdownButtonFormField<String>(
                                   value: selectedSexo,
                                   onChanged: (value) {
                                     setState(() {
@@ -224,13 +268,16 @@ class _FormuState extends State<Formu> {
                                     labelText: 'Sexo',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                   ),
                                 ),
-                                TextFormField(
+                              ),
+                              SizedBox(
+                                height: largoCasilla,
+                                child: TextFormField(
                                   readOnly: true,
                                   controller:
                                       _fechaController, // Usa el controlador de texto
@@ -251,9 +298,11 @@ class _FormuState extends State<Formu> {
                                     }
                                   },
                                   keyboardType: TextInputType.datetime,
+
+                                  keyboardAppearance: Brightness.light,
                                   style: TextStyle(
-                                    fontSize: largoActual * 0.024,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: tamanoLabel,
+                                    fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
                                   decoration: InputDecoration(
@@ -261,29 +310,32 @@ class _FormuState extends State<Formu> {
                                     // hintText: 'Ingrese sus apellidos',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
+                                      fontSize: tamanoHint,
                                       color: Colors.grey,
                                     ),
                                   ),
                                 ),
-                                TextFormField(
+                              ),
+                              SizedBox(
+                                height: largoCasilla,
+                                child: TextFormField(
                                   controller: _username,
                                   decoration: InputDecoration(
                                     labelText: 'Usuario',
                                     hintText: 'Ingresa un usuario',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
+                                      fontSize: tamanoHint,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -294,7 +346,10 @@ class _FormuState extends State<Formu> {
                                     return null;
                                   },
                                 ),
-                                TextFormField(
+                              ),
+                              SizedBox(
+                                height: largoCasilla,
+                                child: TextFormField(
                                   controller: _password,
                                   keyboardType: TextInputType.visiblePassword,
                                   obscureText: _obscureText,
@@ -303,13 +358,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingrese una contraseña',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          const Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
+                                      fontSize: tamanoHint,
                                       color: Colors.grey,
                                     ),
                                     suffixIcon: GestureDetector(
@@ -333,25 +387,10 @@ class _FormuState extends State<Formu> {
                                     return null;
                                   },
                                 ),
-                                TextFormField(
-                                  controller: _email,
-                                  keyboardType: TextInputType.emailAddress,
-                                  decoration: InputDecoration(
-                                    labelText: 'Email (opcional)',
-                                    hintText: 'Ingresa su email',
-                                    isDense: true,
-                                    labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
-                                    ),
-                                    hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                                TextFormField(
+                              ),
+                              SizedBox(
+                                height: largoCasilla * 1.3,
+                                child: TextFormField(
                                   controller: _telefono,
                                   maxLength: 9,
                                   keyboardType: TextInputType.number,
@@ -360,12 +399,12 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingresa un usuario',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
+                                      fontSize: tamanoHint,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -376,7 +415,31 @@ class _FormuState extends State<Formu> {
                                     return null;
                                   },
                                 ),
-                                TextFormField(
+                              ),
+                              SizedBox(
+                                height: largoCasilla,
+                                child: TextFormField(
+                                  controller: _email,
+                                  keyboardType: TextInputType.emailAddress,
+                                  decoration: InputDecoration(
+                                    labelText: 'Email (opcional)',
+                                    hintText: 'Ingresa su email',
+                                    isDense: true,
+                                    labelStyle: TextStyle(
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
+                                    ),
+                                    hintStyle: TextStyle(
+                                      fontSize: tamanoHint,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: largoCasilla * 1.3,
+                                child: TextFormField(
                                   controller: _ruc,
                                   maxLength: 11,
                                   keyboardType: TextInputType.number,
@@ -385,98 +448,109 @@ class _FormuState extends State<Formu> {
                                     hintText: 'Ingresa un usuario',
                                     isDense: true,
                                     labelStyle: TextStyle(
-                                      fontSize: largoActual * 0.02,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 1, 55, 99),
+                                      fontSize: tamanoLabel,
+                                      fontWeight: FontWeight.w500,
+                                      color: textoIngreso,
                                     ),
                                     hintStyle: TextStyle(
-                                      fontSize: largoActual * 0.018,
+                                      fontSize: tamanoHint,
                                       color: Colors.grey,
                                     ),
                                   ),
                                 ),
-                              ],
-                            )),
-                      ),
+                              ),
+                            ],
+                          )),
+                    ),
 
-                      // REGISTRAR
-                      SizedBox(
-                        height: largoActual * 0.02,
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: anchoActual * 0.055),
-                        height: largoActual * 0.081,
-                        width: anchoActual * 0.42,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text(
-                                      'Gracias por registrar',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              Color.fromARGB(255, 4, 80, 143)),
-                                    ),
-                                    content: Text(
-                                      'Te esparamos!',
-                                      style: TextStyle(
-                                          fontSize: largoActual * 0.027,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () async {
-                                          await registrar(
-                                              _nombres.text,
-                                              _apellidos.text,
-                                              _dni.text,
-                                              selectedSexo,
-                                              _fechaController.text,
-                                              tiempoActual,
-                                              _username.text,
-                                              _password.text,
-                                              _email.text,
-                                              _telefono.text,
-                                              _ruc.text);
-                                          print("registrado-....");
-                                          /*Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Login2()),
-                                );*/ // Cierra el AlertDialog
-                                        },
-                                        child: const Text(
-                                          'OK',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                              color: Color.fromARGB(
-                                                  255, 13, 58, 94)),
-                                        ),
+                    // REGISTRAR
+                    SizedBox(
+                      height: largoActual * 0.031,
+                    ),
+                    Container(
+                      //margin: EdgeInsets.only(left: anchoActual * 0.055),
+                      height: largoActual * 0.06,
+                      width: anchoActual * 0.42,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text(
+                                    'Gracias por registrar',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Color.fromARGB(255, 4, 80, 143)),
+                                  ),
+                                  content: Text(
+                                    'Te esparamos!',
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.027,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () async {
+                                        await registrar(
+                                            _nombres.text,
+                                            _apellidos.text,
+                                            _dni.text,
+                                            selectedSexo,
+                                            _fechaController.text,
+                                            tiempoActual,
+                                            _username.text,
+                                            _password.text,
+                                            _email.text,
+                                            _telefono.text,
+                                            _ruc.text);
+                                        print("registrado-....");
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const Login()),
+                                        ); // Cierra el AlertDialog
+                                      },
+                                      child: const Text(
+                                        'OK',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 12,
+                                            color: Color.fromARGB(
+                                                255, 13, 58, 94)),
                                       ),
-                                    ],
-                                  );
-                                },
-                              );
-                            }
-                          },
-                          child: Text(
-                            "Registrar",
-                            style: TextStyle(
-                                fontSize: largoActual * 0.027,
-                                color: Colors.white),
-                          ),
-                          style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  Color.fromARGB(255, 3, 66, 117))),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        },
+                        style: ButtonStyle(
+                          elevation: MaterialStateProperty.all(8),
+                          surfaceTintColor:
+                              MaterialStateProperty.all(Colors.white),
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.white),
                         ),
-                      )
-                    ],
-                  ),
-                ))));
+                        child: const Text(
+                          "Registrar",
+                          style: TextStyle(
+                            color: Color.fromRGBO(0, 106, 252, 1.000),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: largoActual * 0.031,
+                    ),
+                  ],
+                ),
+              ))),
+    ));
   }
 }

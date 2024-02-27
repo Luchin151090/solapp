@@ -71,6 +71,7 @@ class _LoginState extends State<Login> {
               saldoBeneficio:
                   data['usuario']['saldo_beneficios'].toDouble() ?? 0.00,
               codigocliente: data['usuario']['codigo'] ?? 'NoCode',
+              fechaCreacionCuenta: data['usuario']['fecha_creacion_cuenta'],
               suscripcion: data['usuario']['suscripcion'] ?? 'NoSubscribe');
           setState(() {
             status = 200;

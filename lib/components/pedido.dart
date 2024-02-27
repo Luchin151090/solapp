@@ -31,10 +31,13 @@ class _PedidoState extends State<Pedido> {
   bool light0 = false;
   int numero = 0;
   double envio = 0.0;
+  //EL AHORRO ES IGUAL A 4 SOLES POR CADA BIDON NUEVO
   double ahorro = 0.0;
   double totalVenta = 0.0;
   double totalProvider = 0.0;
   double tamanoTitulos = 0.0;
+  double tamanoTitulosDialogs = 0.0;
+  double tamanoContenidoDialogs = 0.0;
   List<dynamic> seleccionadosTodos = [];
   List<Producto> seleccionadosProvider = [];
   List<Promo> selecciondosPromosProvider = [];
@@ -44,11 +47,15 @@ class _PedidoState extends State<Pedido> {
   String notasParaConductor = '';
   int lastPedido = 0;
   Color color = Colors.white;
-  Color colorDireccion = Colors.redAccent;
+  Color colorTitulos = const Color.fromARGB(255, 1, 42, 76);
+  Color colorContenido = const Color.fromARGB(255, 1, 75, 135);
+  Color colorCupon = Colors.white;
+  Color colorDireccion = const Color.fromRGBO(234, 51, 98, 1.000);
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
   //POR AHORA EL CLIENTE ES MANUAL!!""
   String direccion = 'Av. Las Flores 137 - Cayma';
+  String mensajeCodigoExpirado = "";
   DateTime tiempoActual = DateTime.now();
   late DateTime tiempoPeru;
   int ubicacionSelectID = 0;
@@ -56,6 +63,23 @@ class _PedidoState extends State<Pedido> {
   String codigoverify = '/api/code_cliente';
   String apiPedido = '/api/pedido';
   String apiDetallePedido = '/api/detallepedido';
+  bool existe = false;
+  bool buscandoCodigo = false;
+  bool hayBidon = false;
+  int cantidadBidones = 0;
+  String? fechaLimiteString = '';
+  DateTime fechaLimite = DateTime.now();
+  DateTime fechaLimiteCliente = DateTime.now();
+
+  DateTime mesyAnio(String? fecha) {
+    if (fecha is String) {
+      print('es string');
+      return DateTime.parse(fecha);
+    } else {
+      print('no es string');
+      return DateTime.now();
+    }
+  }
 
   Future<dynamic> datosCreadoPedido(
       clienteId, fecha, montoTotal, tipo, estado, notas, ubicacionID) async {
@@ -121,13 +145,23 @@ class _PedidoState extends State<Pedido> {
       setState(() {
         totalProvider = pedido.total;
         print(totalProvider);
-        totalVenta = totalProvider + envio;
+        totalVenta = totalProvider + envio - ahorro;
         cantCarrito = pedido.cantidadProd;
         seleccionadosProvider = pedido.seleccionados;
         selecciondosPromosProvider = pedido.seleccionadosPromo;
         for (var i = 0; i < seleccionadosProvider.length; i++) {
           if (seleccionadosProvider[i].promoID == null) {
             seleccionadosTodos.add(seleccionadosProvider[i]);
+          }
+        }
+        for (var i = 0; i < seleccionadosTodos.length; i++) {
+          //si hay un bidon nuevo en los productos de la lista, solo productos
+          //no promociones
+          if (seleccionadosTodos[i].id == 4) {
+            setState(() {
+              hayBidon = true;
+              cantidadBidones = seleccionadosTodos[i].cantidad;
+            });
           }
         }
         for (var i = 0; i < selecciondosPromosProvider.length; i++) {
@@ -145,14 +179,7 @@ class _PedidoState extends State<Pedido> {
       });
     } else {
       print('no es pedido');
-      setState(() {
-        totalProvider = 0;
-        seleccionadosProvider = [];
-        selecciondosPromosProvider = [];
-        seleccionadosTodos = [];
-        cantCarrito = 0;
-        colorCantidadCarrito = Colors.grey;
-      });
+      limpiarVariables();
     }
   }
 
@@ -174,17 +201,53 @@ class _PedidoState extends State<Pedido> {
   }
 
   Future<dynamic> cuponExist(cupon) async {
+    print('entro a cupon Exists');
     var res = await http.post(Uri.parse(apiUrl + codigoverify),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({"codigo": cupon}));
     try {
       if (res.statusCode == 200) {
-        bool data = json.decode(res.body);
-        return data;
+        var data = json.decode(res.body);
+        setState(() {
+          existe = data['existe'];
+          fechaLimiteString = data['fecha_creacion_cuenta'];
+          print('CORRIO EL COSO');
+          print(existe);
+        });
       }
     } catch (e) {
       throw Exception("$e");
     }
+  }
+
+  void codigoPersonalVigente(String fecha) {
+    fechaLimiteCliente = mesyAnio(fecha).add(const Duration(days: (30 * 3)));
+    if (fechaLimiteCliente.day >= DateTime.now().day &&
+        fechaLimiteCliente.month >= DateTime.now().month &&
+        fechaLimiteCliente.year >= DateTime.now().year) {
+      setState(() {
+        mensajeCodigoExpirado =
+            'Pero puedes compartir tu codigo con tus amigos para recibir beneficios ;D';
+      });
+    } else {
+      setState(() {
+        mensajeCodigoExpirado =
+            'Pero puedes compartir la aplicacion con tus amigos, para recibir descuentos con sus codigos ;D';
+      });
+    }
+  }
+
+  void limpiarVariables() {
+    setState(() {
+      totalProvider = 0;
+      seleccionadosProvider = [];
+      selecciondosPromosProvider = [];
+      seleccionadosTodos = [];
+      cantCarrito = 0;
+      hayBidon = false;
+      cantidadBidones = 0;
+      colorCantidadCarrito = Colors.grey;
+    });
   }
 
   @override
@@ -194,8 +257,12 @@ class _PedidoState extends State<Pedido> {
     final pedidoProvider = context.watch<PedidoProvider>();
     final userProvider = context.watch<UserProvider>();
     final ubicacionProvider = context.watch<UbicacionProvider>();
+    fechaLimiteCliente = mesyAnio(userProvider.user?.fechaCreacionCuenta);
     esUbicacion(ubicacionProvider.ubicacion);
     tamanoTitulos = largoActual * 0.021;
+    tamanoTitulosDialogs = largoActual * 0.021;
+    tamanoContenidoDialogs = largoActual * 0.018;
+
     setState(() {
       seleccionadosTodos = [];
     });
@@ -255,13 +322,7 @@ class _PedidoState extends State<Pedido> {
                                         totalVenta,
                                         seleccionadosProvider,
                                         notas.text);
-                                    setState(() {
-                                      totalProvider = 0;
-                                      seleccionadosTodos = [];
-                                      seleccionadosProvider = [];
-                                      selecciondosPromosProvider = [];
-                                      cantCarrito = 0;
-                                    });
+                                    limpiarVariables();
                                     pedidoMio = PedidoModel(
                                         seleccionados: seleccionadosProvider,
                                         seleccionadosPromo:
@@ -326,13 +387,7 @@ class _PedidoState extends State<Pedido> {
                     style: const TextStyle(fontSize: 12)),
                 child: IconButton(
                   onPressed: () {
-                    setState(() {
-                      totalProvider = 0;
-                      seleccionadosTodos = [];
-                      seleccionadosProvider = [];
-                      selecciondosPromosProvider = [];
-                      cantCarrito = 0;
-                    });
+                    limpiarVariables();
                     pedidoMio = PedidoModel(
                         seleccionados: seleccionadosProvider,
                         seleccionadosPromo: selecciondosPromosProvider,
@@ -366,7 +421,7 @@ class _PedidoState extends State<Pedido> {
                         child: Text(
                           "Tu pedido",
                           style: TextStyle(
-                              color: const Color.fromARGB(255, 1, 42, 76),
+                              color: colorTitulos,
                               fontWeight: FontWeight.w600,
                               fontSize: tamanoTitulos),
                         ),
@@ -438,8 +493,7 @@ class _PedidoState extends State<Pedido> {
                                                 style: TextStyle(
                                                     fontSize:
                                                         largoActual * 0.019,
-                                                    color: const Color.fromARGB(
-                                                        255, 1, 75, 135)),
+                                                    color: colorContenido),
                                               ),
                                               SizedBox(
                                                 width: anchoActual * 0.45,
@@ -451,9 +505,7 @@ class _PedidoState extends State<Pedido> {
                                                   style: TextStyle(
                                                       fontSize:
                                                           largoActual * 0.015,
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255, 1, 75, 135)),
+                                                      color: colorContenido),
                                                 ),
                                               ),
                                             ],
@@ -474,15 +526,13 @@ class _PedidoState extends State<Pedido> {
                                               "S/. ${seleccionadosTodos[index].precio}",
                                               style: TextStyle(
                                                   fontSize: largoActual * 0.018,
-                                                  color: const Color.fromARGB(
-                                                      255, 1, 75, 135)),
+                                                  color: colorContenido),
                                             ),
                                             Text(
                                               "Cant. ${seleccionadosTodos[index].cantidad}",
                                               style: TextStyle(
                                                   fontSize: largoActual * 0.018,
-                                                  color: const Color.fromARGB(
-                                                      255, 1, 75, 135)),
+                                                  color: colorContenido),
                                             ),
                                             SizedBox(
                                               height: largoActual * 0.0081,
@@ -504,13 +554,13 @@ class _PedidoState extends State<Pedido> {
                         child: Text(
                           "Cupones",
                           style: TextStyle(
-                              color: const Color.fromARGB(255, 1, 42, 76),
+                              color: colorTitulos,
                               fontWeight: FontWeight.w600,
                               fontSize: tamanoTitulos),
                         ),
                       ),
                       Card(
-                        surfaceTintColor: Colors.white,
+                        surfaceTintColor: colorCupon,
                         color: Colors.white,
                         elevation: 8,
                         margin: EdgeInsets.only(
@@ -544,8 +594,7 @@ class _PedidoState extends State<Pedido> {
                                 enableInteractiveSelection: false,
                                 style: TextStyle(
                                     fontSize: largoActual * 0.018,
-                                    color:
-                                        const Color.fromARGB(255, 1, 75, 135)),
+                                    color: colorContenido),
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Ingresar cupón',
@@ -561,17 +610,121 @@ class _PedidoState extends State<Pedido> {
                               ),
                             ),
                             SizedBox(
-                              width: anchoActual * 0.03,
+                              width: anchoActual * 0.01,
                             ),
                             ElevatedButton(
                               onPressed: () async {
-                                // LOGICA PARA VALIDAR  62 ELEVADO A LA 5TA
-                                bool existe = await cuponExist(_cupon);
-                                if (existe) //true
-                                {
+                                setState(() {
+                                  buscandoCodigo = true;
+                                });
+                                await cuponExist(_cupon.text);
+                                setState(() {
+                                  fechaLimite = mesyAnio(fechaLimiteString)
+                                      .add(const Duration(days: (30 * 3)));
+                                  ;
+                                });
+                                print(fechaLimite);
+                                if (existe) {
+                                  //EXISTE EL CODIGO
                                   print("codigo válido");
+                                  if (fechaLimite.day <= DateTime.now().day &&
+                                      fechaLimite.month <=
+                                          DateTime.now().month &&
+                                      fechaLimite.year <= DateTime.now().year) {
+                                    print("el codigo ya expiro");
+                                    // ignore: use_build_context_synchronously
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            backgroundColor: Colors.white,
+                                            surfaceTintColor: Colors.white,
+                                            title: Text(
+                                              'El código que estas usando ya expiró :(',
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      tamanoTitulosDialogs),
+                                            ),
+                                            content: Text(
+                                              'Pero todavìa puedes compartir tu codigo con tus amigos para recibir beneficios',
+                                              style: TextStyle(
+                                                  fontSize:
+                                                      tamanoContenidoDialogs),
+                                            ),
+                                          );
+                                        });
+                                  } else {
+                                    print('el codigo esta vigentee');
+                                    if (hayBidon) {
+                                      //SI HAY BIDONES NUEVOS EN LA LISTA DE PRODUCTOS
+                                      print('hay bidones nuevos');
+                                      setState(() {
+                                        buscandoCodigo = false;
+                                        colorCupon = const Color.fromRGBO(
+                                            255, 0, 93, 1.000);
+                                        ahorro = 4.0 * cantidadBidones;
+                                        totalVenta =
+                                            envio + totalProvider - ahorro;
+                                      });
+                                    } else {
+                                      print('no hay bidones');
+                                      setState(() {
+                                        buscandoCodigo = false;
+                                        colorCupon = Colors.white;
+                                      });
+                                      // ignore: use_build_context_synchronously
+                                      showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              backgroundColor: Colors.white,
+                                              surfaceTintColor: Colors.white,
+                                              title: Text(
+                                                'Este codigo solo es valido para compras de Bidones Nuevos',
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        tamanoTitulosDialogs),
+                                              ),
+                                              content: Text(
+                                                'Agrega un bidón nuevo a tu carrito para acceder a tu descuento ;)',
+                                                style: TextStyle(
+                                                    fontSize:
+                                                        tamanoContenidoDialogs),
+                                              ),
+                                            );
+                                          });
+                                      //PONER SEÑAL DE QUE EL CODIGO SOLO EL VALIDO
+                                      //DESUCENTO EN BIDONES NUEVOS
+                                    }
+                                  }
                                 } else {
+                                  //PONER UNA SEÑAL DE
+                                  //QUE EL CODIGO NO EXISTE
                                   print("no existe el codigo");
+                                  setState(() {
+                                    buscandoCodigo = false;
+                                    colorCupon = Colors.white;
+                                  });
+                                  // ignore: use_build_context_synchronously
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          backgroundColor: Colors.white,
+                                          surfaceTintColor: Colors.white,
+                                          title: Text(
+                                            'El codigo que ingresaste no existe :(',
+                                            style: TextStyle(
+                                                fontSize: tamanoTitulosDialogs),
+                                          ),
+                                          content: Text(
+                                            'Pruba ',
+                                            style: TextStyle(
+                                                fontSize:
+                                                    tamanoContenidoDialogs),
+                                          ),
+                                        );
+                                      });
                                 }
                               },
                               style: ButtonStyle(
@@ -581,13 +734,22 @@ class _PedidoState extends State<Pedido> {
                                 backgroundColor: MaterialStateProperty.all(
                                     const Color.fromRGBO(255, 0, 93, 1.000)),
                               ),
-                              child: Text(
-                                'Validar',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: largoActual * 0.018,
-                                    fontWeight: FontWeight.w500),
-                              ),
+                              child: buscandoCodigo
+                                  ? SizedBox(
+                                      height: largoActual * 0.02,
+                                      width: largoActual * 0.02,
+                                      child: const CircularProgressIndicator(
+                                        color: Color.fromRGBO(253, 253, 253, 1),
+                                        strokeWidth: 3,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Validar',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: largoActual * 0.018,
+                                          fontWeight: FontWeight.w500),
+                                    ),
                             ),
                           ],
                         ),
@@ -600,7 +762,7 @@ class _PedidoState extends State<Pedido> {
                         child: Text(
                           "Tipo de envio",
                           style: TextStyle(
-                              color: const Color.fromARGB(255, 1, 42, 76),
+                              color: colorTitulos,
                               fontWeight: FontWeight.w600,
                               fontSize: tamanoTitulos),
                         ),
@@ -630,22 +792,20 @@ class _PedidoState extends State<Pedido> {
                                     style: TextStyle(
                                         fontSize: largoActual * 0.019,
                                         fontWeight: FontWeight.w500,
-                                        color: Color.fromARGB(255, 1, 75, 135)),
+                                        color: colorContenido),
                                   ),
                                   Text(
                                     'GRATIS',
                                     style: TextStyle(
                                         fontSize: largoActual * 0.013,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
+                                        color: colorContenido),
                                   ),
                                   Text(
                                     "Si lo pides después de la 1:00 P.M se agenda para mañana.",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: largoActual * 0.013,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
+                                        color: colorContenido),
                                   ).animate().shake(),
                                 ],
                               ),
@@ -703,7 +863,7 @@ class _PedidoState extends State<Pedido> {
                                 }
 
                                 setState(() {
-                                  totalVenta = totalProvider + envio;
+                                  totalVenta = totalProvider + envio - ahorro;
                                   print(totalVenta);
                                 });
                               },
@@ -722,21 +882,18 @@ class _PedidoState extends State<Pedido> {
                                     style: TextStyle(
                                         fontSize: largoActual * 0.019,
                                         fontWeight: FontWeight.w500,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
+                                        color: colorContenido),
                                   ),
                                   Text('+ S/. 4.00',
                                       style: TextStyle(
                                           fontSize: largoActual * 0.013,
-                                          color: const Color.fromARGB(
-                                              255, 1, 75, 135))),
+                                          color: colorContenido)),
                                   Text(
                                     "Recive tu producto más rapido y disfrútalo lo antes posible",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: largoActual * 0.013,
-                                        color: const Color.fromARGB(
-                                            255, 1, 75, 135)),
+                                        color: colorContenido),
                                   ),
                                 ],
                               ),
@@ -752,7 +909,7 @@ class _PedidoState extends State<Pedido> {
                         child: Text(
                           "A esta dirección enviaremos el pedido",
                           style: TextStyle(
-                              color: Color.fromARGB(255, 1, 42, 76),
+                              color: colorTitulos,
                               fontWeight: FontWeight.w600,
                               fontSize: tamanoTitulos),
                         ),
@@ -814,7 +971,7 @@ class _PedidoState extends State<Pedido> {
                         child: Text(
                           "Notas para el repartidor",
                           style: TextStyle(
-                              color: const Color.fromARGB(255, 1, 42, 76),
+                              color: colorTitulos,
                               fontWeight: FontWeight.w600,
                               fontSize: tamanoTitulos),
                         ),
@@ -839,7 +996,7 @@ class _PedidoState extends State<Pedido> {
                             enableInteractiveSelection: false,
                             style: TextStyle(
                                 fontSize: largoActual * 0.018,
-                                color: const Color.fromARGB(255, 1, 75, 135)),
+                                color: colorContenido),
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               hintText:
@@ -864,7 +1021,7 @@ class _PedidoState extends State<Pedido> {
                         child: Text(
                           "Resumen de Pedido",
                           style: TextStyle(
-                              color: const Color.fromARGB(255, 1, 42, 76),
+                              color: colorTitulos,
                               fontWeight: FontWeight.w600,
                               fontSize: tamanoTitulos),
                         ),
@@ -895,16 +1052,14 @@ class _PedidoState extends State<Pedido> {
                                       style: TextStyle(
                                           fontSize: largoActual * (13 / 736),
                                           fontWeight: FontWeight.w500,
-                                          color: const Color.fromARGB(
-                                              255, 1, 75, 135)),
+                                          color: colorContenido),
                                     ),
                                     Text(
                                       'S/.$totalProvider',
                                       style: TextStyle(
                                           fontSize: largoActual * (13 / 736),
                                           fontWeight: FontWeight.w500,
-                                          color: const Color.fromARGB(
-                                              255, 1, 75, 135)),
+                                          color: colorContenido),
                                     )
                                   ],
                                 ),
@@ -917,16 +1072,14 @@ class _PedidoState extends State<Pedido> {
                                       style: TextStyle(
                                           fontSize: largoActual * (13 / 736),
                                           fontWeight: FontWeight.w500,
-                                          color: const Color.fromARGB(
-                                              255, 1, 75, 135)),
+                                          color: colorContenido),
                                     ),
                                     Text(
                                       'S/.$envio',
                                       style: TextStyle(
                                           fontSize: largoActual * (13 / 736),
                                           fontWeight: FontWeight.w500,
-                                          color: const Color.fromARGB(
-                                              255, 1, 75, 135)),
+                                          color: colorContenido),
                                     )
                                   ],
                                 ),

@@ -16,9 +16,23 @@ class _PerfilCliente extends State<PerfilCliente> {
   //Color colorTitulos = Color.fromARGB(255, 1, 42, 76);
   Color colorTitulos = Colors.black;
   String apiUrl = dotenv.env['API_URL'] ?? '';
+  DateTime fechaLimite = DateTime.now();
+
+  DateTime mesyAnio(String? fecha) {
+    if (fecha is String) {
+      print('es string');
+      return DateTime.parse(fecha);
+    } else {
+      print('no es string');
+      return DateTime.now();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
+    fechaLimite = mesyAnio(userProvider.user?.fechaCreacionCuenta)
+        .add(const Duration(days: (30 * 3)));
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -236,7 +250,7 @@ class _PerfilCliente extends State<PerfilCliente> {
                         ],
                       ),
                       Text(
-                        'Retiralo hasta el: 05/03/2024',
+                        'Retiralo hasta el: ${fechaLimite.day}/${fechaLimite.month}/${fechaLimite.year}',
                         style: TextStyle(
                             color: colorLetra,
                             fontWeight: FontWeight.w400,

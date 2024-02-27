@@ -4,6 +4,7 @@ class UserModel {
   final String apellidos;
   double? saldoBeneficio;
   String? codigocliente;
+  String? fechaCreacionCuenta;
   String? suscripcion;
 
   // Agrega más atributos según sea necesario
@@ -14,6 +15,7 @@ class UserModel {
       required this.apellidos,
       this.saldoBeneficio,
       this.codigocliente,
+      this.fechaCreacionCuenta,
       this.suscripcion
 
       // Agrega más parámetros según sea necesario
@@ -26,6 +28,7 @@ class UserModel {
       apellidos: json['usuario']['apellidos'] ?? '',
       saldoBeneficio: json['usuario']['saldo_beneficios'].toDouble(),
       codigocliente: json['usuario']['codigo'],
+      fechaCreacionCuenta: json['usuario']['fecha_creacion_cuenta'],
       suscripcion: json['usuario']['suscripcion'],
 
       // Agrega más inicializaciones según sea necesario
