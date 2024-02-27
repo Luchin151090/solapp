@@ -54,11 +54,13 @@ class _PedidoState extends State<Pedido> {
   int ubicacionSelectID = 0;
   String apiUrl = dotenv.env['API_URL'] ?? '';
   String codigoverify = '/api/code_cliente';
+  String apiPedido = '/api/pedido';
+  String apiDetallePedido = '/api/detallepedido';
 
   Future<dynamic> datosCreadoPedido(
       clienteId, fecha, montoTotal, tipo, estado, notas, ubicacionID) async {
     print("-----------------------creandoPEDIDOO");
-    await http.post(Uri.parse(apiUrl + '/api/pedido'),
+    await http.post(Uri.parse(apiUrl + apiPedido),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
           "cliente_id": clienteId,
@@ -75,7 +77,7 @@ class _PedidoState extends State<Pedido> {
 
   Future<dynamic> detallePedido(
       clienteId, productoId, cantidad, promoID) async {
-    await http.post(Uri.parse(apiUrl + '/api/detallepedido'),
+    await http.post(Uri.parse(apiUrl + apiDetallePedido),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
           "cliente_id": clienteId,
@@ -87,7 +89,7 @@ class _PedidoState extends State<Pedido> {
 
   Future<void> crearPedidoyDetallePedido(
       clienteID, tipo, monto, seleccionados, notas) async {
-    DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 5));
+    DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 0));
     showDialog(
         context: context,
         builder: (context) {
@@ -98,7 +100,7 @@ class _PedidoState extends State<Pedido> {
           );
         });
 
-    await datosCreadoPedido(clienteID, tiempoActual.toString(), monto, tipo,
+    await datosCreadoPedido(clienteID, tiempoGMTPeru.toString(), monto, tipo,
         "pendiente", notas, ubicacionSelectID);
     print(tiempoGMTPeru.toString());
     print(tiempoActual.timeZoneName);
@@ -663,7 +665,8 @@ class _PedidoState extends State<Pedido> {
                               onChanged: (bool value) {
                                 setState(() {
                                   light0 = value;
-                                  tiempoPeru = tiempoActual;
+                                  tiempoPeru = tiempoActual
+                                      .subtract(const Duration(hours: 0));
                                   print(value);
                                   print('hora acrtual ${tiempoPeru.hour}');
                                 });
@@ -678,7 +681,7 @@ class _PedidoState extends State<Pedido> {
                                   });
                                 } else {
                                   //ES EXPRESS
-                                  if (tiempoActual.hour <= 16) {
+                                  if (tiempoPeru.hour <= 16) {
                                     print('son menos de las 16');
                                     setState(() {
                                       tipoPedido = 'express';

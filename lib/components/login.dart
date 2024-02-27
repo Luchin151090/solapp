@@ -68,7 +68,9 @@ class _LoginState extends State<Login> {
               id: data['usuario']['id'],
               nombre: data['usuario']['nombre'],
               apellidos: data['usuario']['apellidos'],
-              codigocliente: data['usuario']['codigocliente'] ?? 'NoCode',
+              saldoBeneficio:
+                  data['usuario']['saldo_beneficios'].toDouble() ?? 0.00,
+              codigocliente: data['usuario']['codigo'] ?? 'NoCode',
               suscripcion: data['usuario']['suscripcion'] ?? 'NoSubscribe');
           setState(() {
             status = 200;
@@ -297,21 +299,14 @@ class _LoginState extends State<Login> {
                         print(anchoActual);
                         if (_formKey.currentState!.validate()) {
                           showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return const AlertDialog(
-                                content: Row(
-                                  children: [
-                                    CircularProgressIndicator(
-                                      backgroundColor: Colors.green,
-                                    ),
-                                    SizedBox(width: 20),
-                                    Text("Cargando..."),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
+                              context: context,
+                              builder: (context) {
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                );
+                              });
                           try {
                             await loginsol(_usuario.text, _contrasena.text);
 

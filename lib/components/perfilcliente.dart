@@ -215,7 +215,7 @@ class _PerfilCliente extends State<PerfilCliente> {
                         children: [
                           /** SARITA =) YA ESTA EL END POINT DE SALDO SERA QU LO PRUEBS  */
                           Text(
-                            'S/. 30.00',
+                            'S/. ${userProvider.user?.saldoBeneficio}0',
                             style: TextStyle(
                                 color: colorLetra,
                                 fontWeight: FontWeight.w700,

@@ -428,530 +428,553 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     print(listUbicacionesObjetos);
     return Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
-            key: _scaffoldKey,
-            child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      //CONTAINER DE UBICACION Y CARRITO
-                      Container(
-                        width: anchoActual,
-                        margin: EdgeInsets.only(
-                            left: anchoActual * 0.028,
-                            right: anchoActual * 0.028),
-                        //color: Colors.red,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            //LOCATION
-                            Container(
-                              width: MediaQuery.of(context).size.width / 1.4,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15)),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: anchoActual * 0.7,
-                                    decoration: BoxDecoration(
-                                      color: const Color.fromRGBO(
-                                          83, 176, 68, 1.000),
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    child: Container(
-                                      //color: Colors.amberAccent,
-                                      margin: const EdgeInsets.only(
-                                          left: 12, right: 5),
-                                      child: DropdownButton<String>(
-                                        hint: Text(
-                                          '¿A dónde llevamos tu pedido?',
+        body: PopScope(
+          canPop: false,
+          onPopInvoked: (bool didPop) {
+            if (didPop) {
+              return;
+            }
+          },
+          child: SafeArea(
+              key: _scaffoldKey,
+              child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        //CONTAINER DE UBICACION Y CARRITO
+                        Container(
+                          width: anchoActual,
+                          margin: EdgeInsets.only(
+                              left: anchoActual * 0.028,
+                              right: anchoActual * 0.028),
+                          //color: Colors.red,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              //LOCATION
+                              Container(
+                                width: MediaQuery.of(context).size.width / 1.4,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15)),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: anchoActual * 0.7,
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromRGBO(
+                                            83, 176, 68, 1.000),
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Container(
+                                        //color: Colors.amberAccent,
+                                        margin: const EdgeInsets.only(
+                                            left: 12, right: 5),
+                                        child: DropdownButton<String>(
+                                          hint: Text(
+                                            '¿A dónde llevamos tu pedido?',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: largoActual * 0.018,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                          icon: IconButton(
+                                            onPressed: () {
+                                              showModalBottomSheet(
+                                                backgroundColor:
+                                                    const Color.fromRGBO(
+                                                        0, 106, 252, 1.000),
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Container(
+                                                    margin: EdgeInsets.only(
+                                                        top:
+                                                            largoActual * 0.041,
+                                                        left:
+                                                            anchoActual * 0.055,
+                                                        right: anchoActual *
+                                                            0.055),
+                                                    height: largoActual * 0.17,
+                                                    width: anchoActual,
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Container(
+                                                          margin:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  left: 10),
+                                                          child: Text(
+                                                            'Agregar Ubicación',
+                                                            style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize:
+                                                                  largoActual *
+                                                                      0.023,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                            height:
+                                                                largoActual *
+                                                                    0.013),
+                                                        ElevatedButton(
+                                                          onPressed: () async {
+                                                            print(
+                                                                "ubi añadidda");
+                                                            await currentLocation();
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          style: ButtonStyle(
+                                                            elevation:
+                                                                MaterialStateProperty
+                                                                    .all(8),
+                                                            minimumSize:
+                                                                MaterialStatePropertyAll(Size(
+                                                                    anchoActual *
+                                                                        0.28,
+                                                                    largoActual *
+                                                                        0.054)),
+                                                            backgroundColor:
+                                                                MaterialStateProperty
+                                                                    .all(Colors
+                                                                        .white),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .add_location_alt_rounded,
+                                                                color: const Color
+                                                                    .fromRGBO(
+                                                                    0,
+                                                                    106,
+                                                                    252,
+                                                                    1.000),
+                                                                size:
+                                                                    largoActual *
+                                                                        0.034,
+                                                              ),
+                                                              Text(
+                                                                ' Agregar ubicación actual',
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        largoActual *
+                                                                            0.021,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                    color: const Color
+                                                                        .fromRGBO(
+                                                                        0,
+                                                                        106,
+                                                                        252,
+                                                                        1.000)),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            icon: Icon(
+                                                Icons.add_location_alt_rounded,
+                                                size: largoActual * 0.031,
+                                                color: Colors.white),
+                                          ),
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: largoActual * 0.018,
                                               fontWeight: FontWeight.w500),
-                                        ),
-                                        icon: IconButton(
-                                          onPressed: () {
-                                            showModalBottomSheet(
-                                              backgroundColor:
-                                                  const Color.fromRGBO(
-                                                      0, 106, 252, 1.000),
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return Container(
-                                                  margin: EdgeInsets.only(
-                                                      top: largoActual * 0.041,
-                                                      left: anchoActual * 0.055,
-                                                      right:
-                                                          anchoActual * 0.055),
-                                                  height: largoActual * 0.17,
-                                                  width: anchoActual,
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        margin: const EdgeInsets
-                                                            .only(left: 10),
-                                                        child: Text(
-                                                          'Agregar Ubicación',
-                                                          style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize:
-                                                                largoActual *
-                                                                    0.023,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                          height: largoActual *
-                                                              0.013),
-                                                      ElevatedButton(
-                                                        onPressed: () async {
-                                                          print("ubi añadidda");
-                                                          await currentLocation();
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        style: ButtonStyle(
-                                                          elevation:
-                                                              MaterialStateProperty
-                                                                  .all(8),
-                                                          minimumSize:
-                                                              MaterialStatePropertyAll(Size(
-                                                                  anchoActual *
-                                                                      0.28,
-                                                                  largoActual *
-                                                                      0.054)),
-                                                          backgroundColor:
-                                                              MaterialStateProperty
-                                                                  .all(Colors
-                                                                      .white),
-                                                        ),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Icon(
-                                                              Icons
-                                                                  .add_location_alt_rounded,
-                                                              color: const Color
-                                                                  .fromRGBO(
-                                                                  0,
-                                                                  106,
-                                                                  252,
-                                                                  1.000),
-                                                              size:
-                                                                  largoActual *
-                                                                      0.034,
-                                                            ),
-                                                            Text(
-                                                              ' Agregar ubicación actual',
-                                                              style: TextStyle(
-                                                                  fontSize:
-                                                                      largoActual *
-                                                                          0.021,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                  color: const Color
-                                                                      .fromRGBO(
-                                                                      0,
-                                                                      106,
-                                                                      252,
-                                                                      1.000)),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          elevation: 20,
+                                          dropdownColor: const Color.fromRGBO(
+                                              83, 176, 68, 1.000),
+                                          isExpanded: true,
+                                          value: _ubicacionSelected,
+                                          items: ubicacionesString
+                                              .map((String value) {
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(value),
                                             );
+                                          }).toList(),
+                                          onChanged: (String? newValue) {
+                                            print(newValue);
+                                            setState(() {
+                                              _ubicacionSelected = newValue!;
+                                              miUbicacion =
+                                                  direccionSeleccionada(
+                                                      newValue);
+                                              Provider.of<UbicacionProvider>(
+                                                      context,
+                                                      listen: false)
+                                                  .updateUbicacion(miUbicacion);
+                                            });
                                           },
-                                          icon: Icon(
-                                              Icons.add_location_alt_rounded,
-                                              size: largoActual * 0.031,
-                                              color: Colors.white),
                                         ),
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: largoActual * 0.018,
-                                            fontWeight: FontWeight.w500),
-                                        borderRadius: BorderRadius.circular(20),
-                                        elevation: 20,
-                                        dropdownColor: const Color.fromRGBO(
-                                            83, 176, 68, 1.000),
-                                        isExpanded: true,
-                                        value: _ubicacionSelected,
-                                        items: ubicacionesString
-                                            .map((String value) {
-                                          return DropdownMenuItem<String>(
-                                            value: value,
-                                            child: Text(value),
-                                          );
-                                        }).toList(),
-                                        onChanged: (String? newValue) {
-                                          print(newValue);
-                                          setState(() {
-                                            _ubicacionSelected = newValue!;
-                                            miUbicacion =
-                                                direccionSeleccionada(newValue);
-                                            Provider.of<UbicacionProvider>(
-                                                    context,
-                                                    listen: false)
-                                                .updateUbicacion(miUbicacion);
-                                          });
-                                        },
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
 
-                            //CARRITO
-                            Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color:
-                                      const Color.fromRGBO(0, 106, 252, 1.000),
-                                  borderRadius: BorderRadius.circular(50)),
-                              height: largoActual * 0.059,
-                              width: largoActual * 0.059,
-                              child: Badge(
-                                largeSize: 18,
-                                backgroundColor: colorCantidadCarrito,
-                                label: Text(cantCarrito.toString(),
-                                    style: const TextStyle(fontSize: 12)),
-                                child: IconButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => const Pedido()
-                                          //const Promos()
-                                          ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.shopping_cart_rounded),
-                                  color: Colors.white,
-                                  iconSize: largoActual * 0.030,
-                                ).animate().shakeY(
-                                      duration: Duration(milliseconds: 300),
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      //BIENVENIDA DEL CLIENTE
-                      Container(
-                        width: anchoActual,
-                        margin: EdgeInsets.only(
-                            left: anchoActual * 0.055, top: largoActual * 0.03),
-                        child: Text(
-                          "Bienvenid@, ${userProvider.user?.nombre.capitalize()}",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w200,
-                              fontSize: largoActual * 0.020,
-                              color: colorTextos),
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: anchoActual * 0.055),
-                        child: Text(
-                          "Disfruta de Agua Sol!",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: largoActual * 0.020,
-                              color: colorTextos),
-                        ),
-                      ),
-                      SizedBox(
-                        height: largoActual * 0.02,
-                      ),
-                      //TAB BAR PRODUCTOS/PROMOCIONES
-                      Container(
-                        height: largoActual * 0.045,
-                        width: anchoActual,
-                        margin: EdgeInsets.only(
-                          top: largoActual * 0.013,
-                        ),
-                        child: TabBar(
-                            indicatorSize: TabBarIndicatorSize.tab,
-                            controller: _tabController,
-                            //indicatorWeight: 10,
-                            indicator: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Color.fromRGBO(120, 251, 99, 0.5),
-                            ),
-                            labelStyle: TextStyle(
-                                fontSize: largoActual * 0.020,
-                                fontWeight: FontWeight
-                                    .w500), // Ajusta el tamaño del texto de la pestaña seleccionada
-                            unselectedLabelStyle: TextStyle(
-                                fontSize: largoActual * 0.020,
-                                fontWeight: FontWeight.w300),
-                            labelColor: colorTextos,
-                            unselectedLabelColor: colorTextos,
-                            indicatorColor:
-                                const Color.fromRGBO(83, 176, 68, 1.000),
-                            tabs: const [
-                              Tab(
-                                text: "Promociones",
-                              ),
-                              Tab(
-                                text: "Productos",
-                              ),
-                            ]),
-                      ),
-                      //IMAGENES DE PRODUCTOS Y PROMOCIONES TAB BAR
-                      Container(
-                        margin: EdgeInsets.only(
-                          top: largoActual * 0.013,
-                        ),
-                        height: largoActual / 2.13,
-                        width: double.maxFinite,
-                        child: TabBarView(
-                          controller: _tabController,
-                          children: [
-                            ListView.builder(
-                                controller: scrollController1,
-                                scrollDirection: Axis.horizontal,
-                                itemCount: 5,
-                                itemBuilder: (context, index) {
-                                  return GestureDetector(
-                                    onTap: () {
+                              //CARRITO
+                              Container(
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    color: const Color.fromRGBO(
+                                        0, 106, 252, 1.000),
+                                    borderRadius: BorderRadius.circular(50)),
+                                height: largoActual * 0.059,
+                                width: largoActual * 0.059,
+                                child: Badge(
+                                  largeSize: 18,
+                                  backgroundColor: colorCantidadCarrito,
+                                  label: Text(cantCarrito.toString(),
+                                      style: const TextStyle(fontSize: 12)),
+                                  child: IconButton(
+                                    onPressed: () {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                            builder: (context) =>
-                                                const BarraNavegacion(
-                                                  indice: 0,
-                                                  subIndice: 1,
-                                                )
+                                            builder: (context) => const Pedido()
                                             //const Promos()
                                             ),
                                       );
                                     },
-                                    child: Container(
-                                      margin: EdgeInsets.only(
-                                          right: anchoActual * 0.028),
-                                      height: anchoActual * 0.83,
-                                      width: anchoActual * 0.83,
-                                      decoration: BoxDecoration(
-                                          color: const Color.fromARGB(
-                                              255, 130, 219, 133),
-                                          borderRadius:
-                                              BorderRadius.circular(30),
-                                          image: const DecorationImage(
-                                            image: AssetImage(
-                                                'lib/imagenes/bodegon.png'),
-                                            fit: BoxFit.cover,
-                                          )),
-                                    ),
-                                  );
-                                }),
-                            ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                controller: scrollController2,
-                                itemCount: listProducto.length,
-                                itemBuilder: (context, index) {
-                                  Producto producto = listProducto[index];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                BarraNavegacion(
-                                                  indice: 0,
-                                                  subIndice: 2,
-                                                )
-                                            //const Productos()
-                                            ),
-                                      );
-                                    },
-                                    child: Container(
-                                      margin: EdgeInsets.only(
-                                          right: anchoActual * 0.028),
-                                      height: anchoActual * 0.83,
-                                      width: anchoActual * 0.83,
-                                      decoration: BoxDecoration(
-                                          color: Color.fromARGB(
-                                              255, 130, 219, 133),
-                                          borderRadius:
-                                              BorderRadius.circular(50),
-                                          image: DecorationImage(
-                                            image: NetworkImage(producto.foto),
-                                            fit: BoxFit.fitHeight,
-                                          )),
-                                    ),
-                                  );
-                                }),
-                          ],
-                        ),
-                      ),
-                      Expanded(child: Container()),
-                      //TEXTOS MEJORA TU VIDA Y ASISTENCIA
-                      Container(
-                        margin: EdgeInsets.only(
-                            left: anchoActual * 0.055,
-                            right: anchoActual * 0.055),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                                child: Text(
-                              "Mejora tu vida!",
-                              style: TextStyle(
-                                  fontSize: largoActual * 0.019,
-                                  fontWeight: FontWeight.w300,
-                                  color: colorTextos),
-                            )),
-                            Container(
-                              child: Text(
-                                "Necesitas",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w300,
-                                    fontSize: largoActual * 0.019,
-                                    color: colorTextos),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      //BOTONES MEJORA TU VIDA Y ASISTENCIA
-                      Row(children: [
-                        //boton aqui
-                        SizedBox(
-                          width: anchoActual * 0.40,
-                          height: largoActual * 0.054,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text(
-                                      'PRONTO',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              Color.fromARGB(255, 4, 80, 143)),
-                                    ),
-                                    content: Text(
-                                      'Muy pronto te sorprenderemos!',
-                                      style: TextStyle(
-                                          fontSize: largoActual * 0.027,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context)
-                                              .pop(); // Cierra el AlertDialog
-                                        },
-                                        child: Text(
-                                          'OK',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: largoActual * 0.034,
-                                              color: const Color.fromARGB(
-                                                  255, 13, 58, 94)),
-                                        ),
+                                    icon:
+                                        const Icon(Icons.shopping_cart_rounded),
+                                    color: Colors.white,
+                                    iconSize: largoActual * 0.030,
+                                  ).animate().shakeY(
+                                        duration: Duration(milliseconds: 300),
                                       ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            style: ButtonStyle(
-                              elevation: MaterialStateProperty.all(8),
-                              minimumSize: MaterialStatePropertyAll(Size(
-                                  anchoActual * 0.28, largoActual * 0.054)),
-                              backgroundColor: MaterialStateProperty.all(
-                                  const Color.fromRGBO(0, 106, 252, 1.000)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons
-                                      .attach_money_outlined, // Reemplaza con el icono que desees
-                                  size: largoActual * 0.025,
-                                  color: Colors.white,
                                 ),
-                                SizedBox(
-                                    width: anchoActual *
-                                        0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
-                                Text(
-                                  "Aquí",
-                                  style: TextStyle(
-                                      fontSize: largoActual * 0.021,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        //BIENVENIDA DEL CLIENTE
+                        Container(
+                          width: anchoActual,
+                          margin: EdgeInsets.only(
+                              left: anchoActual * 0.055,
+                              top: largoActual * 0.03),
+                          child: Text(
+                            "Bienvenid@, ${userProvider.user?.nombre.capitalize()}",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w200,
+                                fontSize: largoActual * 0.020,
+                                color: colorTextos),
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(left: anchoActual * 0.055),
+                          child: Text(
+                            "Disfruta de Agua Sol!",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: largoActual * 0.020,
+                                color: colorTextos),
+                          ),
+                        ),
+                        SizedBox(
+                          height: largoActual * 0.02,
+                        ),
+                        //TAB BAR PRODUCTOS/PROMOCIONES
+                        Container(
+                          height: largoActual * 0.045,
+                          width: anchoActual,
+                          margin: EdgeInsets.only(
+                            top: largoActual * 0.013,
+                          ),
+                          child: TabBar(
+                              indicatorSize: TabBarIndicatorSize.label,
+                              controller: _tabController,
+                              indicatorWeight: 10,
+                              /*indicator: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Color.fromRGBO(120, 251, 99, 0.5),
+                              ),*/
+                              labelStyle: TextStyle(
+                                  fontSize: largoActual * 0.020,
+                                  fontWeight: FontWeight
+                                      .w500), // Ajusta el tamaño del texto de la pestaña seleccionada
+                              unselectedLabelStyle: TextStyle(
+                                  fontSize: largoActual * 0.020,
+                                  fontWeight: FontWeight.w300),
+                              labelColor: colorTextos,
+                              unselectedLabelColor: colorTextos,
+                              indicatorColor:
+                                  const Color.fromRGBO(83, 176, 68, 1.000),
+                              tabs: const [
+                                Tab(
+                                  text: "Promociones",
                                 ),
-                              ],
-                            ),
+                                Tab(
+                                  text: "Productos",
+                                ),
+                              ]),
+                        ),
+                        //IMAGENES DE PRODUCTOS Y PROMOCIONES TAB BAR
+                        Container(
+                          margin: EdgeInsets.only(
+                            top: largoActual * 0.013,
+                          ),
+                          height: largoActual / 2.13,
+                          width: double.maxFinite,
+                          child: TabBarView(
+                            controller: _tabController,
+                            children: [
+                              ListView.builder(
+                                  controller: scrollController1,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: 5,
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const BarraNavegacion(
+                                                    indice: 0,
+                                                    subIndice: 1,
+                                                  )
+                                              //const Promos()
+                                              ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.only(
+                                            right: anchoActual * 0.028),
+                                        height: anchoActual * 0.83,
+                                        width: anchoActual * 0.83,
+                                        decoration: BoxDecoration(
+                                            color: const Color.fromARGB(
+                                                255, 130, 219, 133),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                            image: const DecorationImage(
+                                              image: AssetImage(
+                                                  'lib/imagenes/bodegon.png'),
+                                              fit: BoxFit.cover,
+                                            )),
+                                      ),
+                                    );
+                                  }),
+                              ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  controller: scrollController2,
+                                  itemCount: listProducto.length,
+                                  itemBuilder: (context, index) {
+                                    Producto producto = listProducto[index];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  BarraNavegacion(
+                                                    indice: 0,
+                                                    subIndice: 2,
+                                                  )
+                                              //const Productos()
+                                              ),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.only(
+                                            right: anchoActual * 0.028),
+                                        height: anchoActual * 0.83,
+                                        width: anchoActual * 0.83,
+                                        decoration: BoxDecoration(
+                                            color: Color.fromARGB(
+                                                255, 130, 219, 133),
+                                            borderRadius:
+                                                BorderRadius.circular(50),
+                                            image: DecorationImage(
+                                              image:
+                                                  NetworkImage(producto.foto),
+                                              fit: BoxFit.fitHeight,
+                                            )),
+                                      ),
+                                    );
+                                  }),
+                            ],
                           ),
                         ),
                         Expanded(child: Container()),
-                        //boton ayuda
-                        SizedBox(
-                          width: anchoActual * 0.4,
-                          height: largoActual * 0.054,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const Asistencia()),
-                              );
-                            },
-                            style: ButtonStyle(
-                              elevation: MaterialStateProperty.all(8),
-                              minimumSize: MaterialStatePropertyAll(Size(
-                                  anchoActual * 0.28, largoActual * 0.054)),
-                              backgroundColor: MaterialStateProperty.all(
-                                  const Color.fromRGBO(0, 106, 252, 1.000)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons
-                                      .support_agent_rounded, // Reemplaza con el icono que desees
-                                  size: largoActual * 0.025,
-                                  color: Colors.white,
-                                ),
-
-                                SizedBox(
-                                    width: anchoActual *
-                                        0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
-                                Text(
-                                  "Ayuda",
+                        //TEXTOS MEJORA TU VIDA Y ASISTENCIA
+                        Container(
+                          margin: EdgeInsets.only(
+                              left: anchoActual * 0.055,
+                              right: anchoActual * 0.055),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                  child: Text(
+                                "Mejora tu vida!",
+                                style: TextStyle(
+                                    fontSize: largoActual * 0.019,
+                                    fontWeight: FontWeight.w300,
+                                    color: colorTextos),
+                              )),
+                              Container(
+                                child: Text(
+                                  "Necesitas",
                                   style: TextStyle(
-                                      fontSize: largoActual * 0.021,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white),
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: largoActual * 0.019,
+                                      color: colorTextos),
                                 ),
-                              ],
-                            ),
+                              )
+                            ],
                           ),
                         ),
-                      ]),
-                    ]))));
+                        //BOTONES MEJORA TU VIDA Y ASISTENCIA
+                        Row(children: [
+                          //boton aqui
+                          SizedBox(
+                            width: anchoActual * 0.40,
+                            height: largoActual * 0.054,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text(
+                                        'PRONTO',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Color.fromARGB(
+                                                255, 4, 80, 143)),
+                                      ),
+                                      content: Text(
+                                        'Muy pronto te sorprenderemos!',
+                                        style: TextStyle(
+                                            fontSize: largoActual * 0.027,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pop(); // Cierra el AlertDialog
+                                          },
+                                          child: Text(
+                                            'OK',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: largoActual * 0.034,
+                                                color: const Color.fromARGB(
+                                                    255, 13, 58, 94)),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              style: ButtonStyle(
+                                elevation: MaterialStateProperty.all(8),
+                                minimumSize: MaterialStatePropertyAll(Size(
+                                    anchoActual * 0.28, largoActual * 0.054)),
+                                backgroundColor: MaterialStateProperty.all(
+                                    const Color.fromRGBO(0, 106, 252, 1.000)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons
+                                        .attach_money_outlined, // Reemplaza con el icono que desees
+                                    size: largoActual * 0.025,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                      width: anchoActual *
+                                          0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                  Text(
+                                    "Aquí",
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.021,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(child: Container()),
+                          //boton ayuda
+                          SizedBox(
+                            width: anchoActual * 0.4,
+                            height: largoActual * 0.054,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Asistencia()),
+                                );
+                              },
+                              style: ButtonStyle(
+                                elevation: MaterialStateProperty.all(8),
+                                minimumSize: MaterialStatePropertyAll(Size(
+                                    anchoActual * 0.28, largoActual * 0.054)),
+                                backgroundColor: MaterialStateProperty.all(
+                                    const Color.fromRGBO(0, 106, 252, 1.000)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons
+                                        .support_agent_rounded, // Reemplaza con el icono que desees
+                                    size: largoActual * 0.025,
+                                    color: Colors.white,
+                                  ),
+
+                                  SizedBox(
+                                      width: anchoActual *
+                                          0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                  Text(
+                                    "Ayuda",
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.021,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ]),
+                      ]))),
+        ));
   }
 }

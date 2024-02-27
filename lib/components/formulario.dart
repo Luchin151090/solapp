@@ -1,7 +1,6 @@
-
 import 'dart:convert';
 import 'package:intl/intl.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
@@ -27,17 +26,19 @@ class _FormuState extends State<Formu> {
   String? selectedSexo;
   List<String> sexos = ['Masculino', 'Femenino'];
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String apiCreateUser = 'http://10.0.2.2:8004/api/user_cliente';
+  String apiUrl = dotenv.env['API_URL'] ?? '';
+  String apiCreateUser = '/api/user_cliente';
 
-  Future<dynamic> registrar(nombre, apellidos, dni, sexo, fecha, nickname,contrasena, email, telefono, ruc) async {
+  Future<dynamic> registrar(nombre, apellidos, dni, sexo, fecha, fechaAct,
+      nickname, contrasena, email, telefono, ruc) async {
     try {
       // Parsear la fecha de nacimiento a DateTime
-    DateTime fechaNacimiento = DateFormat('d/M/yyyy').parse(fecha);
+      DateTime fechaNacimiento = DateFormat('d/M/yyyy').parse(fecha);
 
-    // Formatear la fecha como una cadena en el formato deseado (por ejemplo, 'yyyy-MM-dd')
-    String fechaFormateada = DateFormat('yyyy-MM-dd').format(fechaNacimiento);
+      // Formatear la fecha como una cadena en el formato deseado (por ejemplo, 'yyyy-MM-dd')
+      String fechaFormateada = DateFormat('yyyy-MM-dd').format(fechaNacimiento);
 
-      await http.post(Uri.parse(apiCreateUser),
+      await http.post(Uri.parse(apiUrl + apiCreateUser),
           headers: {"Content-type": "application/json"},
           body: jsonEncode({
             "rol_id": 4,
@@ -50,6 +51,7 @@ class _FormuState extends State<Formu> {
             "ruc": ruc ?? "",
             "dni": dni,
             "fecha_nacimiento": fechaFormateada,
+            "fecha_creacion_cuenta": fechaAct,
             "sexo": sexo
           }));
     } catch (e) {
@@ -62,6 +64,7 @@ class _FormuState extends State<Formu> {
     //final TabController _tabController = TabController(length: 2, vsync: this);
     final anchoActual = MediaQuery.of(context).size.width;
     final largoActual = MediaQuery.of(context).size.height;
+    DateTime tiempoActual = DateTime.now();
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 255, 255, 255),
         appBar: AppBar(),
@@ -75,7 +78,8 @@ class _FormuState extends State<Formu> {
                     children: [
                       // TITULOS
                       Container(
-                        margin: const EdgeInsets.only(top: 10 * 0.013, left: 10 * 0.055),
+                        margin: const EdgeInsets.only(
+                            top: 10 * 0.013, left: 10 * 0.055),
                         //color:Colors.grey,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -102,7 +106,8 @@ class _FormuState extends State<Formu> {
                               ],
                             ),
                             Container(
-                              margin: EdgeInsets.only(right: anchoActual * 0.025),
+                              margin:
+                                  EdgeInsets.only(right: anchoActual * 0.025),
                               height: (largoActual * 0.094) + 20,
                               width: (largoActual * 0.094) + 20,
                               child: Lottie.asset(
@@ -300,7 +305,8 @@ class _FormuState extends State<Formu> {
                                     labelStyle: TextStyle(
                                       fontSize: largoActual * 0.02,
                                       fontWeight: FontWeight.bold,
-                                      color: const Color.fromARGB(255, 1, 55, 99),
+                                      color:
+                                          const Color.fromARGB(255, 1, 55, 99),
                                     ),
                                     hintStyle: TextStyle(
                                       fontSize: largoActual * 0.018,
@@ -402,65 +408,67 @@ class _FormuState extends State<Formu> {
                         height: largoActual * 0.081,
                         width: anchoActual * 0.42,
                         child: ElevatedButton(
-                          onPressed: ()  {
+                          onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text(
-                                        'Gracias por registrar',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Color.fromARGB(
-                                                255, 4, 80, 143)),
-                                      ),
-                                      content: Text(
-                                        'Te esparamos!',
-                                        style: TextStyle(
-                                            fontSize: largoActual * 0.027,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () async{
-                                            await registrar(
-                                  _nombres.text,
-                                  _apellidos.text,
-                                  _dni.text,
-                                  selectedSexo,
-                                  _fechaController.text,
-                                  _username.text,
-                                  _password.text,
-                                  _email.text,
-                                  _telefono.text,
-                                  _ruc.text);
-                              print("registrado-....");
-                                            /*Navigator.push(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text(
+                                      'Gracias por registrar',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Color.fromARGB(255, 4, 80, 143)),
+                                    ),
+                                    content: Text(
+                                      'Te esparamos!',
+                                      style: TextStyle(
+                                          fontSize: largoActual * 0.027,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () async {
+                                          await registrar(
+                                              _nombres.text,
+                                              _apellidos.text,
+                                              _dni.text,
+                                              selectedSexo,
+                                              _fechaController.text,
+                                              tiempoActual,
+                                              _username.text,
+                                              _password.text,
+                                              _email.text,
+                                              _telefono.text,
+                                              _ruc.text);
+                                          print("registrado-....");
+                                          /*Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => const Login2()),
                                 );*/ // Cierra el AlertDialog
-                                          },
-                                          child: const Text(
-                                            'OK',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12,
-                                                color: Color.fromARGB(
-                                                    255, 13, 58, 94)),
-                                          ),
+                                        },
+                                        child: const Text(
+                                          'OK',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                              color: Color.fromARGB(
+                                                  255, 13, 58, 94)),
                                         ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             }
                           },
                           child: Text(
                             "Registrar",
-                            style: TextStyle(fontSize: largoActual * 0.027, color: Colors.white),
+                            style: TextStyle(
+                                fontSize: largoActual * 0.027,
+                                color: Colors.white),
                           ),
                           style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all(
@@ -472,4 +480,3 @@ class _FormuState extends State<Formu> {
                 ))));
   }
 }
-
