@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +13,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'dart:io';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 //import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:appsol_final/models/producto_model.dart';
@@ -91,7 +92,7 @@ class HolaConductor2 extends StatefulWidget {
 class _HolaConductor2State extends State<HolaConductor2> {
   late io.Socket socket;
   String apiUrl = dotenv.env['API_URL'] ?? '';
-  String googleApiKey = 'AIzaSyBibduCuOg5ba-aAqvMWHf9XkZUgLZoks4';
+  String googleApiKey = 'AIzaSyCyDQIhOQ_fxWclmJnJTq0yHT1JFhzMTPM';
   String apiPedidosConductor = '/api/pedido_conductor/';
   String apiDetallePedido = '/api/detallepedido/';
   bool puedoLlamar = false;
@@ -140,11 +141,26 @@ class _HolaConductor2State extends State<HolaConductor2> {
   double decimalProgreso = 0;
   int porcentajeProgreso = 0;
   List<int> idpedidos = [];
-  @override
-  void initState() {
-    super.initState();
-    _initialize();
-    connectToServer();
+  late GoogleMapController mapController;
+  late Location location;
+  LatLng _currentLocation = LatLng(-16.403174, -71.582565);
+
+  List<LatLng> polylineCoordinates = [];
+  LocationData? currentLocation;
+  void getPolyPoints() async {
+    polylineCoordinates = [];
+    PolylinePoints polylinePoints = PolylinePoints();
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+        'AIzaSyCX0DB2ilFam7EoOcvoto1vpvinszdSMIw',
+        PointLatLng(_currentLocation.latitude, _currentLocation.longitude),
+        PointLatLng(latitudPedido, longitudPedido));
+    if (result.points.isNotEmpty) {
+      result.points.forEach(
+        (PointLatLng point) =>
+            polylineCoordinates.add(LatLng(point.latitude, point.longitude)),
+      );
+      setState(() {});
+    }
   }
 
   _cargarPreferencias() async {
@@ -167,7 +183,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
       });
     } else {
       setState(() {
-        conductorIDpref = 3;
+        conductorIDpref = 4;
       });
     }
 
@@ -364,9 +380,10 @@ class _HolaConductor2State extends State<HolaConductor2> {
               pedidoTrabajo = listPedidosbyRuta[i];
               latitudPedido = listPedidosbyRuta[i].latitud;
               longitudPedido = listPedidosbyRuta[i].longitud;
+              getPolyPoints();
               nombreCliente = listPedidosbyRuta[i].nombre.capitalize();
               apellidoCliente = listPedidosbyRuta[i].apellidos.capitalize();
-              observacionCliente = listPedidosbyRuta[i].comentario.capitalize();
+              //observacionCliente = listPedidosbyRuta[i].comentario.capitalize();
               print('12) Este es el pedidoIDactual $pedidoIDActual');
             });
             break;
@@ -705,6 +722,20 @@ class _HolaConductor2State extends State<HolaConductor2> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    location = Location();
+    location.onLocationChanged.listen((LocationData currentLocation) {
+      setState(() {
+        _currentLocation =
+            LatLng(currentLocation.latitude!, currentLocation.longitude!);
+      });
+    });
+    _initialize();
+    connectToServer();
+  }
+
+  @override
   void dispose() {
     socket.disconnect();
     socket.dispose();
@@ -735,28 +766,36 @@ class _HolaConductor2State extends State<HolaConductor2> {
                     height: largoActual,
                     width: anchoActual,
                     child: Stack(children: [
-                      //EL MAPA OCUPA TODA LA PANTALLA
-                      FlutterMap(
-                          options: MapOptions(
-                            initialCenter: LatLng(-16.405013, -71.570120),
-                            initialZoom: 13,
+                      GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: _currentLocation,
+                          zoom: 13.5,
+                        ),
+                        onMapCreated: (GoogleMapController controller) {
+                          mapController = controller;
+                        },
+                        markers: {
+                          Marker(
+                            markerId: const MarkerId('currentLocation'),
+                            position: _currentLocation,
                           ),
-                          children: [
-                            TileLayer(
-                              urlTemplate:
-                                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                              userAgentPackageName: 'com.example.app',
-                            ),
-                            MarkerLayer(markers: [
-                              Marker(
-                                  point: LatLng(latitudPedido, longitudPedido),
-                                  child: Icon(
-                                    Icons.location_on_rounded,
-                                    color: Colors.black,
-                                    size: 40,
-                                  ))
-                            ])
-                          ]),
+                          Marker(
+                            markerId: const MarkerId('pedido'),
+                            position: LatLng(latitudPedido, longitudPedido),
+                            icon: BitmapDescriptor.defaultMarkerWithHue(
+                                BitmapDescriptor.hueRose),
+                          ),
+                        },
+                        polylines: {
+                          Polyline(
+                              polylineId: const PolylineId("route"),
+                              points: polylineCoordinates,
+                              color: Colors.blue,
+                              width: 6),
+                        },
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                      ),
 
                       //BOTON DE MENU
                       //FALTA HABILITAR
