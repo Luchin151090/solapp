@@ -1,6 +1,8 @@
 import 'package:appsol_final/components/navegador.dart';
 import 'package:appsol_final/components/pedido.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:geocoding/geocoding.dart';
@@ -58,6 +60,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   String? _ubicacionSelected;
   late String? dropdownValue;
   int cantCarrito = 0;
+  double ganacia = 3.00;
   Color colorCantidadCarrito = Colors.black;
   Color colorLetra = const Color.fromARGB(255, 1, 42, 76);
   Color colorTextos = const Color.fromARGB(255, 1, 42, 76);
@@ -677,7 +680,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  BarraNavegacion(
+                                                  const BarraNavegacion(
                                                     indice: 0,
                                                     subIndice: 2,
                                                   )
@@ -691,7 +694,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                         height: anchoActual * 0.83,
                                         width: anchoActual * 0.83,
                                         decoration: BoxDecoration(
-                                            color: Color.fromARGB(
+                                            color: const Color.fromARGB(
                                                 255, 130, 219, 133),
                                             borderRadius:
                                                 BorderRadius.circular(20),
@@ -722,22 +725,259 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           ),
                         ),
                         SizedBox(
-                          height: largoActual * 0.15,
+                          height: largoActual * 0.009,
+                        ),
+                        SizedBox(
+                          height: largoActual * 0.16,
                           child: Card(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10)),
                               surfaceTintColor: Colors.white,
                               color: Colors.white,
                               elevation: 10,
-                              child: Container(
-                                margin: const EdgeInsets.only(
-                                    left: 40, right: 40, bottom: 10, top: 10),
+                              child: OutlinedButton(
+                                style: const ButtonStyle(
+                                    shape: MaterialStatePropertyAll(
+                                      RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10))),
+                                    ),
+                                    side: MaterialStatePropertyAll(
+                                        BorderSide.none)),
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      barrierColor:
+                                          Colors.black.withOpacity(0.8),
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(5)),
+                                          insetPadding: EdgeInsets.all(
+                                            0,
+                                          ),
+                                          backgroundColor: Colors.transparent,
+                                          surfaceTintColor: Colors.transparent,
+                                          child: Stack(
+                                              clipBehavior: Clip.none,
+                                              alignment: Alignment.center,
+                                              children: [
+                                                //CONTAINER CON INFO DE LA PROMOOO
+                                                Container(
+                                                  height: largoActual * 0.64,
+                                                  width: anchoActual * 0.8,
+                                                  decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15),
+                                                      gradient:
+                                                          const LinearGradient(
+                                                              colors: [
+                                                            Color.fromRGBO(
+                                                                0,
+                                                                106,
+                                                                252,
+                                                                1.000),
+                                                            Color.fromRGBO(
+                                                                0,
+                                                                106,
+                                                                252,
+                                                                1.000),
+                                                            Color.fromRGBO(
+                                                                0,
+                                                                106,
+                                                                252,
+                                                                1.000),
+                                                            Color.fromRGBO(150,
+                                                                198, 230, 1),
+                                                            Colors.white,
+                                                            Colors.white,
+                                                          ],
+                                                              begin: Alignment
+                                                                  .topLeft,
+                                                              end: Alignment
+                                                                  .bottomCenter)),
+                                                  child: Container(
+                                                    margin: EdgeInsets.all(
+                                                        anchoActual * 0.06),
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        //ESPACIO PARA QUE EL TEXTO NO SE TAPE CON LAS IMAGENES
+                                                        SizedBox(
+                                                          height: largoActual *
+                                                              0.15,
+                                                        ),
+                                                        //TEXTO QUIERES GANAR MONI
+                                                        Text(
+                                                          '¿Quieres ganar dinero sin salir de tu hogar?',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize:
+                                                                  largoActual *
+                                                                      0.03,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                        //TEXTO CON AGUA SOL PUEDES LOGRARLO
+                                                        Text(
+                                                          '¡Con Agua Sol puedes lograrlo!',
+                                                          style: TextStyle(
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic,
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize:
+                                                                  largoActual *
+                                                                      0.025,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400),
+                                                        ),
+                                                        //ESPACIOOO
+                                                        SizedBox(
+                                                            height:
+                                                                largoActual *
+                                                                    0.06),
+                                                        //TEXTO EXPLICATIVO
+                                                        RichText(
+                                                            text: TextSpan(
+                                                                style: TextStyle(
+                                                                    fontStyle:
+                                                                        FontStyle
+                                                                            .normal,
+                                                                    color:
+                                                                        colorLetra,
+                                                                    fontSize:
+                                                                        largoActual *
+                                                                            0.021,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400),
+                                                                children: [
+                                                              const TextSpan(
+                                                                  text:
+                                                                      'Puedes '),
+                                                              TextSpan(
+                                                                  text:
+                                                                      'GANAR S/. ${ganacia}0 ',
+                                                                  style: const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w800)),
+                                                              const TextSpan(
+                                                                  text:
+                                                                      'por cada '),
+                                                              const TextSpan(
+                                                                  text:
+                                                                      'Bidon Nuevo ',
+                                                                  style: TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w800)),
+                                                              const TextSpan(
+                                                                  text: 'que '),
+                                                              const TextSpan(
+                                                                  text:
+                                                                      'compren ',
+                                                                  style: TextStyle(
+                                                                      fontStyle:
+                                                                          FontStyle
+                                                                              .italic,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w800)),
+                                                              const TextSpan(
+                                                                  text:
+                                                                      'tus contactos con tu código.'),
+                                                            ])),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                //ANIMACION PLAYERA
+                                                Positioned(
+                                                  top: -largoActual * 0.08,
+                                                  left: anchoActual * 0.035,
+                                                  height: largoActual * 0.23,
+                                                  child: Lottie.asset(
+                                                      'lib/imagenes/playa1.json'),
+                                                ),
+                                                //IMAGEN DE BIDONCITO BONITO
+                                                Positioned(
+                                                  top: -largoActual * 0.15,
+                                                  right: -anchoActual * 0.08,
+                                                  child: Container(
+                                                    height: largoActual * 0.30,
+                                                    width: anchoActual * 0.5,
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            top: 10),
+                                                    decoration: const BoxDecoration(
+                                                        color:
+                                                            Colors.transparent,
+                                                        image: DecorationImage(
+                                                            image: AssetImage(
+                                                                'lib/imagenes/BIDON20.png'),
+                                                            fit: BoxFit
+                                                                .scaleDown)),
+                                                  ),
+                                                ),
+                                                //BOTON DE CERRADO
+                                                Positioned(
+                                                  top: -largoActual * 0.13,
+                                                  right: -anchoActual * 0.018,
+                                                  child: Container(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      decoration: BoxDecoration(
+                                                          color: const Color
+                                                              .fromARGB(11, 191,
+                                                              191, 191),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      50)),
+                                                      height:
+                                                          largoActual * 0.05,
+                                                      width: largoActual * 0.05,
+                                                      child: IconButton(
+                                                        onPressed: () {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        const Pedido()
+                                                                //const Promos()
+                                                                ),
+                                                          );
+                                                        },
+                                                        icon: const Icon(Icons
+                                                            .close_rounded),
+                                                        color: Colors.white,
+                                                        iconSize:
+                                                            largoActual * 0.030,
+                                                      )),
+                                                ),
+                                              ]),
+                                        );
+                                      });
+                                },
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    /** SARITA =) YA ESTA EL END POINT DE SALDO SERA QU LO PRUEBS  */
                                     Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -760,17 +1000,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                         ),
                                       ],
                                     ),
-                                    Container(
-                                      height: 80,
-                                      width: 80,
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        //color: Colors.amberAccent,
-                                        borderRadius: BorderRadius.circular(0),
-                                      ),
-                                      child: Lottie.asset(
-                                          'lib/imagenes/billetera3.json'),
-                                    ),
+                                    Lottie.asset(
+                                        'lib/imagenes/billetera3.json'),
                                   ],
                                 ),
                               )),

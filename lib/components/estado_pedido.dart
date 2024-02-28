@@ -23,7 +23,7 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
   String apiUrl = dotenv.env['API_URL'] ?? '';
   String apiPedidosCliente = "/api/pedido_cliente/";
   String apiProductosPedido = "/api/productosPedido/";
-  String iconoRecibido = 'lib/imagenes/recibidoon4.json';
+  String iconoRecibido = 'lib/imagenes/recibidoon6.json';
   String iconoEnCaminoON = 'lib/imagenes/encaminoon1.json';
   String iconoEnCaminoOF = 'lib/imagenes/encaminoof1.json';
   String iconoEntregadoON = 'lib/imagenes/entregadoon2.json';
