@@ -1,4 +1,3 @@
-import 'package:appsol_final/components/asistencia.dart';
 import 'package:appsol_final/components/navegador.dart';
 import 'package:appsol_final/components/pedido.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +14,7 @@ import 'package:appsol_final/provider/pedido_provider.dart';
 import 'package:appsol_final/provider/ubicacion_provider.dart';
 import 'package:appsol_final/models/pedido_model.dart';
 import 'package:appsol_final/models/ubicacion_model.dart';
+import 'package:lottie/lottie.dart';
 
 class Producto {
   final String nombre;
@@ -59,7 +59,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   late String? dropdownValue;
   int cantCarrito = 0;
   Color colorCantidadCarrito = Colors.black;
-  Color colorTextos = const Color.fromARGB(255, 3, 34, 60);
+  Color colorLetra = const Color.fromARGB(255, 1, 42, 76);
+  Color colorTextos = const Color.fromARGB(255, 1, 42, 76);
   late String direccion;
   late UbicacionModel miUbicacion;
   Timer? _timer;
@@ -68,6 +69,18 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
 
   ScrollController scrollController1 = ScrollController();
   ScrollController scrollController2 = ScrollController();
+  DateTime fechaLimite = DateTime.now();
+
+  DateTime mesyAnio(String? fecha) {
+    if (fecha is String) {
+      print('es string');
+      return DateTime.parse(fecha);
+    } else {
+      print('no es string');
+      return DateTime.now();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -289,6 +302,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     final pedidoProvider = context.watch<PedidoProvider>();
     final userProvider = context.watch<UserProvider>();
+    fechaLimite = mesyAnio(userProvider.user?.fechaCreacionCuenta)
+        .add(const Duration(days: (30 * 3)));
     direccionesVacias();
     esVacio(pedidoProvider.pedido);
     print("ya esta corriendo el widget");
@@ -549,13 +564,13 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           width: anchoActual,
                           margin: EdgeInsets.only(
                               left: anchoActual * 0.055,
-                              top: largoActual * 0.03),
+                              top: largoActual * 0.016),
                           child: Text(
                             "Bienvenid@, ${userProvider.user?.nombre.capitalize()}",
                             style: TextStyle(
-                                fontWeight: FontWeight.w200,
-                                fontSize: largoActual * 0.020,
-                                color: colorTextos),
+                                fontWeight: FontWeight.w300,
+                                fontSize: largoActual * 0.019,
+                                color: colorLetra),
                           ),
                         ),
                         Container(
@@ -563,21 +578,18 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           child: Text(
                             "Disfruta de Agua Sol!",
                             style: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: largoActual * 0.020,
+                                fontWeight: FontWeight.w500,
+                                fontSize: largoActual * 0.019,
                                 color: colorTextos),
                           ),
                         ),
                         SizedBox(
-                          height: largoActual * 0.02,
+                          height: largoActual * 0.016,
                         ),
                         //TAB BAR PRODUCTOS/PROMOCIONES
-                        Container(
-                          height: largoActual * 0.045,
+                        SizedBox(
+                          height: largoActual * 0.046,
                           width: anchoActual,
-                          margin: EdgeInsets.only(
-                            top: largoActual * 0.013,
-                          ),
                           child: TabBar(
                               indicatorSize: TabBarIndicatorSize.label,
                               controller: _tabController,
@@ -587,11 +599,11 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                 color: Color.fromRGBO(120, 251, 99, 0.5),
                               ),*/
                               labelStyle: TextStyle(
-                                  fontSize: largoActual * 0.020,
+                                  fontSize: largoActual * 0.019,
                                   fontWeight: FontWeight
                                       .w500), // Ajusta el tamaño del texto de la pestaña seleccionada
                               unselectedLabelStyle: TextStyle(
-                                  fontSize: largoActual * 0.020,
+                                  fontSize: largoActual * 0.019,
                                   fontWeight: FontWeight.w300),
                               labelColor: colorTextos,
                               unselectedLabelColor: colorTextos,
@@ -611,7 +623,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                           margin: EdgeInsets.only(
                             top: largoActual * 0.013,
                           ),
-                          height: largoActual / 2.13,
+                          height: largoActual / 2.5,
                           width: double.maxFinite,
                           child: TabBarView(
                             controller: _tabController,
@@ -644,7 +656,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                             color: const Color.fromARGB(
                                                 255, 130, 219, 133),
                                             borderRadius:
-                                                BorderRadius.circular(30),
+                                                BorderRadius.circular(20),
                                             image: const DecorationImage(
                                               image: AssetImage(
                                                   'lib/imagenes/bodegon.png'),
@@ -682,7 +694,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                             color: Color.fromARGB(
                                                 255, 130, 219, 133),
                                             borderRadius:
-                                                BorderRadius.circular(50),
+                                                BorderRadius.circular(20),
                                             image: DecorationImage(
                                               image:
                                                   NetworkImage(producto.foto),
@@ -694,155 +706,75 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                             ],
                           ),
                         ),
-                        Expanded(child: Container()),
-                        //TEXTOS MEJORA TU VIDA Y ASISTENCIA
+                        //Expanded(child: Container()),
+                        SizedBox(
+                          height: largoActual * 0.03,
+                        ),
+                        //BILLETERA SOL
                         Container(
-                          margin: EdgeInsets.only(
-                              left: anchoActual * 0.055,
-                              right: anchoActual * 0.055),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                  child: Text(
-                                "Mejora tu vida!",
-                                style: TextStyle(
-                                    fontSize: largoActual * 0.019,
-                                    fontWeight: FontWeight.w300,
-                                    color: colorTextos),
-                              )),
-                              Container(
-                                child: Text(
-                                  "Necesitas",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w300,
-                                      fontSize: largoActual * 0.019,
-                                      color: colorTextos),
-                                ),
-                              )
-                            ],
+                          margin: EdgeInsets.only(left: anchoActual * 0.055),
+                          child: Text(
+                            "Billetera Sol",
+                            style: TextStyle(
+                                color: colorTextos,
+                                fontWeight: FontWeight.w500,
+                                fontSize: largoActual * 0.019),
                           ),
                         ),
-                        //BOTONES MEJORA TU VIDA Y ASISTENCIA
-                        Row(children: [
-                          //boton aqui
-                          SizedBox(
-                            width: anchoActual * 0.40,
-                            height: largoActual * 0.054,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text(
-                                        'PRONTO',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Color.fromARGB(
-                                                255, 4, 80, 143)),
-                                      ),
-                                      content: Text(
-                                        'Muy pronto te sorprenderemos!',
-                                        style: TextStyle(
-                                            fontSize: largoActual * 0.027,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context)
-                                                .pop(); // Cierra el AlertDialog
-                                          },
-                                          child: Text(
-                                            'OK',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: largoActual * 0.034,
-                                                color: const Color.fromARGB(
-                                                    255, 13, 58, 94)),
-                                          ),
+                        SizedBox(
+                          height: largoActual * 0.15,
+                          child: Card(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              surfaceTintColor: Colors.white,
+                              color: Colors.white,
+                              elevation: 10,
+                              child: Container(
+                                margin: const EdgeInsets.only(
+                                    left: 40, right: 40, bottom: 10, top: 10),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    /** SARITA =) YA ESTA EL END POINT DE SALDO SERA QU LO PRUEBS  */
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'S/. ${userProvider.user?.saldoBeneficio}0',
+                                          style: TextStyle(
+                                              color: colorLetra,
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 35),
+                                        ),
+                                        Text(
+                                          'Retiralo hasta el: ${fechaLimite.day}/${fechaLimite.month}/${fechaLimite.year}',
+                                          style: TextStyle(
+                                              color: colorLetra,
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: largoActual * 0.016),
                                         ),
                                       ],
-                                    );
-                                  },
-                                );
-                              },
-                              style: ButtonStyle(
-                                elevation: MaterialStateProperty.all(8),
-                                minimumSize: MaterialStatePropertyAll(Size(
-                                    anchoActual * 0.28, largoActual * 0.054)),
-                                backgroundColor: MaterialStateProperty.all(
-                                    const Color.fromRGBO(0, 106, 252, 1.000)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons
-                                        .attach_money_outlined, // Reemplaza con el icono que desees
-                                    size: largoActual * 0.025,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(
-                                      width: anchoActual *
-                                          0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
-                                  Text(
-                                    "Aquí",
-                                    style: TextStyle(
-                                        fontSize: largoActual * 0.021,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Expanded(child: Container()),
-                          //boton ayuda
-                          SizedBox(
-                            width: anchoActual * 0.4,
-                            height: largoActual * 0.054,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const Asistencia()),
-                                );
-                              },
-                              style: ButtonStyle(
-                                elevation: MaterialStateProperty.all(8),
-                                minimumSize: MaterialStatePropertyAll(Size(
-                                    anchoActual * 0.28, largoActual * 0.054)),
-                                backgroundColor: MaterialStateProperty.all(
-                                    const Color.fromRGBO(0, 106, 252, 1.000)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons
-                                        .support_agent_rounded, // Reemplaza con el icono que desees
-                                    size: largoActual * 0.025,
-                                    color: Colors.white,
-                                  ),
-
-                                  SizedBox(
-                                      width: anchoActual *
-                                          0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
-                                  Text(
-                                    "Ayuda",
-                                    style: TextStyle(
-                                        fontSize: largoActual * 0.021,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ]),
+                                    ),
+                                    Container(
+                                      height: 80,
+                                      width: 80,
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                        //color: Colors.amberAccent,
+                                        borderRadius: BorderRadius.circular(0),
+                                      ),
+                                      child: Lottie.asset(
+                                          'lib/imagenes/billetera3.json'),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
                       ]))),
         ));
   }

@@ -70,9 +70,9 @@ class _LoginState extends State<Login> {
               apellidos: data['usuario']['apellidos'],
               saldoBeneficio:
                   data['usuario']['saldo_beneficios'].toDouble() ?? 0.00,
-              codigocliente: data['usuario']['codigo'] ?? 'NoCode',
+              codigocliente: data['usuario']['codigo'] ?? 'Sin código',
               fechaCreacionCuenta: data['usuario']['fecha_creacion_cuenta'],
-              suscripcion: data['usuario']['suscripcion'] ?? 'NoSubscribe');
+              suscripcion: data['usuario']['suscripcion'] ?? 'Sin suscripción');
           setState(() {
             status = 200;
             rol = 4;

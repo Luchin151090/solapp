@@ -38,6 +38,8 @@ class PedidoCliente {
   Color colorProceso;
   Color colorEntregado;
   String mensaje;
+  double altoIcono;
+  double anchoIcono;
   PedidoCliente({
     required this.id,
     required this.estado,
@@ -56,5 +58,7 @@ class PedidoCliente {
     this.colorProceso = Colors.transparent,
     this.colorRecibido = Colors.transparent,
     this.mensaje = '',
+    this.altoIcono = 0.0,
+    this.anchoIcono = 0.0,
   });
 }

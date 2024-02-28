@@ -15,24 +15,26 @@ class EstadoPedido extends StatefulWidget {
 
 class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
   //Color colorLetra = Color.fromARGB(255, 1, 75, 135);
-  Color colorLetra = Colors.black;
+  Color colorLetra = const Color.fromARGB(255, 1, 42, 76);
   //Color colorTitulos = Color.fromARGB(255, 1, 42, 76);
-  Color colorTitulos = Colors.black;
+  Color colorTitulos = const Color.fromARGB(255, 3, 34, 60);
   Color colorOF = Colors.grey;
-  Color colorON = Color.fromRGBO(120, 251, 99, 1.000);
+  Color colorON = Color.fromARGB(255, 136, 255, 118);
   String apiUrl = dotenv.env['API_URL'] ?? '';
   String apiPedidosCliente = "/api/pedido_cliente/";
   String apiProductosPedido = "/api/productosPedido/";
   String iconoRecibido = 'lib/imagenes/recibidoon4.json';
   String iconoEnCaminoON = 'lib/imagenes/encaminoon1.json';
   String iconoEnCaminoOF = 'lib/imagenes/encaminoof1.json';
-  String iconoEntregadoON = 'lib/imagenes/entregadoon1.json';
+  String iconoEntregadoON = 'lib/imagenes/entregadoon2.json';
   String iconoEntregadoOF = 'lib/imagenes/entregadoof1.json';
+  String iconoTruncado = 'lib/imagenes/pedidotruncado1.json';
 
   String mensajePendiente =
       'Ya recibimos tu pedido!, estamos gestionando la entrega ;)';
-  String mensajeEncamino = 'Tus productos Sol ya estan em camino!';
-  String mensajeEntregado = 'Ya entregamos tu pedido';
+  String mensajeEncamino = 'Tus productos Sol ya estan en camino!';
+  String mensajeEntregado = '¡Ya entregamos tu pedido! :)';
+  String mensajeTruncado = 'No pudimos entregar tu pedido :(';
   String linea = 'lib/imagenes/lineacargando.json';
   List<PedidoCliente> listPedidosPendientes = [];
   List<PedidoCliente> listPedidosPasados = [];
@@ -43,6 +45,16 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     ordenandoGets(widget.clienteId);
+  }
+
+  DateTime mesyAnio(String? fecha) {
+    if (fecha is String) {
+      print('es string');
+      return DateTime.parse(fecha);
+    } else {
+      print('no es string');
+      return DateTime.now();
+    }
   }
 
   Future<dynamic> getPedidos(clienteID) async {
@@ -94,8 +106,19 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
                 tempPedidos[i].iconoEntregado = iconoEntregadoOF;
                 tempPedidos[i].colorEntregado = colorOF;
                 listPedidosPendientes.add(tempPedidos[i]);
-              } else if (tempPedidos[i].estado == 'entregado' ||
-                  tempPedidos[i].estado == 'truncado') {
+              } else if (tempPedidos[i].estado == 'entregado') {
+                tempPedidos[i].mensaje = mensajeEntregado;
+                tempPedidos[i].iconoEntregado = iconoEntregadoON;
+                tempPedidos[i].colorEntregado = colorON;
+                tempPedidos[i].altoIcono = 0.2;
+                tempPedidos[i].anchoIcono = 0.35;
+                listPedidosPasados.add(tempPedidos[i]);
+              } else if (tempPedidos[i].estado == 'truncado') {
+                tempPedidos[i].mensaje = mensajeTruncado;
+                tempPedidos[i].iconoEntregado = iconoTruncado;
+                tempPedidos[i].colorEntregado = colorON;
+                tempPedidos[i].altoIcono = 0.1;
+                tempPedidos[i].anchoIcono = 0.12;
                 listPedidosPasados.add(tempPedidos[i]);
               }
             }
@@ -186,7 +209,7 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
                 //indicatorWeight: 10,
                 indicator: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Color.fromARGB(255, 0, 0, 0),
+                    color: colorTitulos,
                     border: Border.all(
                         color: Colors.white,
                         width: 2,
@@ -225,7 +248,7 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
             margin: EdgeInsets.only(
               top: largoActual * 0.013,
             ),
-            height: largoActual / 1.301,
+            height: largoActual / 1.35,
             width: double.maxFinite,
             child: TabBarView(
               controller: tabController,
@@ -322,7 +345,7 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
                                         color: colorLetra),
                                   ),
                                   Text(
-                                    "Fecha: ${pedido.fecha}",
+                                    "Fecha: ${mesyAnio(pedido.fecha).day}/${mesyAnio(pedido.fecha).month}/${mesyAnio(pedido.fecha).year}",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: largoActual * 0.013,
@@ -365,10 +388,108 @@ class _EstadoPedido extends State<EstadoPedido> with TickerProviderStateMixin {
                                 ),
                           );*/
                         },
-                        child: Container(
-                          margin: EdgeInsets.only(right: anchoActual * 0.028),
-                          height: anchoActual * 0.83,
-                          width: anchoActual * 0.83,
+                        child: SizedBox(
+                          height: anchoActual * 0.51,
+                          child: Card(
+                            surfaceTintColor: Colors.white,
+                            color: Colors.white,
+                            elevation: 8,
+                            margin: EdgeInsets.only(
+                              top: largoActual * 0.0068,
+                              bottom: largoActual * 0.013,
+                              left: largoActual * 0.0068,
+                              right: largoActual * 0.0068,
+                            ),
+                            child: Container(
+                              margin: EdgeInsets.all(
+                                largoActual * 0.025,
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(
+                                        height: anchoActual * 0.2,
+                                        width: anchoActual * 0.2,
+                                        child: Stack(
+                                          children: [
+                                            Positioned.fill(
+                                              child: Align(
+                                                alignment: Alignment.center,
+                                                child: Container(
+                                                  height: largoActual * 0.07,
+                                                  width: anchoActual * 0.15,
+                                                  decoration: BoxDecoration(
+                                                      color:
+                                                          pedido.colorEntregado,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              80)),
+                                                ),
+                                              ),
+                                            ),
+                                            Positioned.fill(
+                                              child: Align(
+                                                alignment: Alignment.center,
+                                                child: SizedBox(
+                                                    width: anchoActual *
+                                                        pedido.anchoIcono,
+                                                    child: Lottie.asset(
+                                                        pedido.iconoEntregado)),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        children: [
+                                          SizedBox(
+                                            width: anchoActual * 0.54,
+                                            child: Text(
+                                              pedido.mensaje,
+                                              textAlign: TextAlign.left,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: largoActual * 0.019,
+                                                  color: colorLetra),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: largoActual * 0.02,
+                                  ),
+                                  Text(
+                                    "Fecha: ${mesyAnio(pedido.fecha).day}/${mesyAnio(pedido.fecha).month}/${mesyAnio(pedido.fecha).year}",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.014,
+                                        color: colorLetra),
+                                  ),
+                                  Text(
+                                    "Total: ${pedido.total}",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.014,
+                                        color: colorLetra),
+                                  ),
+                                  Text(
+                                    "Dirección: ${pedido.direccion}",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.014,
+                                        color: colorLetra),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     }),

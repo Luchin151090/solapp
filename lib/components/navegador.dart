@@ -72,8 +72,8 @@ class _BarraNavegacion extends State<BarraNavegacion> {
       child: Scaffold(
         body: screens[indexSelecionado][subIndex],
         bottomNavigationBar: CurvedNavigationBar(
-          height: 68,
-          backgroundColor: Colors.white,
+          height: 60,
+          backgroundColor: Colors.transparent,
           color: const Color.fromRGBO(0, 106, 252, 1.000),
           animationDuration: const Duration(milliseconds: 400),
           onTap: (index) {

@@ -82,19 +82,31 @@ class _PedidoState extends State<Pedido> {
   }
 
   Future<dynamic> datosCreadoPedido(
-      clienteId, fecha, montoTotal, tipo, estado, notas, ubicacionID) async {
+      clienteId,
+      fecha,
+      subtotal,
+      descuento,
+      montoTotal,
+      cantidadBidon,
+      tipo,
+      estado,
+      notas,
+      codigo,
+      ubicacionID) async {
     print("-----------------------creandoPEDIDOO");
     await http.post(Uri.parse(apiUrl + apiPedido),
         headers: {"Content-type": "application/json"},
         body: jsonEncode({
           "cliente_id": clienteId,
-          "subtotal": montoTotal.toDouble(),
-          "descuento": 0,
+          "subtotal": subtotal.toDouble(),
+          "descuento": descuento.toDouble(),
           "total": montoTotal.toDouble(),
           "fecha": fecha,
           "tipo": tipo,
           "estado": estado,
           "ubicacion_id": ubicacionID,
+          "codigo": codigo,
+          "cantidad_bidones": cantidadBidon,
           "observacion": notas
         }));
   }
@@ -111,8 +123,8 @@ class _PedidoState extends State<Pedido> {
         }));
   }
 
-  Future<void> crearPedidoyDetallePedido(
-      clienteID, tipo, monto, seleccionados, notas) async {
+  Future<void> crearPedidoyDetallePedido(clienteID, tipo, subtotal, monto,
+      descuento, seleccionados, notas, codigo, cantidadBidon) async {
     DateTime tiempoGMTPeru = tiempoActual.subtract(const Duration(hours: 0));
     showDialog(
         context: context,
@@ -124,8 +136,18 @@ class _PedidoState extends State<Pedido> {
           );
         });
 
-    await datosCreadoPedido(clienteID, tiempoGMTPeru.toString(), monto, tipo,
-        "pendiente", notas, ubicacionSelectID);
+    await datosCreadoPedido(
+        clienteID,
+        tiempoGMTPeru.toString(),
+        subtotal,
+        descuento,
+        monto,
+        cantidadBidon,
+        tipo,
+        "pendiente",
+        notas,
+        codigo,
+        ubicacionSelectID);
     print(tiempoGMTPeru.toString());
     print(tiempoActual.timeZoneName);
     print("creando detalles de pedidos----------");
@@ -319,9 +341,13 @@ class _PedidoState extends State<Pedido> {
                                     await crearPedidoyDetallePedido(
                                         userProvider.user?.id,
                                         tipoPedido,
+                                        totalProvider,
                                         totalVenta,
+                                        ahorro,
                                         seleccionadosProvider,
-                                        notas.text);
+                                        notas.text,
+                                        _cupon.text,
+                                        cantidadBidones);
                                     limpiarVariables();
                                     pedidoMio = PedidoModel(
                                         seleccionados: seleccionadosProvider,

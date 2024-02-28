@@ -12,9 +12,9 @@ class PerfilCliente extends StatefulWidget {
 
 class _PerfilCliente extends State<PerfilCliente> {
   //Color colorLetra = Color.fromARGB(255, 1, 75, 135);
-  Color colorLetra = Colors.black;
+  Color colorTitulos = const Color.fromARGB(255, 3, 34, 60);
   //Color colorTitulos = Color.fromARGB(255, 1, 42, 76);
-  Color colorTitulos = Colors.black;
+  Color colorLetra = const Color.fromARGB(255, 1, 42, 76);
   String apiUrl = dotenv.env['API_URL'] ?? '';
   DateTime fechaLimite = DateTime.now();
 
@@ -80,7 +80,7 @@ class _PerfilCliente extends State<PerfilCliente> {
                     ),
                     //Correo
                     Text(
-                      '${userProvider.user?.codigocliente}',
+                      'Codigo: ${userProvider.user?.codigocliente}',
                       style: TextStyle(
                           fontWeight: FontWeight.w300,
                           fontSize: 15,
@@ -220,14 +220,15 @@ class _PerfilCliente extends State<PerfilCliente> {
                 child: Container(
                   margin: const EdgeInsets.only(
                       left: 40, right: 40, bottom: 10, top: 10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      /** SARITA =) YA ESTA EL END POINT DE SALDO SERA QU LO PRUEBS  */
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          /** SARITA =) YA ESTA EL END POINT DE SALDO SERA QU LO PRUEBS  */
                           Text(
                             'S/. ${userProvider.user?.saldoBeneficio}0',
                             style: TextStyle(
@@ -235,26 +236,24 @@ class _PerfilCliente extends State<PerfilCliente> {
                                 fontWeight: FontWeight.w700,
                                 fontSize: 35),
                           ),
-                          Container(
-                            margin: const EdgeInsets.only(
-                                top: 5, bottom: 5, left: 25),
-                            height: 80,
-                            width: 80,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              //color: Colors.amberAccent,
-                              borderRadius: BorderRadius.circular(0),
-                            ),
-                            child: Lottie.asset('lib/imagenes/billetera3.json'),
+                          Text(
+                            'Retiralo hasta el: ${fechaLimite.day}/${fechaLimite.month}/${fechaLimite.year}',
+                            style: TextStyle(
+                                color: colorLetra,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 14),
                           ),
                         ],
                       ),
-                      Text(
-                        'Retiralo hasta el: ${fechaLimite.day}/${fechaLimite.month}/${fechaLimite.year}',
-                        style: TextStyle(
-                            color: colorLetra,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14),
+                      Container(
+                        height: 80,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          //color: Colors.amberAccent,
+                          borderRadius: BorderRadius.circular(0),
+                        ),
+                        child: Lottie.asset('lib/imagenes/billetera3.json'),
                       ),
                     ],
                   ),
@@ -393,6 +392,51 @@ class _PerfilCliente extends State<PerfilCliente> {
                       ),
                     ],
                   ),
+                  /*
+                  SizedBox(
+                            width: anchoActual * 0.4,
+                            height: largoActual * 0.054,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const Asistencia()),
+                                );
+                              },
+                              style: ButtonStyle(
+                                elevation: MaterialStateProperty.all(8),
+                                minimumSize: MaterialStatePropertyAll(Size(
+                                    anchoActual * 0.28, largoActual * 0.054)),
+                                backgroundColor: MaterialStateProperty.all(
+                                    const Color.fromRGBO(0, 106, 252, 1.000)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons
+                                        .support_agent_rounded, // Reemplaza con el icono que desees
+                                    size: largoActual * 0.025,
+                                    color: Colors.white,
+                                  ),
+
+                                  SizedBox(
+                                      width: anchoActual *
+                                          0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                                  Text(
+                                    "Ayuda",
+                                    style: TextStyle(
+                                        fontSize: largoActual * 0.021,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        
+                  */
                   Icon(
                     Icons.arrow_right_rounded,
                     color: colorLetra,
