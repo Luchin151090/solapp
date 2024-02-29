@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:appsol_final/components/navegador.dart';
 import 'package:appsol_final/components/pedido.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:geocoding/geocoding.dart';
@@ -66,6 +69,12 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   Color colorTextos = const Color.fromARGB(255, 1, 42, 76);
   late String direccion;
   late UbicacionModel miUbicacion;
+  //ACA SE DEBE ACTUALIZAR LA IMAGEN PARA COMPARTIR EN LOS ESTADOS
+  String direccionImagenParaEstados = 'lib/imagenes/promocion.jpg';
+  //ACA SE DEBE ACTUALIZAR EL LINK PARA DESCARGAR LA APPPPPP
+  String urlPreview = 'https://youtu.be/bNKXxwOQYB8?si=d_Un1vXsQiPzMt3s';
+  String mensajeCodigoParaAmigos =
+      'Hola!,\nUsa mi código en la *app de 💧 Agua Sol 💧* para comprar un *BIDON DE AGUA NUEVO DE 20L a solo S/.10.00* usando mi código, además puedes _*GANAR S/. 4.00 💸*_ por cada persona que compre con tu código de referencia. \n✅ USA MI CODIGO DE REFERENCIA: \n⏬ Descarga la APP AQUÍ: ';
   Timer? _timer;
   //bool _disposed = false;
   //bool _autoScrollInProgress = false;
@@ -900,10 +909,131 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                                   text:
                                                                       'tus contactos con tu código.'),
                                                             ])),
+//ESPACIOOO
+                                                        SizedBox(
+                                                            height:
+                                                                largoActual *
+                                                                    0.07),
+
+                                                        SizedBox(
+                                                          height: largoActual *
+                                                              0.04,
+                                                          child: OutlinedButton(
+                                                              style:
+                                                                  const ButtonStyle(
+                                                                      shape:
+                                                                          MaterialStatePropertyAll(
+                                                                        RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.all(Radius.circular(10))),
+                                                                      ),
+                                                                      side: MaterialStatePropertyAll(
+                                                                          BorderSide
+                                                                              .none)),
+                                                              onPressed:
+                                                                  () async {
+                                                                await Share.share(
+                                                                    mensajeCodigoParaAmigos +
+                                                                        urlPreview);
+                                                              },
+                                                              child: Text(
+                                                                'COMPARTE TU CÓDIGO',
+                                                                style: TextStyle(
+                                                                    fontStyle:
+                                                                        FontStyle
+                                                                            .normal,
+                                                                    color:
+                                                                        colorTextos,
+                                                                    fontSize:
+                                                                        largoActual *
+                                                                            0.015,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400),
+                                                              )),
+                                                        ),
+
+                                                        //BOTON PARA PUBLICARLO EN TU ESTADO
+                                                        SizedBox(
+                                                          height: largoActual *
+                                                              0.04,
+                                                          child: OutlinedButton(
+                                                              style:
+                                                                  const ButtonStyle(
+                                                                      shape:
+                                                                          MaterialStatePropertyAll(
+                                                                        RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.all(Radius.circular(10))),
+                                                                      ),
+                                                                      side: MaterialStatePropertyAll(
+                                                                          BorderSide
+                                                                              .none)),
+                                                              onPressed:
+                                                                  () async {
+                                                                final image =
+                                                                    await rootBundle
+                                                                        .load(
+                                                                            direccionImagenParaEstados);
+                                                                final buffer =
+                                                                    image
+                                                                        .buffer;
+                                                                final temp =
+                                                                    await getTemporaryDirectory();
+                                                                final path =
+                                                                    '${temp.path}/image.jpg';
+
+                                                                await Share
+                                                                    .shareXFiles(
+                                                                  [
+                                                                    XFile
+                                                                        .fromData(
+                                                                      buffer
+                                                                          .asUint8List(
+                                                                        image
+                                                                            .offsetInBytes,
+                                                                        image
+                                                                            .lengthInBytes,
+                                                                      ),
+                                                                      mimeType:
+                                                                          'image/jpg',
+                                                                      name:
+                                                                          'usaMiCodigo',
+                                                                    )
+                                                                  ],
+                                                                  subject:
+                                                                      'mi codigo',
+                                                                );
+                                                              },
+                                                              child: Text(
+                                                                'PUBLÍCALO EN TU ESTADO',
+                                                                style: TextStyle(
+                                                                    fontStyle:
+                                                                        FontStyle
+                                                                            .normal,
+                                                                    color:
+                                                                        colorTextos,
+                                                                    fontSize:
+                                                                        largoActual *
+                                                                            0.015,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w400),
+                                                              )),
+                                                        ),
                                                       ],
                                                     ),
                                                   ),
                                                 ),
+                                                //ANIMACION PALMERAS
+                                                Positioned(
+                                                  top: -largoActual * 0.08,
+                                                  left: anchoActual * 0.035,
+                                                  height: largoActual * 0.23,
+                                                  child: Lottie.asset(
+                                                      'lib/imagenes/palmeras1.json'),
+                                                ),
+
                                                 //ANIMACION PLAYERA
                                                 Positioned(
                                                   top: -largoActual * 0.08,
@@ -912,6 +1042,15 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                   child: Lottie.asset(
                                                       'lib/imagenes/playa1.json'),
                                                 ),
+                                                //ANIMACION PALMERAS
+                                                Positioned(
+                                                  top: -largoActual * 0.08,
+                                                  left: anchoActual * 0.18,
+                                                  height: largoActual * 0.23,
+                                                  child: Lottie.asset(
+                                                      'lib/imagenes/palmeras1.json'),
+                                                ),
+
                                                 //IMAGEN DE BIDONCITO BONITO
                                                 Positioned(
                                                   top: -largoActual * 0.15,

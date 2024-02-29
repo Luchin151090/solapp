@@ -30,6 +30,8 @@ class _PerfilCliente extends State<PerfilCliente> {
 
   @override
   Widget build(BuildContext context) {
+    final anchoActual = MediaQuery.of(context).size.width;
+    final largoActual = MediaQuery.of(context).size.height;
     final userProvider = context.watch<UserProvider>();
     fechaLimite = mesyAnio(userProvider.user?.fechaCreacionCuenta)
         .add(const Duration(days: (30 * 3)));
@@ -210,7 +212,7 @@ class _PerfilCliente extends State<PerfilCliente> {
           ),
           Container(
             margin: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-            height: 150,
+            height: largoActual * 0.23,
             child: Card(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
@@ -220,40 +222,89 @@ class _PerfilCliente extends State<PerfilCliente> {
                 child: Container(
                   margin: const EdgeInsets.only(
                       left: 40, right: 40, bottom: 10, top: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  child: Column(
                     children: [
-                      /** SARITA =) YA ESTA EL END POINT DE SALDO SERA QU LO PRUEBS  */
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            'S/. ${userProvider.user?.saldoBeneficio}0',
-                            style: TextStyle(
-                                color: colorLetra,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 35),
+                          /** SARITA =) YA ESTA EL END POINT DE SALDO SERA QU LO PRUEBS  */
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'S/. ${userProvider.user?.saldoBeneficio}0',
+                                style: TextStyle(
+                                    color: colorLetra,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 35),
+                              ),
+                              Text(
+                                'Retiralo hasta el: ${fechaLimite.day}/${fechaLimite.month}/${fechaLimite.year}',
+                                style: TextStyle(
+                                    color: colorLetra,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 14),
+                              ),
+                            ],
                           ),
-                          Text(
-                            'Retiralo hasta el: ${fechaLimite.day}/${fechaLimite.month}/${fechaLimite.year}',
-                            style: TextStyle(
-                                color: colorLetra,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 14),
+                          Container(
+                            height: 80,
+                            width: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              //color: Colors.amberAccent,
+                              borderRadius: BorderRadius.circular(0),
+                            ),
+                            child: Lottie.asset('lib/imagenes/billetera3.json'),
                           ),
                         ],
                       ),
-                      Container(
-                        height: 80,
-                        width: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          //color: Colors.amberAccent,
-                          borderRadius: BorderRadius.circular(0),
+                      SizedBox(
+                        height: largoActual * 0.02,
+                      ),
+                      SizedBox(
+                        width: anchoActual * 0.4,
+                        height: largoActual * 0.04,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            /* Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Asistencia()),
+                            );*/
+                          },
+                          style: ButtonStyle(
+                            elevation: MaterialStateProperty.all(1),
+                            minimumSize: MaterialStatePropertyAll(
+                                Size(anchoActual * 0.28, largoActual * 0.01)),
+                            backgroundColor: MaterialStateProperty.all(
+                                const Color.fromRGBO(0, 106, 252, 1.000)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons
+                                    .support_agent_rounded, // Reemplaza con el icono que desees
+                                size: largoActual * 0.025,
+                                color: Colors.white,
+                              ),
+
+                              SizedBox(
+                                  width: anchoActual *
+                                      0.020), // Ajusta el espacio entre el icono y el texto según tus preferencias
+                              Text(
+                                "Ayuda",
+                                style: TextStyle(
+                                    fontSize: largoActual * 0.021,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Lottie.asset('lib/imagenes/billetera3.json'),
                       ),
                     ],
                   ),
