@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'dart:convert';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:appsol_final/provider/user_provider.dart';
 import 'package:appsol_final/components/pdf.dart';
@@ -22,6 +25,9 @@ import 'package:appsol_final/models/producto_model.dart';
 
 extension StringExtension on String {
   String capitalize() {
+    if (this == '') {
+      return '';
+    }
     return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
   }
 }
@@ -141,7 +147,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
   double decimalProgreso = 0;
   int porcentajeProgreso = 0;
   List<int> idpedidos = [];
-  late GoogleMapController mapController;
+  final Completer<GoogleMapController> _controller = Completer();
   late Location location;
   LatLng _currentLocation = LatLng(-16.403174, -71.582565);
 
@@ -174,7 +180,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
       });
     } else {
       setState(() {
-        rutaIDpref = 5;
+        rutaIDpref = 4;
       });
     }
     if (userPreference.getInt("userID") != null) {
@@ -183,7 +189,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
       });
     } else {
       setState(() {
-        conductorIDpref = 4;
+        conductorIDpref = 3;
       });
     }
 
@@ -203,7 +209,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
           return Producto(
             id: mapa['id'],
             nombre: mapa['nombre'],
-            precio: mapa['precio'].toDouble(),
+            precio: mapa['precio'], //?.toDouble(),
             descripcion: mapa['descripcion'],
             promoID: null,
             foto: '$apiUrl/images/${mapa['foto']}',
@@ -249,9 +255,9 @@ class _HolaConductor2State extends State<HolaConductor2> {
         List<Pedido> listTemporal = data.map<Pedido>((mapa) {
           return Pedido(
               id: mapa['id'],
-              montoTotal: mapa['total'].toDouble(),
-              latitud: mapa['latitud'].toDouble(),
-              longitud: mapa['longitud'].toDouble(),
+              montoTotal: mapa['total']?.toDouble(),
+              latitud: mapa['latitud']?.toDouble(),
+              longitud: mapa['longitud']?.toDouble(),
               fecha: mapa['fecha'],
               estado: mapa['estado'],
               tipo: mapa['tipo'],
@@ -383,7 +389,7 @@ class _HolaConductor2State extends State<HolaConductor2> {
               getPolyPoints();
               nombreCliente = listPedidosbyRuta[i].nombre.capitalize();
               apellidoCliente = listPedidosbyRuta[i].apellidos.capitalize();
-              //observacionCliente = listPedidosbyRuta[i].comentario.capitalize();
+              observacionCliente = listPedidosbyRuta[i].comentario.capitalize();
               print('12) Este es el pedidoIDactual $pedidoIDActual');
             });
             break;
@@ -553,8 +559,8 @@ class _HolaConductor2State extends State<HolaConductor2> {
   String estadoNuevo = '';
   String tipoPago = '';
   File? _imageFile;
-
-  Future<void> _takePicture() async {
+  bool flag = false;
+  Future<void> _takePicture(String dato) async {
     final pass = await getApplicationDocumentsDirectory();
     final otro = path.join(pass.path, 'pictures');
     final picturesDirectory = Directory(otro);
@@ -571,6 +577,23 @@ class _HolaConductor2State extends State<HolaConductor2> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
+    }
+    if (_imageFile != null) {
+      final pass = await getApplicationDocumentsDirectory();
+      final otro = path.join(pass.path, 'pictures');
+      final String fileName = '${pedidoTrabajo.id}.jpg';
+      String filePath = '$otro/$fileName';
+      final nuevaFoto = XFile(_imageFile!.path);
+      nuevaFoto.saveTo(filePath);
+      deletePhoto(_imageFile!.path);
+      setState(() {
+        _imageFile = null;
+      });
+      esProblemaOesPago(dato);
+      flag = true;
+    } else {
+      flag = false;
+      print("Todavia no se ha tomado una foto");
     }
   }
 
@@ -608,129 +631,35 @@ class _HolaConductor2State extends State<HolaConductor2> {
     }
   }
 
-  void TomarFoto(double anchoActual, double largoActual, String dato) async {
-    _takePicture();
-    if (_imageFile != null) {
-      final pass = await getApplicationDocumentsDirectory();
-      final otro = path.join(pass.path, 'pictures');
-      final String fileName = '${pedidoTrabajo.id}.jpg';
-      String filePath = '$otro/$fileName';
-      final nuevaFoto = XFile(_imageFile!.path);
-      nuevaFoto.saveTo(filePath);
-      deletePhoto(_imageFile!.path);
-      setState(() {
-        _imageFile = null;
-      });
-      esProblemaOesPago(dato);
-      showModalBottomSheet(
-          backgroundColor: Color.fromRGBO(0, 106, 252, 1.000),
-          context: context,
-          isScrollControlled: true,
-          builder: (context) {
-            return Padding(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom),
-              child: Container(
-                height: largoActual * 0.15,
-                margin: EdgeInsets.only(
-                    left: anchoActual * 0.08,
-                    right: anchoActual * 0.08,
-                    top: largoActual * 0.05,
-                    bottom: largoActual * 0.05),
-                child: Column(
-                  children: [
-                    Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8.0),
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 0.5,
-                              ),
-                            ),
-                            child: TextField(
-                              decoration: InputDecoration(hintText: comentario),
-                              controller: comentarioConductor,
-                            ),
-                          )
-                        ]),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          height: 40,
-                          width: anchoActual * 0.83,
-                          child: ElevatedButton(
-                              onPressed: () {
-                                updateEstadoPedido(
-                                    estadoNuevo,
-                                    null,
-                                    comentarioConductor.text,
-                                    tipoPago,
-                                    pedidoTrabajo.id);
-                                Navigator.push(
-                                  context,
-                                  //REGRESA A LA VISTA DE HOME PERO ACTUALIZA EL PEDIDO
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const HolaConductor2()),
-                                );
-                              },
-                              style: ButtonStyle(
-                                  elevation: MaterialStateProperty.all(8),
-                                  surfaceTintColor:
-                                      MaterialStateProperty.all(Colors.white),
-                                  backgroundColor:
-                                      MaterialStateProperty.all(Colors.white)),
-                              child: const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Listo",
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w400,
-                                        color:
-                                            Color.fromRGBO(0, 106, 252, 1.000)),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Icon(
-                                    Icons
-                                        .arrow_forward, // Reemplaza con el icono que desees
-                                    size: 24,
-                                    color: Color.fromRGBO(0, 106, 252, 1.000),
-                                  ),
-                                ],
-                              )),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          });
-    } else {
-      print("Todavia no se ha tomado una foto");
-    }
+  void TomarFoto(double anchoActual, double largoActual, String dato) {
+    _takePicture(dato);
+    print("Como esta el flag :=> $flag");
   }
 
-  @override
-  void initState() {
-    super.initState();
+  ubicacionExacta() async {
     location = Location();
+    GoogleMapController googleMapController = await _controller.future;
     location.onLocationChanged.listen((LocationData currentLocation) {
       setState(() {
         _currentLocation =
             LatLng(currentLocation.latitude!, currentLocation.longitude!);
       });
+      googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            zoom: 14.7365,
+            target:
+                LatLng(_currentLocation.latitude, _currentLocation.longitude),
+          ),
+        ),
+      );
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ubicacionExacta();
     _initialize();
     connectToServer();
   }
@@ -769,10 +698,10 @@ class _HolaConductor2State extends State<HolaConductor2> {
                       GoogleMap(
                         initialCameraPosition: CameraPosition(
                           target: _currentLocation,
-                          zoom: 13.5,
+                          zoom: 20,
                         ),
-                        onMapCreated: (GoogleMapController controller) {
-                          mapController = controller;
+                        onMapCreated: (mapController) {
+                          _controller.complete(mapController);
                         },
                         markers: {
                           Marker(
@@ -926,8 +855,8 @@ class _HolaConductor2State extends State<HolaConductor2> {
                             },
                             style: ButtonStyle(
                               elevation: MaterialStateProperty.all(8),
-                              fixedSize: MaterialStatePropertyAll(
-                                  Size(anchoActual * 0.14, largoActual * 0.14)),
+                              /*fixedSize: MaterialStatePropertyAll(
+                                  Size(anchoActual * 0.14, largoActual * 0.14)),*/
                               backgroundColor:
                                   MaterialStateProperty.all(colorBotonesAzul),
                             ),
@@ -1244,22 +1173,112 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                                   height: largoActual * 0.05,
                                                   child: ElevatedButton(
                                                       onPressed: () {
-                                                        TomarFoto(
-                                                            anchoActual,
-                                                            largoActual,
-                                                            'pago');
-                                                        /*Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
+                                                        _takePicture('pago');
+                                                        if (flag) {
+                                                          showModalBottomSheet(
+                                                              backgroundColor:
+                                                                  const Color
+                                                                      .fromRGBO(
+                                                                      0,
+                                                                      106,
+                                                                      252,
+                                                                      1.000),
+                                                              // ignore: use_build_context_synchronously
+                                                              context: context,
+                                                              isScrollControlled:
+                                                                  true,
                                                               builder:
-                                                                  (context) =>
-                                                                      Camara(
-                                                                        pedidoID:
-                                                                            pedidoTrabajo.id,
-                                                                        problemasOpago:
-                                                                            'pago',
-                                                                      )),
-                                                        );*/
+                                                                  (context) {
+                                                                return Padding(
+                                                                  padding: EdgeInsets.only(
+                                                                      bottom: MediaQuery.of(
+                                                                              context)
+                                                                          .viewInsets
+                                                                          .bottom),
+                                                                  child:
+                                                                      Container(
+                                                                    height:
+                                                                        largoActual *
+                                                                            0.15,
+                                                                    margin: EdgeInsets.only(
+                                                                        left: anchoActual *
+                                                                            0.08,
+                                                                        right: anchoActual *
+                                                                            0.08,
+                                                                        top: largoActual *
+                                                                            0.05,
+                                                                        bottom: largoActual *
+                                                                            0.05),
+                                                                    child:
+                                                                        Column(
+                                                                      children: [
+                                                                        Column(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.center,
+                                                                            children: [
+                                                                              Container(
+                                                                                decoration: BoxDecoration(
+                                                                                  color: Colors.white,
+                                                                                  borderRadius: BorderRadius.circular(8.0),
+                                                                                  border: Border.all(
+                                                                                    color: Colors.grey,
+                                                                                    width: 0.5,
+                                                                                  ),
+                                                                                ),
+                                                                                child: TextField(
+                                                                                  decoration: InputDecoration(hintText: comentario),
+                                                                                  controller: comentarioConductor,
+                                                                                ),
+                                                                              )
+                                                                            ]),
+                                                                        const SizedBox(
+                                                                          height:
+                                                                              20,
+                                                                        ),
+                                                                        Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceBetween,
+                                                                          children: [
+                                                                            SizedBox(
+                                                                              height: 40,
+                                                                              width: anchoActual * 0.83,
+                                                                              child: ElevatedButton(
+                                                                                  onPressed: () {
+                                                                                    updateEstadoPedido(estadoNuevo, null, comentarioConductor.text, tipoPago, pedidoTrabajo.id);
+                                                                                    Navigator.push(
+                                                                                      context,
+                                                                                      //REGRESA A LA VISTA DE HOME PERO ACTUALIZA EL PEDIDO
+                                                                                      MaterialPageRoute(builder: (context) => const HolaConductor2()),
+                                                                                    );
+                                                                                  },
+                                                                                  style: ButtonStyle(elevation: MaterialStateProperty.all(8), surfaceTintColor: MaterialStateProperty.all(Colors.white), backgroundColor: MaterialStateProperty.all(Colors.white)),
+                                                                                  child: const Row(
+                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                    children: [
+                                                                                      Text(
+                                                                                        "Listo",
+                                                                                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: Color.fromRGBO(0, 106, 252, 1.000)),
+                                                                                      ),
+                                                                                      SizedBox(width: 8),
+                                                                                      Icon(
+                                                                                        Icons.arrow_forward, // Reemplaza con el icono que desees
+                                                                                        size: 24,
+                                                                                        color: Color.fromRGBO(0, 106, 252, 1.000),
+                                                                                      ),
+                                                                                    ],
+                                                                                  )),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              });
+                                                        } else {
+                                                          print(
+                                                              "Todavia no se ha tomado una foto");
+                                                        }
                                                       },
                                                       style: ButtonStyle(
                                                           backgroundColor:
@@ -1456,23 +1475,117 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                               height: largoActual * 0.05,
                                               child: ElevatedButton(
                                                   onPressed: () {
-                                                    TomarFoto(
-                                                        anchoActual,
-                                                        largoActual,
-                                                        'problemas');
-                                                    /*
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              Camara(
-                                                                pedidoID:
-                                                                    pedidoTrabajo
-                                                                        .id,
-                                                                problemasOpago:
-                                                                    'problemas',
-                                                              )),
-                                                    );*/
+                                                    _takePicture('problemas');
+                                                    if (flag) {
+                                                      showModalBottomSheet(
+                                                          backgroundColor:
+                                                              const Color
+                                                                  .fromRGBO(
+                                                                  0,
+                                                                  106,
+                                                                  252,
+                                                                  1.000),
+                                                          // ignore: use_build_context_synchronously
+                                                          context: context,
+                                                          isScrollControlled:
+                                                              true,
+                                                          builder: (context) {
+                                                            return Padding(
+                                                              padding: EdgeInsets.only(
+                                                                  bottom: MediaQuery.of(
+                                                                          context)
+                                                                      .viewInsets
+                                                                      .bottom),
+                                                              child: Container(
+                                                                height:
+                                                                    largoActual *
+                                                                        0.15,
+                                                                margin: EdgeInsets.only(
+                                                                    left:
+                                                                        anchoActual *
+                                                                            0.08,
+                                                                    right:
+                                                                        anchoActual *
+                                                                            0.08,
+                                                                    top: largoActual *
+                                                                        0.05,
+                                                                    bottom:
+                                                                        largoActual *
+                                                                            0.05),
+                                                                child: Column(
+                                                                  children: [
+                                                                    Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Container(
+                                                                            decoration:
+                                                                                BoxDecoration(
+                                                                              color: Colors.white,
+                                                                              borderRadius: BorderRadius.circular(8.0),
+                                                                              border: Border.all(
+                                                                                color: Colors.grey,
+                                                                                width: 0.5,
+                                                                              ),
+                                                                            ),
+                                                                            child:
+                                                                                TextField(
+                                                                              decoration: InputDecoration(hintText: comentario),
+                                                                              controller: comentarioConductor,
+                                                                            ),
+                                                                          )
+                                                                        ]),
+                                                                    const SizedBox(
+                                                                      height:
+                                                                          20,
+                                                                    ),
+                                                                    Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceBetween,
+                                                                      children: [
+                                                                        SizedBox(
+                                                                          height:
+                                                                              40,
+                                                                          width:
+                                                                              anchoActual * 0.83,
+                                                                          child: ElevatedButton(
+                                                                              onPressed: () {
+                                                                                updateEstadoPedido(estadoNuevo, null, comentarioConductor.text, tipoPago, pedidoTrabajo.id);
+                                                                                Navigator.push(
+                                                                                  context,
+                                                                                  //REGRESA A LA VISTA DE HOME PERO ACTUALIZA EL PEDIDO
+                                                                                  MaterialPageRoute(builder: (context) => const HolaConductor2()),
+                                                                                );
+                                                                              },
+                                                                              style: ButtonStyle(elevation: MaterialStateProperty.all(8), surfaceTintColor: MaterialStateProperty.all(Colors.white), backgroundColor: MaterialStateProperty.all(Colors.white)),
+                                                                              child: const Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    "Listo",
+                                                                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: Color.fromRGBO(0, 106, 252, 1.000)),
+                                                                                  ),
+                                                                                  SizedBox(width: 8),
+                                                                                  Icon(
+                                                                                    Icons.arrow_forward, // Reemplaza con el icono que desees
+                                                                                    size: 24,
+                                                                                    color: Color.fromRGBO(0, 106, 252, 1.000),
+                                                                                  ),
+                                                                                ],
+                                                                              )),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            );
+                                                          });
+                                                    } else {
+                                                      print(
+                                                          "Todavia no se ha tomado una foto");
+                                                    }
                                                   },
                                                   style: ButtonStyle(
                                                       backgroundColor:
@@ -1570,8 +1683,8 @@ class _HolaConductor2State extends State<HolaConductor2> {
                                 color: Colors.white),
                             style: ButtonStyle(
                               elevation: MaterialStateProperty.all(8),
-                              minimumSize: MaterialStatePropertyAll(Size(
-                                  anchoActual * 0.28, largoActual * 0.054)),
+                              /*minimumSize: MaterialStatePropertyAll(Size(
+                                  anchoActual * 0.28, largoActual * 0.054)),*/
                               backgroundColor: MaterialStateProperty.all(
                                   const Color.fromRGBO(0, 106, 252, 1.000)),
                             ),
