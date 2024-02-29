@@ -914,7 +914,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                             height:
                                                                 largoActual *
                                                                     0.07),
-
+//BOTON COMPARTE
                                                         SizedBox(
                                                           height: largoActual *
                                                               0.04,
