@@ -1,5 +1,5 @@
 import 'package:appsol_final/components/formulario.dart';
-import 'package:appsol_final/components/holaconductor2.dart';
+import 'package:appsol_final/components/holaconductor.dart';
 import 'package:appsol_final/components/navegador.dart';
 import 'package:appsol_final/components/prueba.dart';
 import 'package:appsol_final/components/ubicacion.dart';
@@ -345,7 +345,7 @@ class _LoginState extends State<Login> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          const HolaConductor2()),
+                                          const HolaConductor()),
                                 );
 
                                 //SI ES GERENTE

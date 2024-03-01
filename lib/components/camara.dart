@@ -207,7 +207,7 @@ class _CamaraState extends State<Camara> {
 
                             //BOTONES DE TOMAR FOTO ACEPTAR Y DESCARTAR
                             Positioned(
-                              bottom: largoActual * 0.02,
+                              bottom: largoActual * 0.01,
                               child: SizedBox(
                                 width: anchoActual,
                                 child: Row(
