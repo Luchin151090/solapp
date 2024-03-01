@@ -1,3 +1,4 @@
+import 'package:appsol_final/components/actualizado_stock.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -39,7 +40,7 @@ class _HolaConductorState extends State<HolaConductor> {
   int numerodePedidosExpress = 0;
   int numPedidoActual = 1;
   int pedidoIDActual = 0;
-  bool tengoruta = false;
+  bool tengoruta = true;
   Color colorProgreso = Colors.transparent;
   Color colorBotonesAzul = const Color.fromRGBO(0, 106, 252, 1.000);
   Color colorTexto = const Color.fromARGB(255, 75, 75, 75);
@@ -48,6 +49,9 @@ class _HolaConductorState extends State<HolaConductor> {
   int? conductorIDpref = 0;
   int cantidad = 0;
   List<int> idpedidos = [];
+
+  //CREAR UN FUNCION QUE LLAME EL ENDPOINT EN EL QUE SE VERIFICA QUE EL CONDUCTOR
+  //TIENE UNA RUTA ASIGNADA PARA ESE DÍA
 
   _cargarPreferencias() async {
     print('3) CARGAR PREFERENCIAS-------');
@@ -191,8 +195,9 @@ class _HolaConductorState extends State<HolaConductor> {
                 child: Column(
                   children: [
                     SizedBox(
-                      height: largoActual * 0.23,
+                      height: largoActual * 0.2,
                     ),
+                    //MENSAJE DE SALUDO AL CONDUCTOR
                     Text(
                       '¡Hola, ${userProvider.user?.nombre}!',
                       textAlign: TextAlign.center,
@@ -201,9 +206,10 @@ class _HolaConductorState extends State<HolaConductor> {
                           color: Colors.white,
                           fontSize: largoActual * 0.04),
                     ),
+                    //MENSAJE DE ESTADO DE SU RUTA POR EL DÍA
                     Container(
                       margin: EdgeInsets.only(
-                          left: anchoActual * 0.03, right: anchoActual * 0.03),
+                          left: anchoActual * 0.1, right: anchoActual * 0.1),
                       child: Text(
                         mensaje,
                         textAlign: TextAlign.center,
@@ -215,14 +221,25 @@ class _HolaConductorState extends State<HolaConductor> {
                       ),
                     ),
                     SizedBox(
-                      height: largoActual * 0.2,
+                      height: largoActual * 0.1,
                     ),
+                    //BOTON DE COMENZAR RUTA QUE APARECE SOLO SI EL CONDUCTOR TIENE UNA RUTA DE ESE DÍA
                     SizedBox(
                       child: tengoruta
-                          ? ElevatedButton(onPressed: () {}, child: Text(''))
-                          : Container(
-                              child: Text('data'),
-                            ),
+                          ? ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ActualizadoStock()
+                                      //const Promos()
+                                      ),
+                                );
+                                //QUE LO LLEVE A LA VISTA DE FORMULARIO DE LLENADO DE STOCK
+                              },
+                              child: Text('¡Comenzar!'))
+                          : Expanded(child: Container()),
                     ),
                     Expanded(child: Container()),
                     Lottie.asset('lib/imagenes/camion6.json'),

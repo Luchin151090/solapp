@@ -1,4 +1,8 @@
+import 'dart:math';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:turf_pip/turf_pip.dart';
 import 'package:appsol_final/components/navegador.dart';
+import 'package:appsol_final/models/zona_model.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart' as location_package;
 import 'package:geocoding/geocoding.dart';
@@ -18,13 +22,57 @@ class Ubicacion extends StatefulWidget {
 
 class _UbicacionState extends State<Ubicacion> {
   String apiUrl = dotenv.env['API_URL'] ?? '';
+  String apiZona = '/zona';
   bool _isloading = false;
   double? latitudUser = 0.0;
   double? longitudUser = 0.0;
   int? clienteID = 0;
-  String apiCliente = '';
   late String direccion;
   late String? distrito;
+  List<Zona> listZonas = [];
+
+  Future<dynamic> getZonas() async {
+    var res = await http.get(
+      Uri.parse(apiUrl + apiZona),
+      headers: {"Content-type": "application/json"},
+    );
+    try {
+      if (res.statusCode == 200) {
+        var data = json.decode(res.body);
+        List<Zona> tempZona = data.map<Zona>((mapa) {
+          return Zona(
+            id: mapa['id'],
+            nombre: mapa['nombre'],
+            poligono: mapa['poligono'],
+            departamento: mapa['departamento'],
+          );
+        }).toList();
+
+        if (mounted) {
+          setState(() {
+            listZonas = tempZona;
+          });
+          for (var i = 0; i < tempZona.length; i++) {
+            List tempString = tempZona[i].poligono.split(',');
+            for (var j = 0; j < tempString.length; j++) {
+              print((j / 2).runtimeType);
+              if (j / 2 is int) {
+                //SI ES PAR
+                double x = double.parse(tempString[j]);
+                double y = double.parse(tempString[j - 1]);
+                setState(() {
+                  tempZona[i].puntos.add(Point(x, y));
+                });
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Error en la solicitud: $e');
+      throw Exception('Error en la solicitud: $e');
+    }
+  }
 
   // GET UBICACIÓN
   Future<dynamic> creadoUbicacion(clienteId, distrito) async {
@@ -45,6 +93,7 @@ class _UbicacionState extends State<Ubicacion> {
     try {
       if (placemark.isNotEmpty) {
         Placemark lugar = placemark.first;
+        Point puntoUbi = Point(x, y);
         setState(() {
           direccion =
               "${lugar.locality}, ${lugar.subAdministrativeArea}, ${lugar.street}";
