@@ -1,6 +1,4 @@
 import 'dart:math';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:turf_pip/turf_pip.dart';
 import 'package:appsol_final/components/navegador.dart';
 import 'package:appsol_final/models/zona_model.dart';
 import 'package:flutter/material.dart';
@@ -22,16 +20,20 @@ class Ubicacion extends StatefulWidget {
 
 class _UbicacionState extends State<Ubicacion> {
   String apiUrl = dotenv.env['API_URL'] ?? '';
-  String apiZona = '/zona';
+  String apiZona = '/api/zona';
   bool _isloading = false;
+  int? zonaIDUbicacion = 0;
   double? latitudUser = 0.0;
   double? longitudUser = 0.0;
   int? clienteID = 0;
   late String direccion;
   late String? distrito;
   List<Zona> listZonas = [];
+  List<String> tempString = [];
+  Map<int, dynamic> mapaLineasZonas = {};
 
   Future<dynamic> getZonas() async {
+    print('1) obteniendo las zonas de trabajo');
     var res = await http.get(
       Uri.parse(apiUrl + apiZona),
       headers: {"Content-type": "application/json"},
@@ -51,17 +53,94 @@ class _UbicacionState extends State<Ubicacion> {
         if (mounted) {
           setState(() {
             listZonas = tempZona;
+            print('2) esta es la lista de zonas de trabajo');
+            print(listZonas);
           });
-          for (var i = 0; i < tempZona.length; i++) {
-            List tempString = tempZona[i].poligono.split(',');
+          print('-----------------------------------');
+          print('3) Revisando zona por zona');
+          for (var i = 0; i < listZonas.length; i++) {
+            print('zona Nª $i');
+            setState(() {
+              tempString = listZonas[i].poligono.split(',');
+            });
+
+            print(tempString);
+            //el string 'poligono', se separa en strings por las comas en la lista
+            //temString
             for (var j = 0; j < tempString.length; j++) {
-              print((j / 2).runtimeType);
-              if (j / 2 is int) {
+              //luego se recorre la lista y se hacen puntos con cada dos numeros
+              if (j % 2 == 0) {
+                print('es par');
+                //es multiplo de dos
                 //SI ES PAR
                 double x = double.parse(tempString[j]);
-                double y = double.parse(tempString[j - 1]);
+                double y = double.parse(tempString[j + 1]);
+                print('$x y $y');
                 setState(() {
-                  tempZona[i].puntos.add(Point(x, y));
+                  print('entro al set Statw');
+                  listZonas[i].puntos.add(Point(x, y));
+                });
+              }
+            }
+            print('se llenaron los puntos de esta zona');
+            print(listZonas[i].puntos);
+          }
+
+          //AHORA DE ACUERDO A LA CANTIDAD DE PUTNOS QUE HAY EN LA LISTA DE PUNTOS SE CALCULA LA CANTIDAD
+          //DE LINEAS CON LAS QUE S ETRABAJA
+          for (var i = 0; i < listZonas.length; i++) {
+            print('entro al for');
+            var zonaID = listZonas[i].id;
+            setState(() {
+              mapaLineasZonas[zonaID] = {};
+            });
+
+            ///ACA CAMBIAR COMO SE BUSAC EN LAS LIZTAAAA
+            for (var j = 0; j < listZonas[i].puntos.length; j++) {
+              setState(() {
+                mapaLineasZonas[zonaID]['intersecciones'] = 0;
+              });
+
+              if (j == listZonas[i].puntos.length - 1) {
+                Point punto1 = listZonas[i].puntos[j];
+                Point punto2 = listZonas[i].puntos[0];
+                var maxX = max(punto1.x, punto2.x);
+                var maxY = max(punto1.y, punto2.y);
+                var minY = min(punto1.y, punto2.y);
+                var pendiente = (punto2.y - punto1.y) / (punto2.x - punto1.x);
+                var constante = punto1.y - (pendiente * punto1.x);
+                Map lineaTemporal = {
+                  "punto1": punto1,
+                  "punto2": punto2,
+                  "maxX": maxX,
+                  "maxY": maxY,
+                  "minY": minY,
+                  "pendiente": pendiente,
+                  "constante": constante
+                };
+
+                setState(() {
+                  mapaLineasZonas[zonaID][j] = lineaTemporal;
+                });
+              } else {
+                Point punto1 = listZonas[i].puntos[j];
+                Point punto2 = listZonas[i].puntos[j + 1];
+                var maxX = max(punto1.x, punto2.x);
+                var maxY = max(punto1.y, punto2.y);
+                var minY = min(punto1.y, punto2.y);
+                var pendiente = (punto2.y - punto1.y) / (punto2.x - punto1.x);
+                var constante = punto1.y - (pendiente * punto1.x);
+                Map lineaTemporal = {
+                  "punto1": punto1,
+                  "punto2": punto2,
+                  "maxX": maxX,
+                  "maxY": maxY,
+                  "minY": minY,
+                  "pendiente": pendiente,
+                  "constante": constante
+                };
+                setState(() {
+                  mapaLineasZonas[zonaID][j] = lineaTemporal;
                 });
               }
             }
@@ -85,6 +164,7 @@ class _UbicacionState extends State<Ubicacion> {
           "cliente_id": clienteId,
           "cliente_nr_id": null,
           "distrito": distrito,
+          "zona_trabajo_id": zonaIDUbicacion
         }));
   }
 
@@ -93,7 +173,6 @@ class _UbicacionState extends State<Ubicacion> {
     try {
       if (placemark.isNotEmpty) {
         Placemark lugar = placemark.first;
-        Point puntoUbi = Point(x, y);
         setState(() {
           direccion =
               "${lugar.locality}, ${lugar.subAdministrativeArea}, ${lugar.street}";
@@ -106,6 +185,7 @@ class _UbicacionState extends State<Ubicacion> {
       }
       print("x-----y");
       print("${x},${y}");
+      await puntoEnPoligono(x, y);
     } catch (e) {
       //throw Exception("Error ${e}");
       // Manejo de errores, puedes mostrar un mensaje al usuario indicando que hubo un problema al obtener la ubicación.
@@ -145,6 +225,7 @@ class _UbicacionState extends State<Ubicacion> {
         latitudUser = x;
         longitudUser = y;
         _isloading = false;
+        print('esta e sla zonaID $zonaIDUbicacion');
         creadoUbicacion(clienteID, distrito);
         showDialog(
           context: context,
@@ -247,6 +328,61 @@ class _UbicacionState extends State<Ubicacion> {
     }
   }
 
+  Future puntoEnPoligono(double? xA, double? yA) async {
+    print('entro a punto en poligono');
+    if (xA is double && yA is double) {
+      print('son double');
+      print('se recorre las zonas');
+      for (var i = 0; i < listZonas.length; i++) {
+        var zonaID = listZonas[i].id;
+        print('zonaID = $zonaID');
+        mapaLineasZonas[zonaID].forEach((int, mapaLinea) {
+          if (xA <= mapaLinea["maxX"] &&
+              mapaLinea['minY'] <= yA &&
+              yA <= mapaLinea['maxY']) {
+            var xInterseccion =
+                (yA - mapaLinea['constante']) / mapaLinea['pendiente'];
+            if (xA <= xInterseccion) {
+              //EL PUNTO INTERSECTA A LA LINEA
+              print('el punto intersecta');
+              setState(() {
+                mapaLinea['intersecciones'] = 1;
+              });
+            }
+          }
+        });
+      }
+      //SE CUENTA LA CANTIDAD DE INTERSECCIONES EN CADA ZONA
+      for (var i = 0; i < listZonas.length; i++) {
+        var zonaID = listZonas[i].id;
+        Map mapLineas = mapaLineasZonas[zonaID];
+        int intersecciones = 0;
+        mapLineas.forEach((key, linea) {
+          if (linea['intersecciones'] == 1) {
+            intersecciones += 1;
+          }
+        });
+
+        if (intersecciones % 2 == 0) {
+          setState(() {
+            zonaIDUbicacion = zonaID;
+          });
+        } else {
+          setState(() {
+            zonaIDUbicacion = null;
+          });
+          //es impar ESTA AFUERA
+        }
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getZonas();
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = context.watch<UserProvider>();
@@ -314,8 +450,8 @@ class _UbicacionState extends State<Ubicacion> {
                       width: anchoActual * (350 / 500),
                       height: largoActual * (38 / 600),
                       child: ElevatedButton(
-                        onPressed: () {
-                          currentLocation();
+                        onPressed: () async {
+                          await currentLocation();
                         },
                         style: ButtonStyle(
                             elevation: MaterialStateProperty.all(8),
