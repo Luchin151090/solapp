@@ -44,6 +44,7 @@ class _ActualizadoStockState extends State<ActualizadoStock> {
   Color colorTexto = const Color.fromARGB(255, 75, 75, 75);
   int rutaID = 0;
   int? rutaIDpref = 0;
+  //
   int? conductorIDpref = 0;
   int cantidad = 0;
   List<int> idpedidos = [];
