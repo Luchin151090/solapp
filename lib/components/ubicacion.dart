@@ -25,6 +25,8 @@ class _UbicacionState extends State<Ubicacion> {
   int? zonaIDUbicacion = 0;
   double? latitudUser = 0.0;
   double? longitudUser = 0.0;
+  String tituloUbicacion = 'Gracias por compartir tu ubicación!';
+  String contenidoUbicacion = '¡Disfruta de Agua Sol!';
   int? clienteID = 0;
   late String direccion;
   late String? distrito;
@@ -89,19 +91,23 @@ class _UbicacionState extends State<Ubicacion> {
           //AHORA DE ACUERDO A LA CANTIDAD DE PUTNOS QUE HAY EN LA LISTA DE PUNTOS SE CALCULA LA CANTIDAD
           //DE LINEAS CON LAS QUE S ETRABAJA
           for (var i = 0; i < listZonas.length; i++) {
-            print('entro al for');
+            print('entro al for que revisa zona por zona');
             var zonaID = listZonas[i].id;
+            print('esta en la ubicación = $i, con zona ID = $zonaID');
             setState(() {
+              print(
+                  'se crea la key zon ID, con un valor igual a un mapa vacio');
               mapaLineasZonas[zonaID] = {};
             });
 
-            ///ACA CAMBIAR COMO SE BUSAC EN LAS LIZTAAAA
             for (var j = 0; j < listZonas[i].puntos.length; j++) {
-              setState(() {
-                mapaLineasZonas[zonaID]['intersecciones'] = 0;
-              });
-
+              print(
+                  'revisa punto por punto en la lista de puntos de cada zona');
+              print('zonaID = $zonaID y punto Nº = $j');
+              //ingresa a un for en el que se obtienen los datos de todas la lineas que forman los puntos del polígono
               if (j == listZonas[i].puntos.length - 1) {
+                print('-- esta en el ultimo punto');
+                print('se hallan las propiedades de la linea');
                 Point punto1 = listZonas[i].puntos[j];
                 Point punto2 = listZonas[i].puntos[0];
                 var maxX = max(punto1.x, punto2.x);
@@ -118,11 +124,13 @@ class _UbicacionState extends State<Ubicacion> {
                   "pendiente": pendiente,
                   "constante": constante
                 };
+                print('$lineaTemporal');
 
                 setState(() {
                   mapaLineasZonas[zonaID][j] = lineaTemporal;
                 });
               } else {
+                print('se hallan las propiedades de la linea');
                 Point punto1 = listZonas[i].puntos[j];
                 Point punto2 = listZonas[i].puntos[j + 1];
                 var maxX = max(punto1.x, punto2.x);
@@ -139,6 +147,7 @@ class _UbicacionState extends State<Ubicacion> {
                   "pendiente": pendiente,
                   "constante": constante
                 };
+                print('$lineaTemporal');
                 setState(() {
                   mapaLineasZonas[zonaID][j] = lineaTemporal;
                 });
@@ -225,23 +234,30 @@ class _UbicacionState extends State<Ubicacion> {
         latitudUser = x;
         longitudUser = y;
         _isloading = false;
-        print('esta e sla zonaID $zonaIDUbicacion');
+        print('esta es la zonaID $zonaIDUbicacion');
         creadoUbicacion(clienteID, distrito);
+        if (zonaIDUbicacion == null) {
+          setState(() {
+            tituloUbicacion = 'Lo sentimos :(';
+            contenidoUbicacion =
+                'Todavía no llegamos a tu zona, pero puedes revisar nuestros productos en la aplicación :D';
+          });
+        }
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               backgroundColor: Colors.white,
               surfaceTintColor: Colors.white,
-              title: const Text(
-                'Ubicación',
+              title: Text(
+                tituloUbicacion,
                 style: TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.w400,
                     color: Colors.black),
               ),
-              content: const Text(
-                'Gracias por compartir tu ubicación!',
+              content: Text(
+                contenidoUbicacion,
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
               ),
               actions: <Widget>[
@@ -329,22 +345,34 @@ class _UbicacionState extends State<Ubicacion> {
   }
 
   Future puntoEnPoligono(double? xA, double? yA) async {
-    print('entro a punto en poligono');
+    print('----------------------------------------');
+    print('----------------------------------------');
+    print('¡¡ENTRO A PUNTO EN POLIGONO!!');
     if (xA is double && yA is double) {
-      print('son double');
-      print('se recorre las zonas');
+      print('1) son double, se recorre las zonas');
       for (var i = 0; i < listZonas.length; i++) {
         var zonaID = listZonas[i].id;
         print('zonaID = $zonaID');
-        mapaLineasZonas[zonaID].forEach((int, mapaLinea) {
+        mapaLineasZonas[zonaID].forEach((value, mapaLinea) {
+          print('Ingreso a recorrer las lineas de la zona $zonaID');
           if (xA <= mapaLinea["maxX"] &&
               mapaLinea['minY'] <= yA &&
               yA <= mapaLinea['maxY']) {
+            print('- Cumple todas estas');
+            print('- $xA <= ${mapaLinea["maxX"]}');
+            print('- ${mapaLinea['minY']} <= $yA');
+            print('- $yA<= ${mapaLinea['maxY']}');
+            print('');
             var xInterseccion =
                 (yA - mapaLinea['constante']) / mapaLinea['pendiente'];
+            print('Se calcula la xInterseccion');
+            print(
+                'xI = ($yA - ${mapaLinea['constante']})/${mapaLinea['pendiente']} = $xInterseccion');
             if (xA <= xInterseccion) {
               //EL PUNTO INTERSECTA A LA LINEA
-              print('el punto intersecta');
+              print('- el punto intersecta la linea hacia la deresha');
+              print('- $xA <= $xInterseccion');
+              print('');
               setState(() {
                 mapaLinea['intersecciones'] = 1;
               });
@@ -354,24 +382,39 @@ class _UbicacionState extends State<Ubicacion> {
       }
       //SE CUENTA LA CANTIDAD DE INTERSECCIONES EN CADA ZONA
       for (var i = 0; i < listZonas.length; i++) {
+        //se revisa para cada zona
+        print('');
+        print('');
+        print('Ahora se cuenta la cantidad de intersecciones');
         var zonaID = listZonas[i].id;
-        Map mapLineas = mapaLineasZonas[zonaID];
+        print('Primero en la zona $zonaID');
         int intersecciones = 0;
-        mapLineas.forEach((key, linea) {
-          if (linea['intersecciones'] == 1) {
+        mapaLineasZonas[zonaID].forEach((key, mapaLinea) {
+          if (mapaLinea['intersecciones'] == 1) {
             intersecciones += 1;
           }
         });
-
-        if (intersecciones % 2 == 0) {
-          setState(() {
-            zonaIDUbicacion = zonaID;
-          });
+        if (intersecciones > 0) {
+          print('Nª intersecciones = $intersecciones en la Zona $zonaID');
+          if (intersecciones % 2 == 0) {
+            print('- Es una cantidad PAR, ESTA AFUERA');
+            setState(() {
+              zonaIDUbicacion = null;
+            });
+          } else {
+            setState(() {
+              print('- Es una cantidad IMPAR, ESTA DENTRO');
+              zonaIDUbicacion = zonaID;
+            });
+            //es impar ESTA AFUERA
+          }
+          print('');
         } else {
+          print('No tiene intersecciones');
           setState(() {
             zonaIDUbicacion = null;
           });
-          //es impar ESTA AFUERA
+          print('');
         }
       }
     }
