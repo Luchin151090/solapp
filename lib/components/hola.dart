@@ -114,6 +114,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   Future<void> ordenarFuncionesInit() async {
     await getUbicaciones(widget.clienteId);
     await getProducts();
+    await getZonas();
   }
 
   Future<dynamic> getZonas() async {
@@ -356,66 +357,69 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
         longitudUser = y;
         _isloading = false;
         print('esta es la zonaID $zonaIDUbicacion');
-        creadoUbicacion(clienteID, distrito);
+        creadoUbicacion(widget.clienteId, distrito);
         if (zonaIDUbicacion == null) {
           setState(() {
             tituloUbicacion = 'Lo sentimos :(';
             contenidoUbicacion =
                 'Todavía no llegamos a tu zona, pero puedes revisar nuestros productos en la aplicación :D';
           });
-        }
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              surfaceTintColor: Colors.white,
-              title: Text(
-                tituloUbicacion,
-                style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black),
-              ),
-              content: Text(
-                contenidoUbicacion,
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Cierra el AlertDialog
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const BarraNavegacion(
-                                indice: 0,
-                                subIndice: 0,
-                              )),
-                    );
-                  },
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 25,
-                        color: Colors.black),
-                  ),
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.white,
+                title: Text(
+                  tituloUbicacion,
+                  style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black),
                 ),
-              ],
-            );
-          },
-        );
+                content: Text(
+                  contenidoUbicacion,
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w400),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Cierra el AlertDialog
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const BarraNavegacion(
+                                  indice: 0,
+                                  subIndice: 0,
+                                )),
+                      );
+                    },
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 25,
+                          color: Colors.black),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       });
     }
   }
 
   Future<void> currentLocation() async {
+    print("Entro al CurrectLocation");
     var location = location_package.Location();
     location_package.PermissionStatus permissionGranted;
     location_package.LocationData locationData;
 
     setState(() {
+      print("IsLoading cambia a TRUE");
       _isloading = true;
     });
 
@@ -757,14 +761,16 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                                     0.013),
                                                         ElevatedButton(
                                                           onPressed: () async {
-                                                            print(
-                                                                "ubi añadidda");
                                                             await currentLocation();
-                                                            Navigator.of(
-                                                                    context)
-                                                                .pop();
+                                                            // ignore: use_build_context_synchronously
+                                                            Navigator.pop(
+                                                                context);
                                                           },
                                                           style: ButtonStyle(
+                                                            surfaceTintColor:
+                                                                MaterialStateProperty
+                                                                    .all(Colors
+                                                                        .white),
                                                             elevation:
                                                                 MaterialStateProperty
                                                                     .all(8),
@@ -780,41 +786,41 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                                         .white),
                                                           ),
                                                           child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .add_location_alt_rounded,
-                                                                color: const Color
-                                                                    .fromRGBO(
-                                                                    0,
-                                                                    106,
-                                                                    252,
-                                                                    1.000),
-                                                                size:
-                                                                    largoActual *
-                                                                        0.034,
-                                                              ),
-                                                              Text(
-                                                                ' Agregar ubicación actual',
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        largoActual *
-                                                                            0.021,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                    color: const Color
-                                                                        .fromRGBO(
-                                                                        0,
-                                                                        106,
-                                                                        252,
-                                                                        1.000)),
-                                                              ),
-                                                            ],
-                                                          ),
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children:
+                                                                  _isloading
+                                                                      ? [
+                                                                          const CircularProgressIndicator(
+                                                                            color: Color.fromRGBO(
+                                                                                0,
+                                                                                106,
+                                                                                252,
+                                                                                1.000),
+                                                                            strokeWidth:
+                                                                                3,
+                                                                          ),
+                                                                        ]
+                                                                      : [
+                                                                          Icon(
+                                                                            Icons.add_location_alt_rounded,
+                                                                            color: const Color.fromRGBO(
+                                                                                0,
+                                                                                106,
+                                                                                252,
+                                                                                1.000),
+                                                                            size:
+                                                                                largoActual * 0.034,
+                                                                          ),
+                                                                          Text(
+                                                                            ' Agregar ubicación actual',
+                                                                            style: TextStyle(
+                                                                                fontSize: largoActual * 0.021,
+                                                                                fontWeight: FontWeight.w500,
+                                                                                color: const Color.fromRGBO(0, 106, 252, 1.000)),
+                                                                          ),
+                                                                        ]),
                                                         ),
                                                       ],
                                                     ),
