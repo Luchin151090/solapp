@@ -1,7 +1,4 @@
-import 'dart:ffi';
-import 'package:appsol_final/models/zona_model.dart';
 import 'package:appsol_final/components/holaconductor2.dart';
-import 'package:appsol_final/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';

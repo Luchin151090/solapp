@@ -150,14 +150,14 @@ class _LoginState extends State<Login> {
         var data = json.decode(res.body);
         List<UbicacionModel> tempUbicacion = data.map<UbicacionModel>((mapa) {
           return UbicacionModel(
-            id: mapa['id'],
-            latitud: mapa['latitud'].toDouble(),
-            longitud: mapa['longitud'].toDouble(),
-            direccion: mapa['direccion'],
-            clienteID: mapa['cliente_id'],
-            clienteNrID: null,
-            distrito: mapa['distrito'],
-          );
+              id: mapa['id'],
+              latitud: mapa['latitud'].toDouble(),
+              longitud: mapa['longitud'].toDouble(),
+              direccion: mapa['direccion'],
+              clienteID: mapa['cliente_id'],
+              clienteNrID: null,
+              distrito: mapa['distrito'],
+              zonaID: mapa['zona_trabajo_id']);
         }).toList();
         setState(() {
           if (tempUbicacion.isEmpty) {

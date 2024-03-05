@@ -88,6 +88,38 @@ class _HolaConductorState extends State<HolaConductor> {
     print('5) esta es mi ruta Preferencia ACT---- $rutaIDpref');
   }
 
+  Future<dynamic> getRutas() async {
+    var res = await http.get(
+      Uri.parse("$apiUrl/api/products"),
+      headers: {"Content-type": "application/json"},
+    );
+    try {
+      if (res.statusCode == 200) {
+        var data = json.decode(res.body);
+        List<Producto> tempProducto = data.map<Producto>((mapa) {
+          return Producto(
+            id: mapa['id'],
+            nombre: mapa['nombre'],
+            precio: mapa['precio'].toDouble(), //?,
+            descripcion: mapa['descripcion'],
+            promoID: null,
+            foto: '$apiUrl/images/${mapa['foto']}',
+          );
+        }).toList();
+
+        setState(() {
+          listProducto = tempProducto;
+          //conductores = tempConductor;
+        });
+        print("....lista productos");
+        print(listProducto);
+      }
+    } catch (e) {
+      print('Error en la solicitud: $e');
+      throw Exception('Error en la solicitud: $e');
+    }
+  }
+
   void connectToServer() async {
     print("3.1) Dentro de connectToServer");
     // Reemplaza la URL con la URL de tu servidor Socket.io

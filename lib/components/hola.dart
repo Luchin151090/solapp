@@ -87,7 +87,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   String contenidoUbicacion = '¡Disfruta de Agua Sol!';
   String mensajeCodigoParaAmigos =
       'Hola!,\nUsa mi código en la *app de 💧 Agua Sol 💧* para comprar un *BIDON DE AGUA NUEVO DE 20L a solo S/.10.00* usando mi código, además puedes _*GANAR S/. 4.00 💸*_ por cada persona que compre con tu código de referencia. \n✅ USA MI CODIGO DE REFERENCIA: \n⏬ Descarga la APP AQUÍ: ';
-  Timer? _timer;
+
   //bool _disposed = false;
   //bool _autoScrollInProgress = false;
 
@@ -258,14 +258,14 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
         var data = json.decode(res.body);
         List<UbicacionModel> tempUbicacion = data.map<UbicacionModel>((mapa) {
           return UbicacionModel(
-            id: mapa['id'],
-            latitud: mapa['latitud'].toDouble(),
-            longitud: mapa['longitud'].toDouble(),
-            direccion: mapa['direccion'],
-            clienteID: mapa['cliente_id'],
-            clienteNrID: null,
-            distrito: mapa['distrito'],
-          );
+              id: mapa['id'],
+              latitud: mapa['latitud'].toDouble(),
+              longitud: mapa['longitud'].toDouble(),
+              direccion: mapa['direccion'],
+              clienteID: mapa['cliente_id'],
+              clienteNrID: null,
+              distrito: mapa['distrito'],
+              zonaID: mapa['zona_trabajo_id'] ?? 0);
         }).toList();
         if (mounted) {
           setState(() {
@@ -300,6 +300,7 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
   }
 
   Future<void> obtenerDireccion(x, y) async {
+    print("¡¡Entro a obtenerDireccion!!");
     List<Placemark> placemark = await placemarkFromCoordinates(x, y);
     try {
       if (placemark.isNotEmpty) {
@@ -358,69 +359,19 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
         _isloading = false;
         print('esta es la zonaID $zonaIDUbicacion');
         creadoUbicacion(widget.clienteId, distrito);
-        if (zonaIDUbicacion == null) {
-          setState(() {
-            tituloUbicacion = 'Lo sentimos :(';
-            contenidoUbicacion =
-                'Todavía no llegamos a tu zona, pero puedes revisar nuestros productos en la aplicación :D';
-          });
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.white,
-                title: Text(
-                  tituloUbicacion,
-                  style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black),
-                ),
-                content: Text(
-                  contenidoUbicacion,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w400),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Cierra el AlertDialog
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const BarraNavegacion(
-                                  indice: 0,
-                                  subIndice: 0,
-                                )),
-                      );
-                    },
-                    child: const Text(
-                      'OK',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 25,
-                          color: Colors.black),
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
-        }
       });
     }
   }
 
   Future<void> currentLocation() async {
-    print("Entro al CurrectLocation");
+    print("¡¡Entro al CurrectLocation!!");
     var location = location_package.Location();
     location_package.PermissionStatus permissionGranted;
     location_package.LocationData locationData;
 
     setState(() {
-      print("IsLoading cambia a TRUE");
       _isloading = true;
+      print("_isloadin = $_isloading");
     });
 
     // Verificar si el servicio de ubicación está habilitado
@@ -455,12 +406,9 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
       //updateLocation(locationData);
       await obtenerDireccion(locationData.latitude, locationData.longitude);
 
-      print("----ubicación--");
-      print(locationData);
-      print("----latitud--");
-      print(latitudUser);
-      print("----longitud--");
-      print(longitudUser);
+      print("ubicación - $locationData");
+      print("latitud - $latitudUser");
+      print("longitud - $longitudUser");
 
       // Aquí puedes utilizar la ubicación obtenida (locationData)
     } catch (e) {
@@ -623,7 +571,8 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
         direccion: 'direccion',
         clienteID: 0,
         clienteNrID: 0,
-        distrito: 'distrito');
+        distrito: 'distrito',
+        zonaID: 0);
     for (var i = 0; i < listUbicacionesObjetos.length; i++) {
       if (listUbicacionesObjetos[i].direccion == direccion) {
         setState(() {
@@ -634,14 +583,6 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
     return ubicacionObjeto;
   }
   // TEST UBICACIONES PARA DROPDOWN
-
-  @override
-  void dispose() {
-    //_disposed = true; // Mark as disposed
-    _timer?.cancel();
-
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -761,9 +702,14 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                                                     0.013),
                                                         ElevatedButton(
                                                           onPressed: () async {
+                                                            setState(() {
+                                                              _isloading = true;
+                                                            });
                                                             await currentLocation();
+
                                                             // ignore: use_build_context_synchronously
                                                             Navigator.pop(
+                                                                // ignore: use_build_context_synchronously
                                                                 context);
                                                           },
                                                           style: ButtonStyle(
@@ -852,17 +798,85 @@ class _HolaState extends State<Hola2> with TickerProviderStateMixin {
                                             );
                                           }).toList(),
                                           onChanged: (String? newValue) {
-                                            print(newValue);
-                                            setState(() {
-                                              _ubicacionSelected = newValue!;
-                                              miUbicacion =
-                                                  direccionSeleccionada(
-                                                      newValue);
-                                              Provider.of<UbicacionProvider>(
-                                                      context,
-                                                      listen: false)
-                                                  .updateUbicacion(miUbicacion);
-                                            });
+                                            if (newValue is String) {
+                                              if (direccionSeleccionada(
+                                                          newValue)
+                                                      .zonaID ==
+                                                  0) {
+                                                setState(() {
+                                                  tituloUbicacion =
+                                                      'Lo sentimos :(';
+                                                  contenidoUbicacion =
+                                                      'Todavía no llegamos a tu zona, pero puedes revisar nuestros productos en la aplicación o elegir otra ubicación :D';
+                                                });
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      backgroundColor:
+                                                          Colors.white,
+                                                      surfaceTintColor:
+                                                          Colors.white,
+                                                      title: Text(
+                                                        tituloUbicacion,
+                                                        style: TextStyle(
+                                                            fontSize:
+                                                                largoActual *
+                                                                    0.026,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                Colors.black),
+                                                      ),
+                                                      content: Text(
+                                                        contenidoUbicacion,
+                                                        style: TextStyle(
+                                                            fontSize:
+                                                                largoActual *
+                                                                    0.018,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w400),
+                                                      ),
+                                                      actions: <Widget>[
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop(); // Cierra el AlertDialog
+                                                          },
+                                                          child: Text(
+                                                            'OK',
+                                                            style: TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400,
+                                                                fontSize:
+                                                                    largoActual *
+                                                                        0.02,
+                                                                color: Colors
+                                                                    .black),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              } else {
+                                                Provider.of<UbicacionProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .updateUbicacion(
+                                                        miUbicacion);
+                                                setState(() {
+                                                  _ubicacionSelected = newValue;
+                                                  miUbicacion =
+                                                      direccionSeleccionada(
+                                                          newValue);
+                                                });
+                                              }
+                                            }
                                           },
                                         ),
                                       ),

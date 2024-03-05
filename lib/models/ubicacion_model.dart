@@ -6,6 +6,7 @@ class UbicacionModel {
   final int clienteID;
   final int? clienteNrID;
   final String distrito;
+  final int? zonaID;
 
   UbicacionModel({
     required this.id,
@@ -15,5 +16,6 @@ class UbicacionModel {
     required this.clienteID,
     required this.clienteNrID,
     required this.distrito,
+    required this.zonaID,
   });
 }
